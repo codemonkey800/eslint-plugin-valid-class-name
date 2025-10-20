@@ -56,70 +56,107 @@ let cachedRegistry: ClassRegistry | null = null
 let cacheKey: string | null = null
 
 /**
- * Creates a cache key from configuration
+ * Represents a resolved CSS file with its path and modification time
+ */
+interface ResolvedFile {
+  path: string
+  mtime: number
+}
+
+/**
+ * Resolves CSS file patterns to actual files with modification times
+ * @param cssPatterns - Glob patterns for CSS files
+ * @param cwd - Current working directory for resolving relative paths
+ * @returns Array of resolved files with paths and modification times
+ */
+function resolveFilesWithMtimes(
+  cssPatterns: string[],
+  cwd: string,
+): ResolvedFile[] {
+  if (cssPatterns.length === 0) {
+    return []
+  }
+
+  try {
+    // Check if patterns are absolute or relative
+    const isAbsolutePattern = cssPatterns.some(pattern =>
+      path.isAbsolute(pattern),
+    )
+
+    const files = fg.sync(cssPatterns, {
+      cwd: isAbsolutePattern ? undefined : cwd,
+      absolute: true,
+      ignore: ['**/node_modules/**', '**/dist/**', '**/build/**'],
+    })
+
+    // Get modification times for each file
+    return files
+      .map(file => {
+        try {
+          const stats = fs.statSync(file)
+          return { path: file, mtime: stats.mtimeMs }
+        } catch (error) {
+          // If we can't stat the file, skip it
+          console.warn(`Warning: Failed to stat file "${file}":`, error)
+          return null
+        }
+      })
+      .filter((file): file is ResolvedFile => file !== null)
+  } catch (globError) {
+    console.warn('Warning: Failed to find CSS files:', globError)
+    return []
+  }
+}
+
+/**
+ * Creates a cache key from configuration and resolved files
  */
 function createCacheKey(
-  cssPatterns: string[],
+  resolvedFiles: ResolvedFile[],
   whitelist: string[],
   tailwindConfig: boolean | TailwindConfig | undefined,
   cwd: string,
 ): string {
-  return JSON.stringify({ cssPatterns, whitelist, tailwindConfig, cwd })
+  // Include file paths and mtimes in the cache key
+  // This ensures cache invalidates when files are added/removed/modified
+  const fileData = resolvedFiles.map(f => ({ path: f.path, mtime: f.mtime }))
+  return JSON.stringify({ fileData, whitelist, tailwindConfig, cwd })
 }
 
 /**
  * Builds a class registry from CSS files, Tailwind config, and whitelist patterns
- * @param cssPatterns - Glob patterns for CSS files
+ * @param resolvedFiles - Pre-resolved CSS files with paths and mtimes
  * @param whitelist - Array of class name patterns (supports wildcards)
  * @param tailwindClasses - Pre-loaded Tailwind classes (optional)
- * @param cwd - Current working directory for resolving relative paths
  * @returns ClassRegistry instance
  */
 function buildClassRegistry(
-  cssPatterns: string[],
+  resolvedFiles: ResolvedFile[],
   whitelist: string[],
   tailwindClasses: Set<string> | undefined,
-  cwd: string,
 ): ClassRegistry {
   const literalClasses = new Set<string>()
 
   // Extract classes from CSS files
-  if (cssPatterns.length > 0) {
+  for (const file of resolvedFiles) {
     try {
-      // Check if patterns are absolute or relative
-      const isAbsolutePattern = cssPatterns.some(pattern =>
-        path.isAbsolute(pattern),
-      )
+      const content = fs.readFileSync(file.path, 'utf-8')
+      const ext = path.extname(file.path).toLowerCase()
 
-      const files = fg.sync(cssPatterns, {
-        cwd: isAbsolutePattern ? undefined : cwd,
-        absolute: true,
-        ignore: ['**/node_modules/**', '**/dist/**', '**/build/**'],
-      })
-
-      for (const file of files) {
-        try {
-          const content = fs.readFileSync(file, 'utf-8')
-          const ext = path.extname(file).toLowerCase()
-
-          // Handle SCSS files differently from CSS files
-          let classes: Set<string>
-          if (ext === '.scss') {
-            classes = extractClassNamesFromScss(content, file)
-          } else {
-            classes = extractClassNamesFromCss(content)
-          }
-
-          classes.forEach(cls => literalClasses.add(cls))
-        } catch (readError) {
-          console.warn(
-            `Warning: Failed to read CSS/SCSS file "${file}":`,
-            readError,
-          )
-        }
+      // Handle SCSS files differently from CSS files
+      let classes: Set<string>
+      if (ext === '.scss') {
+        classes = extractClassNamesFromScss(content, file.path)
+      } else {
+        classes = extractClassNamesFromCss(content)
       }
-    } catch (globError) {
-      console.warn('Warning: Failed to find CSS files:', globError)
+
+      classes.forEach(cls => literalClasses.add(cls))
+    } catch (readError) {
+      console.warn(
+        `Warning: Failed to read CSS/SCSS file "${file.path}":`,
+        readError,
+      )
     }
   }
 
@@ -171,14 +208,17 @@ export function getClassRegistry(
   tailwindConfig: boolean | TailwindConfig | undefined,
   cwd: string,
 ): ClassRegistry {
+  // Resolve CSS files with modification times
+  const resolvedFiles = resolveFilesWithMtimes(cssPatterns, cwd)
+
   const currentCacheKey = createCacheKey(
-    cssPatterns,
+    resolvedFiles,
     whitelist,
     tailwindConfig,
     cwd,
   )
 
-  // Return cached registry if configuration hasn't changed
+  // Return cached registry if configuration and files haven't changed
   if (cachedRegistry && cacheKey === currentCacheKey) {
     return cachedRegistry
   }
@@ -196,12 +236,11 @@ export function getClassRegistry(
     }
   }
 
-  // Build new registry
+  // Build new registry with pre-resolved files
   cachedRegistry = buildClassRegistry(
-    cssPatterns,
+    resolvedFiles,
     whitelist,
     tailwindClasses,
-    cwd,
   )
   cacheKey = currentCacheKey
 

@@ -4,7 +4,9 @@ import fg from "fast-glob";
 import {
   extractClassNamesFromCss,
   extractClassNamesFromScss,
-} from "../parsers/css-parsers";
+} from "../parsers/css-parser.js";
+import { getTailwindClasses } from "../parsers/tailwind-parser.js";
+import type { TailwindConfig } from "../types/options.js";
 
 /**
  * Helper function to check if a class name matches a glob-style pattern
@@ -53,21 +55,24 @@ let cacheKey: string | null = null;
 function createCacheKey(
   cssPatterns: string[],
   whitelist: string[],
+  tailwindConfig: boolean | TailwindConfig | undefined,
   cwd: string,
 ): string {
-  return JSON.stringify({ cssPatterns, whitelist, cwd });
+  return JSON.stringify({ cssPatterns, whitelist, tailwindConfig, cwd });
 }
 
 /**
- * Builds a class registry from CSS files and whitelist patterns
+ * Builds a class registry from CSS files, Tailwind config, and whitelist patterns
  * @param cssPatterns - Glob patterns for CSS files
  * @param whitelist - Array of class name patterns (supports wildcards)
+ * @param tailwindClasses - Pre-loaded Tailwind classes (optional)
  * @param cwd - Current working directory for resolving relative paths
  * @returns ClassRegistry instance
  */
 function buildClassRegistry(
   cssPatterns: string[],
   whitelist: string[],
+  tailwindClasses: Set<string> | undefined,
   cwd: string,
 ): ClassRegistry {
   const literalClasses = new Set<string>();
@@ -119,6 +124,11 @@ function buildClassRegistry(
     }
   });
 
+  // Add Tailwind classes if provided
+  if (tailwindClasses) {
+    tailwindClasses.forEach((cls) => literalClasses.add(cls));
+  }
+
   // Extract wildcard patterns from whitelist
   const wildcardPatterns = whitelist.filter((pattern) => pattern.includes("*"));
 
@@ -145,26 +155,101 @@ function buildClassRegistry(
  * Gets or creates a class registry with caching
  * @param cssPatterns - Glob patterns for CSS files to validate against
  * @param whitelist - Array of class name patterns that are always valid
+ * @param tailwindConfig - Tailwind configuration (boolean or config object)
  * @param cwd - Current working directory for resolving relative paths
  * @returns ClassRegistry instance
  */
 export function getClassRegistry(
   cssPatterns: string[],
   whitelist: string[],
+  tailwindConfig: boolean | TailwindConfig | undefined,
   cwd: string,
 ): ClassRegistry {
-  const currentCacheKey = createCacheKey(cssPatterns, whitelist, cwd);
+  const currentCacheKey = createCacheKey(
+    cssPatterns,
+    whitelist,
+    tailwindConfig,
+    cwd,
+  );
 
   // Return cached registry if configuration hasn't changed
   if (cachedRegistry && cacheKey === currentCacheKey) {
     return cachedRegistry;
   }
 
+  // Load Tailwind classes synchronously if enabled
+  // Note: This blocks, but only once per config change due to caching
+  let tailwindClasses: Set<string> | undefined;
+  if (tailwindConfig) {
+    try {
+      // Use dynamic import in a blocking way for initial load
+      // The classes will be cached after first load
+      tailwindClasses = loadTailwindClassesSync(tailwindConfig, cwd);
+    } catch (error) {
+      console.warn("Warning: Failed to load Tailwind classes:", error);
+    }
+  }
+
   // Build new registry
-  cachedRegistry = buildClassRegistry(cssPatterns, whitelist, cwd);
+  cachedRegistry = buildClassRegistry(
+    cssPatterns,
+    whitelist,
+    tailwindClasses,
+    cwd,
+  );
   cacheKey = currentCacheKey;
 
   return cachedRegistry;
+}
+
+/**
+ * Synchronously loads Tailwind classes (blocking operation)
+ * This is necessary because ESLint rules must be synchronous
+ * @param tailwindConfig - Tailwind configuration
+ * @param cwd - Current working directory
+ * @returns Set of Tailwind class names
+ */
+function loadTailwindClassesSync(
+  tailwindConfig: boolean | TailwindConfig,
+  cwd: string,
+): Set<string> {
+  // For now, we'll use require() to load the config synchronously
+  // This works because Tailwind configs are typically .js files
+
+  const { findTailwindConfigPath, extractSafelistClasses } = require("../parsers/tailwind-parser.js");
+
+  const configPath =
+    typeof tailwindConfig === "object" ? tailwindConfig.config : undefined;
+
+  const resolvedConfigPath = findTailwindConfigPath(configPath, cwd);
+
+  if (!resolvedConfigPath) {
+    console.warn(
+      "Warning: Tailwind config file not found, skipping Tailwind validation",
+    );
+    return new Set();
+  }
+
+  try {
+    // Use require for synchronous loading (CommonJS/ESM compatible)
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const configModule = require(resolvedConfigPath);
+    const userConfig = configModule.default || configModule;
+
+    // Use Tailwind's resolveConfig
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const resolveConfig = require("tailwindcss/resolveConfig");
+    const resolved = resolveConfig(userConfig);
+
+    // Extract safelist classes
+    return extractSafelistClasses(resolved.safelist || []);
+  } catch (error) {
+    console.warn(
+      `Warning: Failed to load Tailwind config from "${resolvedConfigPath}":`,
+      error,
+    );
+    return new Set();
+  }
 }
 
 /**

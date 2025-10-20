@@ -160,12 +160,20 @@ const rule: Rule.RuleModule = {
     // Get configuration options with proper typing
     const options: RuleOptions = context.options[0] || {};
     const cssPatterns = options.sources?.css || [];
+    const scssPatterns = options.sources?.scss || [];
+    const allCssPatterns = [...cssPatterns, ...scssPatterns];
+    const tailwindConfig = options.sources?.tailwind;
     const whitelist = options.validation?.whitelist || [];
     const ignorePatterns = options.validation?.ignorePatterns || [];
     const cwd = context.getCwd ? context.getCwd() : process.cwd();
 
-    // Get the class registry (with CSS parsing and caching)
-    const classRegistry = getClassRegistry(cssPatterns, whitelist, cwd);
+    // Get the class registry (with CSS, SCSS, Tailwind parsing and caching)
+    const classRegistry = getClassRegistry(
+      allCssPatterns,
+      whitelist,
+      tailwindConfig,
+      cwd,
+    );
 
     return {
       JSXAttribute(node: JSXAttribute) {

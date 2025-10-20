@@ -1,5 +1,9 @@
 import { RuleTester } from "eslint";
 import rule from "./valid-class-name.js";
+import fs from "fs";
+import path from "path";
+import os from "os";
+import { clearCache } from "../cache/class-registry.js";
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -317,3 +321,137 @@ ruleTester.run("valid-class-name", rule, {
     },
   ],
 });
+
+// Additional tests for CSS file validation
+// Note: These tests create temporary CSS files to test the integration
+(() => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "eslint-test-"));
+
+  // Create test CSS files
+  const cssFile = path.join(tempDir, "styles.css");
+  fs.writeFileSync(cssFile, ".btn { color: red; } .card { padding: 10px; }");
+
+  const cssFile2 = path.join(tempDir, "styles2.css");
+  fs.writeFileSync(cssFile2, ".btn { color: red; }");
+
+  const complexCssFile = path.join(tempDir, "complex.css");
+  fs.writeFileSync(
+    complexCssFile,
+    `
+    .btn:hover { color: blue; }
+    .card.active { border: 1px solid red; }
+    .parent .child { margin: 0; }
+  `,
+  );
+
+  // Clear cache before tests
+  clearCache();
+
+  const cssRuleTester = new RuleTester({
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
+  });
+
+  cssRuleTester.run("valid-class-name with CSS files", rule, {
+    valid: [
+      {
+        code: '<div className="btn" />',
+        filename: path.join(tempDir, "test.jsx"),
+        options: [
+          {
+            sources: {
+              css: [path.join(tempDir, "styles.css")],
+            },
+          },
+        ],
+      },
+      {
+        code: '<div className="btn card" />',
+        filename: path.join(tempDir, "test.jsx"),
+        options: [
+          {
+            sources: {
+              css: [path.join(tempDir, "styles.css")],
+            },
+          },
+        ],
+      },
+      {
+        code: '<div className="btn custom-class" />',
+        filename: path.join(tempDir, "test.jsx"),
+        options: [
+          {
+            sources: {
+              css: [path.join(tempDir, "styles2.css")],
+            },
+            validation: {
+              whitelist: ["custom-*"],
+            },
+          },
+        ],
+      },
+      {
+        code: '<div className="btn active card parent child" />',
+        filename: path.join(tempDir, "test.jsx"),
+        options: [
+          {
+            sources: {
+              css: [path.join(tempDir, "complex.css")],
+            },
+          },
+        ],
+      },
+    ],
+    invalid: [
+      {
+        code: '<div className="invalid-class" />',
+        filename: path.join(tempDir, "test.jsx"),
+        options: [
+          {
+            sources: {
+              css: [path.join(tempDir, "styles.css")],
+            },
+          },
+        ],
+        errors: [
+          {
+            messageId: "invalidClassName",
+            data: { className: "invalid-class" },
+          },
+        ],
+      },
+      {
+        code: '<div className="btn invalid-class" />',
+        filename: path.join(tempDir, "test.jsx"),
+        options: [
+          {
+            sources: {
+              css: [path.join(tempDir, "styles2.css")],
+            },
+            validation: {
+              whitelist: ["custom-*"],
+            },
+          },
+        ],
+        errors: [
+          {
+            messageId: "invalidClassName",
+            data: { className: "invalid-class" },
+          },
+        ],
+      },
+    ],
+  });
+
+  // Cleanup - NOTE: Files need to exist when tests actually run
+  // So we can't cleanup immediately. This is a known limitation of RuleTester.
+  // In practice, temp files will be cleaned by OS eventually.
+  // fs.rmSync(tempDir, { recursive: true, force: true });
+})();

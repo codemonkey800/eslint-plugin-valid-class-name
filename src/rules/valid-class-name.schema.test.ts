@@ -17,12 +17,12 @@ const ruleTester = new RuleTester({
 ruleTester.run("valid-class-name schema - valid configurations", rule, {
   valid: [
     {
-      code: '<div className="test" />',
+      code: "<div />",
       filename: "test.jsx",
       options: [{}],
     },
     {
-      code: '<div className="test" />',
+      code: "<div />",
       filename: "test.jsx",
       options: [
         {
@@ -33,7 +33,7 @@ ruleTester.run("valid-class-name schema - valid configurations", rule, {
       ],
     },
     {
-      code: '<div className="test" />',
+      code: "<div />",
       filename: "test.jsx",
       options: [
         {
@@ -44,7 +44,7 @@ ruleTester.run("valid-class-name schema - valid configurations", rule, {
       ],
     },
     {
-      code: '<div className="test" />',
+      code: "<div />",
       filename: "test.jsx",
       options: [
         {
@@ -55,7 +55,7 @@ ruleTester.run("valid-class-name schema - valid configurations", rule, {
       ],
     },
     {
-      code: '<div className="test" />',
+      code: "<div />",
       filename: "test.jsx",
       options: [
         {
@@ -66,7 +66,7 @@ ruleTester.run("valid-class-name schema - valid configurations", rule, {
       ],
     },
     {
-      code: '<div className="test" />',
+      code: "<div />",
       filename: "test.jsx",
       options: [
         {
@@ -79,7 +79,7 @@ ruleTester.run("valid-class-name schema - valid configurations", rule, {
       ],
     },
     {
-      code: '<div className="test" />',
+      code: "<div />",
       filename: "test.jsx",
       options: [
         {
@@ -90,7 +90,7 @@ ruleTester.run("valid-class-name schema - valid configurations", rule, {
       ],
     },
     {
-      code: '<div className="test" />',
+      code: "<div />",
       filename: "test.jsx",
       options: [
         {
@@ -112,7 +112,7 @@ ruleTester.run("valid-class-name schema - valid configurations", rule, {
       ],
     },
     {
-      code: '<div className="test" />',
+      code: "<div />",
       filename: "test.jsx",
       options: [
         {
@@ -123,7 +123,7 @@ ruleTester.run("valid-class-name schema - valid configurations", rule, {
       ],
     },
     {
-      code: '<div className="test" />',
+      code: "<div />",
       filename: "test.jsx",
       options: [
         {
@@ -155,7 +155,7 @@ ruleTester.run("valid-class-name schema - valid configurations", rule, {
       ],
     },
     {
-      code: '<div className="test" />',
+      code: "<div />",
       filename: "test.jsx",
       options: [
         {

@@ -1,5 +1,6 @@
 import type { Rule } from "eslint";
 import type { RuleOptions } from "../types/options.js";
+import { getClassRegistry } from "../cache/class-registry.js";
 
 /**
  * Type definitions for JSX AST nodes
@@ -73,23 +74,6 @@ function isClassNameIgnored(
   ignorePatterns: string[],
 ): boolean {
   return ignorePatterns.some((pattern) => matchesPattern(className, pattern));
-}
-
-/**
- * Checks if a class name is valid according to the whitelist
- * If whitelist is empty or undefined, all class names are considered invalid
- * @param className - The class name to validate
- * @param whitelist - Array of valid class name patterns
- * @returns true if the class name is valid
- */
-function isClassNameValid(className: string, whitelist: string[]): boolean {
-  // If no whitelist is provided, consider all class names invalid
-  if (!whitelist || whitelist.length === 0) {
-    return false;
-  }
-
-  // Check if className matches any pattern in the whitelist
-  return whitelist.some((pattern) => matchesPattern(className, pattern));
 }
 
 const rule: Rule.RuleModule = {
@@ -175,8 +159,13 @@ const rule: Rule.RuleModule = {
   create(context) {
     // Get configuration options with proper typing
     const options: RuleOptions = context.options[0] || {};
+    const cssPatterns = options.sources?.css || [];
     const whitelist = options.validation?.whitelist || [];
     const ignorePatterns = options.validation?.ignorePatterns || [];
+    const cwd = context.getCwd ? context.getCwd() : process.cwd();
+
+    // Get the class registry (with CSS parsing and caching)
+    const classRegistry = getClassRegistry(cssPatterns, whitelist, cwd);
 
     return {
       JSXAttribute(node: JSXAttribute) {
@@ -222,8 +211,9 @@ const rule: Rule.RuleModule = {
             continue;
           }
 
-          // Check if the class name is valid according to the whitelist
-          if (!isClassNameValid(className, whitelist)) {
+          // Check if the class name is valid using the registry
+          // (which checks both CSS files and whitelist patterns)
+          if (!classRegistry.isValid(className)) {
             context.report({
               node,
               messageId: "invalidClassName",

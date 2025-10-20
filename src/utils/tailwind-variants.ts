@@ -214,3 +214,297 @@ export function validateVariants(
 
   return { valid: true }
 }
+
+/**
+ * Tailwind utility prefixes that support arbitrary values
+ * These prefixes can be used with bracket notation (e.g., w-[100px], bg-[#1da1f2])
+ */
+export const ARBITRARY_VALUE_PREFIXES = new Set([
+  // Spacing - Padding
+  'p',
+  'px',
+  'py',
+  'pt',
+  'pr',
+  'pb',
+  'pl',
+  'ps',
+  'pe',
+  // Spacing - Margin
+  'm',
+  'mx',
+  'my',
+  'mt',
+  'mr',
+  'mb',
+  'ml',
+  'ms',
+  'me',
+  // Spacing - Gap
+  'gap',
+  'gap-x',
+  'gap-y',
+  // Spacing - Space
+  'space-x',
+  'space-y',
+  // Spacing - Inset
+  'inset',
+  'inset-x',
+  'inset-y',
+  'top',
+  'right',
+  'bottom',
+  'left',
+  'start',
+  'end',
+  // Spacing - Scroll margin/padding
+  'scroll-m',
+  'scroll-mx',
+  'scroll-my',
+  'scroll-mt',
+  'scroll-mr',
+  'scroll-mb',
+  'scroll-ml',
+  'scroll-ms',
+  'scroll-me',
+  'scroll-p',
+  'scroll-px',
+  'scroll-py',
+  'scroll-pt',
+  'scroll-pr',
+  'scroll-pb',
+  'scroll-pl',
+  'scroll-ps',
+  'scroll-pe',
+  // Sizing
+  'w',
+  'h',
+  'size',
+  'min-w',
+  'max-w',
+  'min-h',
+  'max-h',
+  // Colors
+  'bg',
+  'text',
+  'border',
+  'border-t',
+  'border-r',
+  'border-b',
+  'border-l',
+  'border-s',
+  'border-e',
+  'border-x',
+  'border-y',
+  'ring',
+  'ring-offset',
+  'divide',
+  'placeholder',
+  'from',
+  'via',
+  'to',
+  'decoration',
+  'outline',
+  'accent',
+  'caret',
+  'fill',
+  'stroke',
+  // Typography
+  'text', // Also used for font-size
+  'leading',
+  'tracking',
+  'font',
+  // Border width
+  'border-spacing',
+  'border-spacing-x',
+  'border-spacing-y',
+  'rounded',
+  'rounded-t',
+  'rounded-r',
+  'rounded-b',
+  'rounded-l',
+  'rounded-s',
+  'rounded-e',
+  'rounded-tl',
+  'rounded-tr',
+  'rounded-br',
+  'rounded-bl',
+  'rounded-ss',
+  'rounded-se',
+  'rounded-ee',
+  'rounded-es',
+  // Effects
+  'shadow',
+  'opacity',
+  'bg-opacity',
+  'text-opacity',
+  'border-opacity',
+  'divide-opacity',
+  'placeholder-opacity',
+  'ring-opacity',
+  // Transforms
+  'translate-x',
+  'translate-y',
+  'translate-z',
+  'rotate',
+  'skew-x',
+  'skew-y',
+  'scale',
+  'scale-x',
+  'scale-y',
+  'scale-z',
+  // Filters
+  'blur',
+  'brightness',
+  'contrast',
+  'grayscale',
+  'hue-rotate',
+  'invert',
+  'saturate',
+  'sepia',
+  'drop-shadow',
+  // Backdrop filters
+  'backdrop-blur',
+  'backdrop-brightness',
+  'backdrop-contrast',
+  'backdrop-grayscale',
+  'backdrop-hue-rotate',
+  'backdrop-invert',
+  'backdrop-opacity',
+  'backdrop-saturate',
+  'backdrop-sepia',
+  // Transitions and animations
+  'duration',
+  'delay',
+  'ease',
+  'transition',
+  'animate',
+  // Grid
+  'grid-cols',
+  'grid-rows',
+  'col-span',
+  'col-start',
+  'col-end',
+  'row-span',
+  'row-start',
+  'row-end',
+  'auto-cols',
+  'auto-rows',
+  // Flexbox
+  'flex',
+  'grow',
+  'shrink',
+  'basis',
+  'order',
+  // Layout
+  'z',
+  'aspect',
+  // Interactivity
+  'cursor',
+  'scroll-m',
+  'scroll-p',
+  'will-change',
+  // SVG
+  'stroke-w',
+  // Content
+  'content',
+])
+
+/**
+ * Parsed arbitrary value structure
+ */
+export interface ParsedArbitraryValue {
+  /**
+   * The prefix before the brackets (e.g., "w" from "w-[100px]")
+   */
+  prefix: string
+  /**
+   * The value inside the brackets (e.g., "100px" from "w-[100px]")
+   */
+  value: string
+}
+
+/**
+ * Checks if a class name uses arbitrary value syntax
+ * Arbitrary values use bracket notation: prefix-[value]
+ * @param className - The class name to check (e.g., "w-[100px]", "hover:bg-[#1da1f2]")
+ * @returns true if the class uses arbitrary value syntax
+ * @example
+ * isArbitraryValue("w-[100px]") // true
+ * isArbitraryValue("w-full") // false
+ * isArbitraryValue("bg-[#1da1f2]") // true
+ * isArbitraryValue("text-[14px]") // true
+ */
+export function isArbitraryValue(className: string): boolean {
+  // Pattern: one or more word characters, followed by a dash, followed by brackets with content
+  // Matches: w-[100px], bg-[#1da1f2], grid-cols-[200px_1fr]
+  // Does not match: [&:hover]:w-full (arbitrary variant), w-full (regular class), w-[] (empty)
+  const arbitraryValuePattern = /^[\w-]+-\[.+\]$/
+  return arbitraryValuePattern.test(className)
+}
+
+/**
+ * Parses an arbitrary value class name into prefix and value
+ * @param className - The class name to parse (e.g., "w-[100px]")
+ * @returns Parsed structure with prefix and value, or null if not an arbitrary value
+ * @example
+ * parseArbitraryValue("w-[100px]") // { prefix: "w", value: "100px" }
+ * parseArbitraryValue("bg-[#1da1f2]") // { prefix: "bg", value: "#1da1f2" }
+ * parseArbitraryValue("w-full") // null
+ */
+export function parseArbitraryValue(
+  className: string,
+): ParsedArbitraryValue | null {
+  if (!isArbitraryValue(className)) {
+    return null
+  }
+
+  // Find the last occurrence of "-[" to handle multi-part prefixes like "grid-cols"
+  const bracketIndex = className.lastIndexOf('-[')
+  if (bracketIndex === -1) {
+    return null
+  }
+
+  const prefix = className.substring(0, bracketIndex)
+  const valueWithBrackets = className.substring(bracketIndex + 1)
+
+  // Extract value from brackets
+  if (!valueWithBrackets.startsWith('[') || !valueWithBrackets.endsWith(']')) {
+    return null
+  }
+
+  const value = valueWithBrackets.slice(1, -1)
+
+  return { prefix, value }
+}
+
+/**
+ * Validates an arbitrary value class name
+ * Checks if the prefix is a valid Tailwind utility that supports arbitrary values
+ * @param className - The class name to validate (e.g., "w-[100px]")
+ * @returns true if the arbitrary value is valid
+ * @example
+ * isValidArbitraryValue("w-[100px]") // true
+ * isValidArbitraryValue("invalid-[100px]") // false
+ * isValidArbitraryValue("w-full") // false (not an arbitrary value)
+ */
+export function isValidArbitraryValue(className: string): boolean {
+  const parsed = parseArbitraryValue(className)
+  if (!parsed) {
+    return false
+  }
+
+  const { prefix, value } = parsed
+
+  // Check if prefix is valid
+  if (!ARBITRARY_VALUE_PREFIXES.has(prefix)) {
+    return false
+  }
+
+  // Check if value is not empty
+  if (!value || value.trim().length === 0) {
+    return false
+  }
+
+  return true
+}

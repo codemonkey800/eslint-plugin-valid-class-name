@@ -1,7 +1,11 @@
 import type { Rule } from 'eslint'
 import { getClassRegistry } from 'src/cache/class-registry'
 import type { RuleOptions } from 'src/types/options'
-import { parseClassName, validateVariants } from 'src/utils/tailwind-variants'
+import {
+  isValidArbitraryValue,
+  parseClassName,
+  validateVariants,
+} from 'src/utils/tailwind-variants'
 
 /**
  * Type definitions for JSX AST nodes
@@ -253,6 +257,13 @@ const rule: Rule.RuleModule = {
               })
               continue
             }
+          }
+
+          // Check if the base utility uses arbitrary value syntax
+          // Arbitrary values (e.g., w-[100px], bg-[#1da1f2]) bypass registry validation
+          if (isValidArbitraryValue(base)) {
+            // Valid arbitrary value, skip further validation
+            continue
           }
 
           // Validate base utility

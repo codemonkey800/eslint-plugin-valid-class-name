@@ -3,6 +3,10 @@ import {
   isValidVariant,
   parseClassName,
   validateVariants,
+  isArbitraryValue,
+  parseArbitraryValue,
+  isValidArbitraryValue,
+  ARBITRARY_VALUE_PREFIXES,
 } from './tailwind-variants'
 
 describe('DEFAULT_TAILWIND_VARIANTS', () => {
@@ -170,3 +174,174 @@ describe('validateVariants', () => {
     expect(result).toEqual({ valid: true })
   })
 })
+
+describe('ARBITRARY_VALUE_PREFIXES', () => {
+  it('should include common spacing prefixes', () => {
+    expect(ARBITRARY_VALUE_PREFIXES.has('p')).toBe(true)
+    expect(ARBITRARY_VALUE_PREFIXES.has('m')).toBe(true)
+    expect(ARBITRARY_VALUE_PREFIXES.has('px')).toBe(true)
+    expect(ARBITRARY_VALUE_PREFIXES.has('mt')).toBe(true)
+  })
+
+  it('should include sizing prefixes', () => {
+    expect(ARBITRARY_VALUE_PREFIXES.has('w')).toBe(true)
+    expect(ARBITRARY_VALUE_PREFIXES.has('h')).toBe(true)
+    expect(ARBITRARY_VALUE_PREFIXES.has('min-w')).toBe(true)
+    expect(ARBITRARY_VALUE_PREFIXES.has('max-h')).toBe(true)
+  })
+
+  it('should include color prefixes', () => {
+    expect(ARBITRARY_VALUE_PREFIXES.has('bg')).toBe(true)
+    expect(ARBITRARY_VALUE_PREFIXES.has('text')).toBe(true)
+    expect(ARBITRARY_VALUE_PREFIXES.has('border')).toBe(true)
+  })
+
+  it('should include grid prefixes', () => {
+    expect(ARBITRARY_VALUE_PREFIXES.has('grid-cols')).toBe(true)
+    expect(ARBITRARY_VALUE_PREFIXES.has('col-span')).toBe(true)
+  })
+})
+
+describe('isArbitraryValue', () => {
+  it('should detect simple arbitrary values', () => {
+    expect(isArbitraryValue('w-[100px]')).toBe(true)
+    expect(isArbitraryValue('h-[50vh]')).toBe(true)
+    expect(isArbitraryValue('p-[2.5rem]')).toBe(true)
+  })
+
+  it('should detect arbitrary values with hex colors', () => {
+    expect(isArbitraryValue('bg-[#1da1f2]')).toBe(true)
+    expect(isArbitraryValue('text-[#ff0000]')).toBe(true)
+  })
+
+  it('should detect arbitrary values with complex expressions', () => {
+    expect(isArbitraryValue('grid-cols-[200px_1fr]')).toBe(true)
+    expect(isArbitraryValue('grid-cols-[200px_minmax(900px,_1fr)_100px]')).toBe(
+      true,
+    )
+  })
+
+  it('should detect multi-part prefixes', () => {
+    expect(isArbitraryValue('min-w-[100px]')).toBe(true)
+    expect(isArbitraryValue('max-h-[50vh]')).toBe(true)
+    expect(isArbitraryValue('col-span-[2]')).toBe(true)
+  })
+
+  it('should reject regular classes', () => {
+    expect(isArbitraryValue('w-full')).toBe(false)
+    expect(isArbitraryValue('bg-blue-500')).toBe(false)
+    expect(isArbitraryValue('mt-2')).toBe(false)
+  })
+
+  it('should reject arbitrary variants', () => {
+    expect(isArbitraryValue('[&:hover]')).toBe(false)
+    expect(isArbitraryValue('[&:nth-child(3)]')).toBe(false)
+  })
+
+  it('should reject malformed brackets', () => {
+    expect(isArbitraryValue('w-[100px')).toBe(false)
+    expect(isArbitraryValue('w-100px]')).toBe(false)
+  })
+
+  it('should detect empty brackets', () => {
+    expect(isArbitraryValue('w-[]')).toBe(false) // Empty brackets don't match the pattern
+  })
+})
+
+describe('parseArbitraryValue', () => {
+  it('should parse simple arbitrary values', () => {
+    expect(parseArbitraryValue('w-[100px]')).toEqual({
+      prefix: 'w',
+      value: '100px',
+    })
+    expect(parseArbitraryValue('h-[50vh]')).toEqual({
+      prefix: 'h',
+      value: '50vh',
+    })
+  })
+
+  it('should parse arbitrary values with hex colors', () => {
+    expect(parseArbitraryValue('bg-[#1da1f2]')).toEqual({
+      prefix: 'bg',
+      value: '#1da1f2',
+    })
+  })
+
+  it('should parse multi-part prefixes', () => {
+    expect(parseArbitraryValue('min-w-[100px]')).toEqual({
+      prefix: 'min-w',
+      value: '100px',
+    })
+    expect(parseArbitraryValue('grid-cols-[200px_1fr]')).toEqual({
+      prefix: 'grid-cols',
+      value: '200px_1fr',
+    })
+  })
+
+  it('should parse complex values', () => {
+    expect(
+      parseArbitraryValue('grid-cols-[200px_minmax(900px,_1fr)_100px]'),
+    ).toEqual({
+      prefix: 'grid-cols',
+      value: '200px_minmax(900px,_1fr)_100px',
+    })
+  })
+
+  it('should return null for non-arbitrary values', () => {
+    expect(parseArbitraryValue('w-full')).toBeNull()
+    expect(parseArbitraryValue('bg-blue-500')).toBeNull()
+  })
+
+  it('should return null for malformed values', () => {
+    expect(parseArbitraryValue('w-[100px')).toBeNull()
+    expect(parseArbitraryValue('w-100px]')).toBeNull()
+  })
+
+  it('should return null for empty brackets', () => {
+    expect(parseArbitraryValue('w-[]')).toBeNull()
+  })
+})
+
+describe('isValidArbitraryValue', () => {
+  it('should validate arbitrary values with valid prefixes', () => {
+    expect(isValidArbitraryValue('w-[100px]')).toBe(true)
+    expect(isValidArbitraryValue('h-[50vh]')).toBe(true)
+    expect(isValidArbitraryValue('bg-[#1da1f2]')).toBe(true)
+    expect(isValidArbitraryValue('text-[14px]')).toBe(true)
+    expect(isValidArbitraryValue('p-[2.5rem]')).toBe(true)
+  })
+
+  it('should validate multi-part prefixes', () => {
+    expect(isValidArbitraryValue('min-w-[100px]')).toBe(true)
+    expect(isValidArbitraryValue('max-h-[50vh]')).toBe(true)
+    expect(isValidArbitraryValue('grid-cols-[200px_1fr]')).toBe(true)
+  })
+
+  it('should validate complex values', () => {
+    expect(
+      isValidArbitraryValue('grid-cols-[200px_minmax(900px,_1fr)_100px]'),
+    ).toBe(true)
+  })
+
+  it('should reject arbitrary values with invalid prefixes', () => {
+    expect(isValidArbitraryValue('invalid-[100px]')).toBe(false)
+    expect(isValidArbitraryValue('foo-[bar]')).toBe(false)
+    expect(isValidArbitraryValue('custom-[value]')).toBe(false)
+  })
+
+  it('should reject arbitrary values with empty values', () => {
+    expect(isValidArbitraryValue('w-[]')).toBe(false)
+    expect(isValidArbitraryValue('bg-[]')).toBe(false)
+  })
+
+  it('should reject non-arbitrary values', () => {
+    expect(isValidArbitraryValue('w-full')).toBe(false)
+    expect(isValidArbitraryValue('bg-blue-500')).toBe(false)
+  })
+
+  it('should reject malformed values', () => {
+    expect(isValidArbitraryValue('w-[100px')).toBe(false)
+    expect(isValidArbitraryValue('w-100px]')).toBe(false)
+  })
+})
+

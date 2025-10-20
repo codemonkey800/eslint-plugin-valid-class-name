@@ -225,27 +225,10 @@ describe('tailwind-parser', () => {
       consoleWarnSpy.mockRestore()
     })
 
-    it('should handle explicit config path', async () => {
-      mockFs.existsSync.mockReturnValue(true)
-
-      // Mock dynamic import and resolveConfig
-      const mockResolveConfig = jest.fn().mockReturnValue({
-        safelist: ['bg-red-500', 'text-blue-600'],
-        theme: {},
-        content: [],
-      })
-
-      // Mock module import
-      jest.unstable_mockModule('tailwindcss/resolveConfig', () => ({
-        default: mockResolveConfig,
-      }))
-
-      const configPath = '/project/custom/tailwind.config.js'
-      mockFs.existsSync.mockImplementation(path => String(path) === configPath)
-
-      // Note: This test demonstrates the structure, but actual dynamic import mocking
-      // is complex in Jest. In practice, you might need to use a different approach
-      // or test the integration at a higher level.
-    })
   })
+
+  // Note: Comprehensive integration tests for utility generation would require
+  // mocking dynamic imports, which is complex in Jest. The utility generation
+  // is tested through real usage in the main test suite and through manual testing
+  // with actual Tailwind config files.
 })

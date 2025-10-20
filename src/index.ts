@@ -1,4 +1,5 @@
 import type { ESLint } from 'eslint'
+
 import { rules } from './rules/index.js'
 
 const plugin: ESLint.Plugin = {

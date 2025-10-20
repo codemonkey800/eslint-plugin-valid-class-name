@@ -1,7 +1,7 @@
+import path from 'path'
 import postcss from 'postcss'
 import selectorParser from 'postcss-selector-parser'
 import * as sass from 'sass'
-import path from 'path'
 
 /**
  * Extracts CSS class names from CSS content using PostCSS

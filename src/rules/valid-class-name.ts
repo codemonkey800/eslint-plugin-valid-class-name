@@ -1,6 +1,7 @@
 import type { Rule } from 'eslint'
-import type { RuleOptions } from '../types/options.js'
+
 import { getClassRegistry } from '../cache/class-registry.js'
+import type { RuleOptions } from '../types/options.js'
 
 /**
  * Type definitions for JSX AST nodes
@@ -94,6 +95,7 @@ const rule: Rule.RuleModule = {
         properties: {
           sources: {
             type: 'object',
+            description: 'Configuration for CSS class name sources',
             properties: {
               css: {
                 type: 'array',
@@ -107,9 +109,10 @@ const rule: Rule.RuleModule = {
               },
               tailwind: {
                 oneOf: [
-                  { type: 'boolean' },
+                  { type: 'boolean', description: 'Enable Tailwind CSS validation' },
                   {
                     type: 'object',
+                    description: 'Tailwind CSS configuration object',
                     properties: {
                       config: {
                         type: 'string',
@@ -131,6 +134,7 @@ const rule: Rule.RuleModule = {
           },
           validation: {
             type: 'object',
+            description: 'Validation options for class names',
             properties: {
               whitelist: {
                 type: 'array',
@@ -155,6 +159,7 @@ const rule: Rule.RuleModule = {
         additionalProperties: false,
       },
     ],
+    defaultOptions: [{}],
   },
   create(context) {
     // Get configuration options with proper typing

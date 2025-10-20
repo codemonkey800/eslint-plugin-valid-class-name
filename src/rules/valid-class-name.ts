@@ -233,33 +233,36 @@ const rule: Rule.RuleModule = {
           }
 
           // Validate variants if present
-          if (variants.length > 0) {
-            const validVariants = classRegistry.getValidVariants()
+          const validVariants = classRegistry.getValidVariants()
+          const hasTailwindVariants = variants.length > 0 && validVariants.size > 0
 
-            // Only validate variants if we have Tailwind enabled
-            if (validVariants.size > 0) {
-              const { valid, invalidVariant } = validateVariants(
-                variants,
-                validVariants,
-              )
+          if (hasTailwindVariants) {
+            const { valid, invalidVariant } = validateVariants(
+              variants,
+              validVariants,
+            )
 
-              if (!valid && invalidVariant) {
-                context.report({
-                  node,
-                  messageId: 'invalidVariant',
-                  data: {
-                    variant: invalidVariant,
-                    className,
-                  },
-                })
-                continue
-              }
+            if (!valid && invalidVariant) {
+              context.report({
+                node,
+                messageId: 'invalidVariant',
+                data: {
+                  variant: invalidVariant,
+                  className,
+                },
+              })
+              continue
             }
           }
 
-          // Validate base utility using the registry
-          // (which checks both CSS files and whitelist patterns)
-          if (!classRegistry.isValid(base)) {
+          // Validate base utility
+          // When Tailwind variants are present, only validate against Tailwind classes
+          // Otherwise, validate against all sources (CSS, Tailwind, whitelist)
+          const isValidBase = hasTailwindVariants
+            ? classRegistry.isTailwindClass(base)
+            : classRegistry.isValid(base)
+
+          if (!isValidBase) {
             context.report({
               node,
               messageId: 'invalidClassName',

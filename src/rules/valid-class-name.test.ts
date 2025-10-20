@@ -637,6 +637,153 @@ describe('Tailwind variant validation', () => {
     ],
   })
 
+  // Test that CSS classes with Tailwind variants are invalid
+  // (variants should only work with Tailwind utilities)
+  describe('CSS classes with Tailwind variants', () => {
+    const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'eslint-test-'))
+    const cssFile = path.join(testDir, 'test.css')
+
+    beforeAll(() => {
+      // Create a CSS file with a container class
+      fs.writeFileSync(
+        cssFile,
+        `
+        .container {
+          max-width: 1200px;
+        }
+        .header {
+          background: #fff;
+        }
+      `,
+      )
+    })
+
+    afterAll(() => {
+      // Clean up
+      fs.unlinkSync(cssFile)
+      fs.rmdirSync(testDir)
+      clearCache()
+    })
+
+    ruleTester.run(
+      'valid-class-name (CSS classes with Tailwind variants)',
+      rule,
+      {
+        valid: [
+          // CSS class without variants should be valid
+          {
+            code: '<div className="container" />',
+            filename: 'test.jsx',
+            options: [
+              {
+                sources: {
+                  css: [cssFile],
+                  tailwind: {
+                    config: path.join(
+                      process.cwd(),
+                      'test-project/tailwind.config.cjs',
+                    ),
+                  },
+                },
+              },
+            ],
+          },
+          // Tailwind utility with variants should be valid
+          {
+            code: '<div className="focus:first:mb-2" />',
+            filename: 'test.jsx',
+            options: [
+              {
+                sources: {
+                  css: [cssFile],
+                  tailwind: {
+                    config: path.join(
+                      process.cwd(),
+                      'test-project/tailwind.config.cjs',
+                    ),
+                  },
+                },
+              },
+            ],
+          },
+          // Whitelist pattern with variants should be valid
+          {
+            code: '<div className="hover:custom-button" />',
+            filename: 'test.jsx',
+            options: [
+              {
+                sources: {
+                  tailwind: {
+                    config: path.join(
+                      process.cwd(),
+                      'test-project/tailwind.config.cjs',
+                    ),
+                  },
+                },
+                validation: {
+                  whitelist: ['custom-*'],
+                },
+              },
+            ],
+          },
+        ],
+        invalid: [
+          // CSS class with Tailwind variants should be invalid
+          {
+            code: '<div className="focus:first:container" />',
+            filename: 'test.jsx',
+            options: [
+              {
+                sources: {
+                  css: [cssFile],
+                  tailwind: {
+                    config: path.join(
+                      process.cwd(),
+                      'test-project/tailwind.config.cjs',
+                    ),
+                  },
+                },
+              },
+            ],
+            errors: [
+              {
+                messageId: 'invalidClassName',
+                data: {
+                  className: 'container',
+                },
+              },
+            ],
+          },
+          {
+            code: '<div className="hover:header" />',
+            filename: 'test.jsx',
+            options: [
+              {
+                sources: {
+                  css: [cssFile],
+                  tailwind: {
+                    config: path.join(
+                      process.cwd(),
+                      'test-project/tailwind.config.cjs',
+                    ),
+                  },
+                },
+              },
+            ],
+            errors: [
+              {
+                messageId: 'invalidClassName',
+                data: {
+                  className: 'header',
+                },
+              },
+            ],
+          },
+        ],
+      },
+    )
+  })
+
   // Test that ignore patterns work with variants
   ruleTester.run('valid-class-name (variants - ignore patterns)', rule, {
     valid: [

@@ -43,6 +43,14 @@ export interface ClassRegistry {
   isValid(className: string): boolean
 
   /**
+   * Checks if a class name is a valid Tailwind class (excludes CSS classes)
+   * Used when validating classes with Tailwind variants
+   * @param className - The class name to validate
+   * @returns true if the class name is a Tailwind utility or matches whitelist pattern
+   */
+  isTailwindClass(className: string): boolean
+
+  /**
    * Gets all literal class names in the registry (excludes patterns)
    * @returns Set of all literal class names
    */
@@ -145,7 +153,10 @@ function buildClassRegistry(
   tailwindClasses: Set<string> | undefined,
   validVariants: Set<string> | undefined,
 ): ClassRegistry {
-  const literalClasses = new Set<string>()
+  // Separate CSS classes from Tailwind classes
+  const cssClasses = new Set<string>()
+  const tailwindLiteralClasses = new Set<string>()
+  const whitelistLiteralClasses = new Set<string>()
 
   // Extract classes from CSS files
   for (const file of resolvedFiles) {
@@ -161,7 +172,7 @@ function buildClassRegistry(
         classes = extractClassNamesFromCss(content)
       }
 
-      classes.forEach(cls => literalClasses.add(cls))
+      classes.forEach(cls => cssClasses.add(cls))
     } catch (readError) {
       console.warn(
         `Warning: Failed to read CSS/SCSS file "${file.path}":`,
@@ -170,17 +181,30 @@ function buildClassRegistry(
     }
   }
 
-  // Add literal whitelist entries (non-wildcard patterns) to the set
+  // Add literal whitelist entries (non-wildcard patterns) to whitelist set
   whitelist.forEach(pattern => {
     if (!pattern.includes('*')) {
-      literalClasses.add(pattern)
+      whitelistLiteralClasses.add(pattern)
     }
   })
 
   // Add Tailwind classes if provided
   if (tailwindClasses) {
-    tailwindClasses.forEach(cls => literalClasses.add(cls))
+    tailwindClasses.forEach(cls => tailwindLiteralClasses.add(cls))
   }
+
+  // Combine all literal classes for general validation
+  const allLiteralClasses = new Set<string>([
+    ...cssClasses,
+    ...tailwindLiteralClasses,
+    ...whitelistLiteralClasses,
+  ])
+
+  // Combine Tailwind and whitelist for Tailwind-only validation
+  const tailwindOnlyLiteralClasses = new Set<string>([
+    ...tailwindLiteralClasses,
+    ...whitelistLiteralClasses,
+  ])
 
   // Extract wildcard patterns from whitelist
   const wildcardPatterns = whitelist.filter(pattern => pattern.includes('*'))
@@ -188,7 +212,19 @@ function buildClassRegistry(
   return {
     isValid(className: string): boolean {
       // Check literal classes first (O(1) lookup)
-      if (literalClasses.has(className)) {
+      if (allLiteralClasses.has(className)) {
+        return true
+      }
+
+      // Check wildcard patterns
+      return wildcardPatterns.some(pattern =>
+        matchesPattern(className, pattern),
+      )
+    },
+
+    isTailwindClass(className: string): boolean {
+      // Check Tailwind + whitelist literal classes first (O(1) lookup)
+      if (tailwindOnlyLiteralClasses.has(className)) {
         return true
       }
 
@@ -199,7 +235,7 @@ function buildClassRegistry(
     },
 
     getAllClasses(): Set<string> {
-      return new Set(literalClasses)
+      return new Set(allLiteralClasses)
     },
 
     getValidVariants(): Set<string> {

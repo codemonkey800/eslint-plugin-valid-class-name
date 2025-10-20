@@ -1,0 +1,46 @@
+{
+  "name": "eslint-plugin-valid-class-name",
+  "version": "0.1.0",
+  "description": "ESLint plugin that validates CSS class names against actual CSS/SCSS files, Tailwind config, and whitelists",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "keywords": [
+    "eslint",
+    "eslint-plugin",
+    "css",
+    "classnames",
+    "tailwind",
+    "validation",
+    "linter"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "eslint": "^8.0.0 || ^9.0.0"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.2.0",
+    "@types/eslint": "^9.6.1",
+    "@types/estree": "^1.0.8",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.8.1",
+    "eslint": "^9.38.0",
+    "jest": "^30.2.0",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.4.5",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

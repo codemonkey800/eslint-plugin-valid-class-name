@@ -10,29 +10,29 @@ This is an ESLint plugin that validates CSS class names in JSX/TSX files against
 
 ### Build
 ```bash
-npm run build
+pnpm run build
 ```
 Compiles TypeScript to JavaScript using tsup. Output goes to `lib/` directory.
 
 ### Testing
 ```bash
-npm test                 # Run all tests
-npm run test:watch       # Run tests in watch mode
-npm run test:coverage    # Run tests with coverage report
+pnpm test                 # Run all tests
+pnpm run test:watch       # Run tests in watch mode
+pnpm run test:coverage    # Run tests with coverage report
 ```
 
 To run a single test file:
 ```bash
-npm test -- src/parsers/css-parser.test.ts
+pnpm test -- src/parsers/css-parser.test.ts
 ```
 
 ### Linting and Formatting
 ```bash
-npm run lint             # Run ESLint
-npm run lint:fix         # Run ESLint with auto-fix
-npm run prettier         # Check code formatting
-npm run prettier:fix     # Auto-fix code formatting
-npm run type-check       # Run TypeScript type checking
+pnpm run lint             # Run ESLint
+pnpm run lint:fix         # Run ESLint with auto-fix
+pnpm run prettier         # Check code formatting
+pnpm run prettier:fix     # Auto-fix code formatting
+pnpm run type-check       # Run TypeScript type checking
 ```
 
 When modifying files, run linters only for changed files to save time.

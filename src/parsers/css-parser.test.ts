@@ -1,5 +1,9 @@
 import { describe, expect, it } from "@jest/globals";
-import { extractClassNamesFromCss } from "./css-parser.js";
+import {
+  extractClassNamesFromCss,
+  extractClassNamesFromScss,
+} from "./css-parser.js";
+import path from "path";
 
 describe("extractClassNamesFromCss", () => {
   it("should extract simple class names", () => {
@@ -204,5 +208,206 @@ describe("extractClassNamesFromCss", () => {
     const classes = extractClassNamesFromCss(css);
     expect(classes.has("btn")).toBe(true);
     expect(classes.size).toBe(1);
+  });
+});
+
+describe("extractClassNamesFromScss", () => {
+  // Mock file path for testing
+  const mockFilePath = path.join(__dirname, "test.scss");
+
+  it("should extract class names from basic SCSS", () => {
+    const scss = `
+      .btn {
+        color: red;
+      }
+      .card {
+        padding: 10px;
+      }
+    `;
+    const classes = extractClassNamesFromScss(scss, mockFilePath);
+    expect(classes.has("btn")).toBe(true);
+    expect(classes.has("card")).toBe(true);
+    expect(classes.size).toBe(2);
+  });
+
+  it("should extract class names from nested SCSS", () => {
+    const scss = `
+      .parent {
+        color: blue;
+
+        .child {
+          color: red;
+        }
+
+        .another-child {
+          color: green;
+        }
+      }
+    `;
+    const classes = extractClassNamesFromScss(scss, mockFilePath);
+    expect(classes.has("parent")).toBe(true);
+    expect(classes.has("child")).toBe(true);
+    expect(classes.has("another-child")).toBe(true);
+    expect(classes.size).toBe(3);
+  });
+
+  it("should extract class names from SCSS with ampersand nesting", () => {
+    const scss = `
+      .btn {
+        color: blue;
+
+        &:hover {
+          color: red;
+        }
+
+        &.active {
+          color: green;
+        }
+
+        &-primary {
+          background: blue;
+        }
+      }
+    `;
+    const classes = extractClassNamesFromScss(scss, mockFilePath);
+    expect(classes.has("btn")).toBe(true);
+    expect(classes.has("active")).toBe(true);
+    expect(classes.has("btn-primary")).toBe(true);
+    expect(classes.size).toBe(3);
+  });
+
+  it("should handle SCSS variables", () => {
+    const scss = `
+      $primary-color: blue;
+
+      .btn {
+        color: $primary-color;
+      }
+
+      .card {
+        background: $primary-color;
+      }
+    `;
+    const classes = extractClassNamesFromScss(scss, mockFilePath);
+    expect(classes.has("btn")).toBe(true);
+    expect(classes.has("card")).toBe(true);
+    expect(classes.size).toBe(2);
+  });
+
+  it("should handle SCSS mixins", () => {
+    const scss = `
+      @mixin button-styles {
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      .btn {
+        @include button-styles;
+        color: blue;
+      }
+
+      .link-btn {
+        @include button-styles;
+        text-decoration: none;
+      }
+    `;
+    const classes = extractClassNamesFromScss(scss, mockFilePath);
+    expect(classes.has("btn")).toBe(true);
+    expect(classes.has("link-btn")).toBe(true);
+    expect(classes.size).toBe(2);
+  });
+
+  it("should handle SCSS with deep nesting", () => {
+    const scss = `
+      .nav {
+        .menu {
+          .item {
+            .link {
+              color: blue;
+            }
+          }
+        }
+      }
+    `;
+    const classes = extractClassNamesFromScss(scss, mockFilePath);
+    expect(classes.has("nav")).toBe(true);
+    expect(classes.has("menu")).toBe(true);
+    expect(classes.has("item")).toBe(true);
+    expect(classes.has("link")).toBe(true);
+    expect(classes.size).toBe(4);
+  });
+
+  it("should handle SCSS with @extend", () => {
+    const scss = `
+      .base-btn {
+        padding: 10px;
+      }
+
+      .primary-btn {
+        @extend .base-btn;
+        color: blue;
+      }
+
+      .secondary-btn {
+        @extend .base-btn;
+        color: gray;
+      }
+    `;
+    const classes = extractClassNamesFromScss(scss, mockFilePath);
+    expect(classes.has("base-btn")).toBe(true);
+    expect(classes.has("primary-btn")).toBe(true);
+    expect(classes.has("secondary-btn")).toBe(true);
+    expect(classes.size).toBe(3);
+  });
+
+  it("should handle SCSS with interpolation", () => {
+    const scss = `
+      $prefix: "btn";
+
+      .#{$prefix}-primary {
+        color: blue;
+      }
+
+      .#{$prefix}-secondary {
+        color: gray;
+      }
+    `;
+    const classes = extractClassNamesFromScss(scss, mockFilePath);
+    expect(classes.has("btn-primary")).toBe(true);
+    expect(classes.has("btn-secondary")).toBe(true);
+    expect(classes.size).toBe(2);
+  });
+
+  it("should handle SCSS compilation errors gracefully", () => {
+    const scss = `
+      .btn {
+        color: $undefined-variable;
+      }
+    `;
+    const classes = extractClassNamesFromScss(scss, mockFilePath);
+    // Should return empty set on compilation error
+    expect(classes.size).toBe(0);
+  });
+
+  it("should handle malformed SCSS gracefully", () => {
+    const scss = `
+      .btn {
+        color: red
+    `;
+    const classes = extractClassNamesFromScss(scss, mockFilePath);
+    // Should return empty set on compilation error
+    expect(classes.size).toBe(0);
+  });
+
+  it("should handle empty SCSS", () => {
+    const scss = "";
+    const classes = extractClassNamesFromScss(scss, mockFilePath);
+    expect(classes.size).toBe(0);
+  });
+
+  it("should handle SCSS with only comments", () => {
+    const scss = "// This is a comment\n/* This is another comment */";
+    const classes = extractClassNamesFromScss(scss, mockFilePath);
+    expect(classes.size).toBe(0);
   });
 });

@@ -1,5 +1,7 @@
 import postcss from "postcss";
 import selectorParser from "postcss-selector-parser";
+import * as sass from "sass";
+import path from "path";
 
 /**
  * Extracts CSS class names from CSS content using PostCSS
@@ -34,4 +36,34 @@ export function extractClassNamesFromCss(cssContent: string): Set<string> {
   }
 
   return classNames;
+}
+
+/**
+ * Extracts CSS class names from SCSS content by compiling to CSS first
+ * @param scssContent - The SCSS content to compile and parse
+ * @param filePath - The file path for resolving @import/@use statements
+ * @returns Set of class names found in the SCSS
+ */
+export function extractClassNamesFromScss(
+  scssContent: string,
+  filePath: string,
+): Set<string> {
+  try {
+    // Compile SCSS to CSS
+    const result = sass.compileString(scssContent, {
+      loadPaths: [path.dirname(filePath)],
+      // Use legacy API for better compatibility
+      syntax: "scss",
+    });
+
+    // Extract class names from compiled CSS
+    return extractClassNamesFromCss(result.css);
+  } catch (compileError) {
+    // Log warning but return empty set on compilation errors
+    console.warn(
+      `Warning: Failed to compile SCSS file "${filePath}":`,
+      compileError,
+    );
+    return new Set<string>();
+  }
 }

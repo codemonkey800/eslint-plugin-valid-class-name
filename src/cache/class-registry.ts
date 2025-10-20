@@ -1,7 +1,10 @@
 import fs from "fs";
 import path from "path";
 import fg from "fast-glob";
-import { extractClassNamesFromCss } from "../parsers/css-parser.js";
+import {
+  extractClassNamesFromCss,
+  extractClassNamesFromScss,
+} from "../parsers/css-parsers";
 
 /**
  * Helper function to check if a class name matches a glob-style pattern
@@ -86,10 +89,22 @@ function buildClassRegistry(
       for (const file of files) {
         try {
           const content = fs.readFileSync(file, "utf-8");
-          const classes = extractClassNamesFromCss(content);
+          const ext = path.extname(file).toLowerCase();
+
+          // Handle SCSS files differently from CSS files
+          let classes: Set<string>;
+          if (ext === ".scss") {
+            classes = extractClassNamesFromScss(content, file);
+          } else {
+            classes = extractClassNamesFromCss(content);
+          }
+
           classes.forEach((cls) => literalClasses.add(cls));
         } catch (readError) {
-          console.warn(`Warning: Failed to read CSS file "${file}":`, readError);
+          console.warn(
+            `Warning: Failed to read CSS/SCSS file "${file}":`,
+            readError,
+          );
         }
       }
     } catch (globError) {

@@ -1,6 +1,7 @@
 import type { Rule } from 'eslint'
 import { getClassRegistry } from 'src/cache/class-registry'
 import type { RuleOptions } from 'src/types/options'
+import { parseClassName, validateVariants } from 'src/utils/tailwind-variants'
 
 /**
  * Type definitions for JSX AST nodes
@@ -87,6 +88,8 @@ const rule: Rule.RuleModule = {
     messages: {
       invalidClassName:
         'Class name "{{className}}" is not defined in any CSS files or configuration',
+      invalidVariant:
+        "Variant '{{variant}}' is not a valid Tailwind variant in class '{{className}}'",
     },
     schema: [
       {
@@ -221,19 +224,47 @@ const rule: Rule.RuleModule = {
 
         // Validate each class name
         for (const className of classNames) {
-          // Skip if the class name matches an ignore pattern
-          if (isClassNameIgnored(className, ignorePatterns)) {
+          // Parse className to extract variants and base utility
+          const { variants, base } = parseClassName(className)
+
+          // Skip if the BASE matches an ignore pattern (not full className)
+          if (isClassNameIgnored(base, ignorePatterns)) {
             continue
           }
 
-          // Check if the class name is valid using the registry
+          // Validate variants if present
+          if (variants.length > 0) {
+            const validVariants = classRegistry.getValidVariants()
+
+            // Only validate variants if we have Tailwind enabled
+            if (validVariants.size > 0) {
+              const { valid, invalidVariant } = validateVariants(
+                variants,
+                validVariants,
+              )
+
+              if (!valid && invalidVariant) {
+                context.report({
+                  node,
+                  messageId: 'invalidVariant',
+                  data: {
+                    variant: invalidVariant,
+                    className,
+                  },
+                })
+                continue
+              }
+            }
+          }
+
+          // Validate base utility using the registry
           // (which checks both CSS files and whitelist patterns)
-          if (!classRegistry.isValid(className)) {
+          if (!classRegistry.isValid(base)) {
             context.report({
               node,
               messageId: 'invalidClassName',
               data: {
-                className,
+                className: base,
               },
             })
           }

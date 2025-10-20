@@ -1598,3 +1598,25 @@ export async function getTailwindClasses(
 
   return allClasses
 }
+
+/**
+ * Extracts custom variants from Tailwind configuration
+ * @param config - Resolved Tailwind configuration
+ * @returns Set of custom variant names (e.g., custom breakpoints)
+ */
+export function extractVariantsFromConfig(
+  config: ResolvedTailwindConfig,
+): Set<string> {
+  const customVariants = new Set<string>()
+
+  // Extract custom screens/breakpoints from theme.screens
+  if (config.theme?.screens) {
+    const screens = config.theme.screens as Record<string, unknown>
+    for (const screenName of Object.keys(screens)) {
+      customVariants.add(screenName)
+    }
+  }
+
+  return customVariants
+}
+

@@ -8,11 +8,13 @@ import {
 } from 'src/parsers/css-parser'
 import {
   extractSafelistClasses,
+  extractVariantsFromConfig,
   findTailwindConfigPath,
   generateUtilityClasses,
   type ResolvedTailwindConfig,
 } from 'src/parsers/tailwind-parser'
 import type { TailwindConfig } from 'src/types/options'
+import { DEFAULT_TAILWIND_VARIANTS } from 'src/utils/tailwind-variants'
 
 /**
  * Helper function to check if a class name matches a glob-style pattern
@@ -45,6 +47,12 @@ export interface ClassRegistry {
    * @returns Set of all literal class names
    */
   getAllClasses(): Set<string>
+
+  /**
+   * Gets all valid Tailwind variants (for variant validation)
+   * @returns Set of all valid variant names
+   */
+  getValidVariants(): Set<string>
 }
 
 /**
@@ -128,12 +136,14 @@ function createCacheKey(
  * @param resolvedFiles - Pre-resolved CSS files with paths and mtimes
  * @param whitelist - Array of class name patterns (supports wildcards)
  * @param tailwindClasses - Pre-loaded Tailwind classes (optional)
+ * @param validVariants - Pre-loaded valid Tailwind variants (optional)
  * @returns ClassRegistry instance
  */
 function buildClassRegistry(
   resolvedFiles: ResolvedFile[],
   whitelist: string[],
   tailwindClasses: Set<string> | undefined,
+  validVariants: Set<string> | undefined,
 ): ClassRegistry {
   const literalClasses = new Set<string>()
 
@@ -191,6 +201,10 @@ function buildClassRegistry(
     getAllClasses(): Set<string> {
       return new Set(literalClasses)
     },
+
+    getValidVariants(): Set<string> {
+      return validVariants || new Set()
+    },
   }
 }
 
@@ -223,14 +237,17 @@ export function getClassRegistry(
     return cachedRegistry
   }
 
-  // Load Tailwind classes synchronously if enabled
+  // Load Tailwind classes and variants synchronously if enabled
   // Note: This blocks, but only once per config change due to caching
   let tailwindClasses: Set<string> | undefined
+  let validVariants: Set<string> | undefined
   if (tailwindConfig) {
     try {
       // Use dynamic import in a blocking way for initial load
       // The classes will be cached after first load
-      tailwindClasses = loadTailwindClassesSync(tailwindConfig, cwd)
+      const tailwindData = loadTailwindClassesSync(tailwindConfig, cwd)
+      tailwindClasses = tailwindData.classes
+      validVariants = tailwindData.variants
     } catch (error) {
       console.warn('Warning: Failed to load Tailwind classes:', error)
     }
@@ -241,6 +258,7 @@ export function getClassRegistry(
     resolvedFiles,
     whitelist,
     tailwindClasses,
+    validVariants,
   )
   cacheKey = currentCacheKey
 
@@ -248,16 +266,24 @@ export function getClassRegistry(
 }
 
 /**
- * Synchronously loads Tailwind classes (blocking operation)
+ * Result of loading Tailwind configuration
+ */
+interface TailwindLoadResult {
+  classes: Set<string>
+  variants: Set<string>
+}
+
+/**
+ * Synchronously loads Tailwind classes and variants (blocking operation)
  * This is necessary because ESLint rules must be synchronous
  * @param tailwindConfig - Tailwind configuration
  * @param cwd - Current working directory
- * @returns Set of Tailwind class names
+ * @returns Object containing utility classes and valid variants
  */
 function loadTailwindClassesSync(
   tailwindConfig: boolean | TailwindConfig,
   cwd: string,
-): Set<string> {
+): TailwindLoadResult {
   // Create a require function for loading CommonJS modules from ES modules
   const require = createRequire(import.meta.url)
 
@@ -270,7 +296,7 @@ function loadTailwindClassesSync(
     console.warn(
       'Warning: Tailwind config file not found, skipping Tailwind validation',
     )
-    return new Set()
+    return { classes: new Set(), variants: new Set() }
   }
 
   try {
@@ -291,13 +317,22 @@ function loadTailwindClassesSync(
     // Combine safelist and generated utilities
     const allClasses = new Set<string>([...safelistClasses, ...utilityClasses])
 
-    return allClasses
+    // Extract custom variants from config
+    const customVariants = extractVariantsFromConfig(resolved)
+
+    // Combine default variants with custom variants
+    const allVariants = new Set([
+      ...DEFAULT_TAILWIND_VARIANTS,
+      ...customVariants,
+    ])
+
+    return { classes: allClasses, variants: allVariants }
   } catch (error) {
     console.warn(
       `Warning: Failed to load Tailwind config from "${resolvedConfigPath}":`,
       error,
     )
-    return new Set()
+    return { classes: new Set(), variants: new Set() }
   }
 }
 

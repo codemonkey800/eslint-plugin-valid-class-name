@@ -455,3 +455,212 @@ ruleTester.run('valid-class-name', rule, {
   // In practice, temp files will be cleaned by OS eventually.
   // fs.rmSync(tempDir, { recursive: true, force: true });
 })()
+
+// Tests for Tailwind variant validation
+describe('Tailwind variant validation', () => {
+  beforeEach(() => {
+    clearCache()
+  })
+
+  const tailwindOptions = [
+    {
+      sources: {
+        tailwind: {
+          config: path.join(process.cwd(), 'test-project/tailwind.config.cjs'),
+        },
+      },
+      validation: {
+        whitelist: ['mt-2', 'bg-blue-500', 'text-lg', 'opacity-100', 'ring-2'],
+      },
+    },
+  ]
+
+  // Valid variant tests
+  ruleTester.run('valid-class-name (variants - valid)', rule, {
+    valid: [
+      {
+        code: '<div className="hover:bg-blue-500" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+      },
+      {
+        code: '<div className="first:mt-2" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+      },
+      {
+        code: '<div className="sm:text-lg" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+      },
+      {
+        code: '<div className="dark:bg-blue-500" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+      },
+      {
+        code: '<div className="sm:hover:bg-blue-500" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+      },
+      {
+        code: '<div className="group-hover:opacity-100" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+      },
+      {
+        code: '<div className="peer-focus:ring-2" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+      },
+      {
+        code: '<div className="[&:nth-child(3)]:mt-2" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+      },
+      {
+        code: '<div className="md:hover:first:mt-2" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+      },
+    ],
+    invalid: [],
+  })
+
+  // Invalid variant tests
+  ruleTester.run('valid-class-name (variants - invalid)', rule, {
+    valid: [],
+    invalid: [
+      {
+        code: '<div className="hovr:bg-blue-500" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+        errors: [
+          {
+            messageId: 'invalidVariant',
+            data: {
+              variant: 'hovr',
+              className: 'hovr:bg-blue-500',
+            },
+          },
+        ],
+      },
+      {
+        code: '<div className="firs:mt-2" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+        errors: [
+          {
+            messageId: 'invalidVariant',
+            data: {
+              variant: 'firs',
+              className: 'firs:mt-2',
+            },
+          },
+        ],
+      },
+      {
+        code: '<div className="smm:text-lg" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+        errors: [
+          {
+            messageId: 'invalidVariant',
+            data: {
+              variant: 'smm',
+              className: 'smm:text-lg',
+            },
+          },
+        ],
+      },
+      {
+        code: '<div className="group-hovr:opacity-100" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+        errors: [
+          {
+            messageId: 'invalidVariant',
+            data: {
+              variant: 'group-hovr',
+              className: 'group-hovr:opacity-100',
+            },
+          },
+        ],
+      },
+      {
+        code: '<div className="peer-focs:ring-2" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+        errors: [
+          {
+            messageId: 'invalidVariant',
+            data: {
+              variant: 'peer-focs',
+              className: 'peer-focs:ring-2',
+            },
+          },
+        ],
+      },
+    ],
+  })
+
+  // Invalid base utility with valid variant
+  ruleTester.run('valid-class-name (variants - invalid base)', rule, {
+    valid: [],
+    invalid: [
+      {
+        code: '<div className="hover:bg-blue-50000" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+        errors: [
+          {
+            messageId: 'invalidClassName',
+            data: {
+              className: 'bg-blue-50000',
+            },
+          },
+        ],
+      },
+      {
+        code: '<div className="first:mt-2x" />',
+        filename: 'test.jsx',
+        options: tailwindOptions,
+        errors: [
+          {
+            messageId: 'invalidClassName',
+            data: {
+              className: 'mt-2x',
+            },
+          },
+        ],
+      },
+    ],
+  })
+
+  // Test that ignore patterns work with variants
+  ruleTester.run('valid-class-name (variants - ignore patterns)', rule, {
+    valid: [
+      {
+        code: '<div className="hover:dynamic-loader" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
+              },
+            },
+            validation: {
+              ignorePatterns: ['dynamic-*'],
+            },
+          },
+        ],
+      },
+    ],
+    invalid: [],
+  })
+})
+

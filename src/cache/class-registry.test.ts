@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from '@jest/globals'
-import { getClassRegistry, clearCache } from './class-registry.js'
+import { getClassRegistry, clearCache } from 'src/cache/class-registry'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
@@ -482,8 +482,17 @@ describe('ClassRegistry', () => {
 
       const registry = getClassRegistry([], [], true, tempDir)
 
-      expect(registry.isValid('anything')).toBe(false)
-      expect(registry.getAllClasses().size).toBe(0)
+      // Even with empty safelist, Tailwind generates utilities from default theme
+      // The getAllClasses() should contain theme-based utilities
+      expect(registry.getAllClasses().size).toBeGreaterThan(1000)
+
+      // Common Tailwind utilities should be valid
+      expect(registry.isValid('flex')).toBe(true)
+      expect(registry.isValid('bg-blue-500')).toBe(true)
+      expect(registry.isValid('p-4')).toBe(true)
+
+      // Non-existent classes should be invalid
+      expect(registry.isValid('nonexistent-class-xyz')).toBe(false)
     })
 
     it('should handle config with no safelist property', () => {

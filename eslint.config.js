@@ -9,7 +9,7 @@ import simpleImportSort from 'eslint-plugin-simple-import-sort'
 
 export default [
   {
-    ignores: ['lib/**', 'node_modules/**', '*.js', '*.mjs'],
+    ignores: ['lib/**', 'node_modules/**', '*.js', '*.mjs', 'test-project/**'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -45,6 +45,11 @@ export default [
       'simple-import-sort/exports': 'error',
       ...nodePlugin.configs.recommended.rules,
       ...eslintPluginPlugin.configs.recommended.rules,
+      // Disable n/no-missing-import as it doesn't understand TypeScript baseUrl
+      'n/no-missing-import': 'off',
+      // Don't enforce relative imports rules since we're using absolute imports
+      'import/no-relative-packages': 'off',
+      'import/no-relative-parent-imports': 'off',
     },
   },
   {

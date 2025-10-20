@@ -1,5 +1,5 @@
 import { RuleTester } from 'eslint'
-import rule from './valid-class-name.js'
+import rule from 'src/rules/valid-class-name'
 
 const ruleTester = new RuleTester({
   languageOptions: {

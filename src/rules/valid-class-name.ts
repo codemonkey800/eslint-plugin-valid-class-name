@@ -1,7 +1,6 @@
 import type { Rule } from 'eslint'
-
-import { getClassRegistry } from '../cache/class-registry.js'
-import type { RuleOptions } from '../types/options.js'
+import { getClassRegistry } from 'src/cache/class-registry'
+import type { RuleOptions } from 'src/types/options'
 
 /**
  * Type definitions for JSX AST nodes
@@ -109,7 +108,10 @@ const rule: Rule.RuleModule = {
               },
               tailwind: {
                 oneOf: [
-                  { type: 'boolean', description: 'Enable Tailwind CSS validation' },
+                  {
+                    type: 'boolean',
+                    description: 'Enable Tailwind CSS validation',
+                  },
                   {
                     type: 'object',
                     description: 'Tailwind CSS configuration object',

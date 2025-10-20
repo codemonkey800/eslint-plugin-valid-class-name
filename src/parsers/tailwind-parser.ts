@@ -1,7 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-
-import type { TailwindConfig } from '../types/options.js'
+import type { TailwindConfig } from 'src/types/options'
 
 /**
  * Resolved Tailwind configuration structure
@@ -403,9 +402,7 @@ function generateSpacingUtilities(
  * @param theme - Resolved theme configuration
  * @returns Set of generated sizing utility classes
  */
-function generateSizingUtilities(
-  theme: Record<string, unknown>,
-): Set<string> {
+function generateSizingUtilities(theme: Record<string, unknown>): Set<string> {
   const utilities = new Set<string>()
 
   // Width utilities
@@ -924,9 +921,7 @@ function generateStaticUtilities(): Set<string> {
  * @param theme - Resolved theme configuration
  * @returns Set of generated border utility classes
  */
-function generateBorderUtilities(
-  theme: Record<string, unknown>,
-): Set<string> {
+function generateBorderUtilities(theme: Record<string, unknown>): Set<string> {
   const utilities = new Set<string>()
 
   // Border width utilities
@@ -1504,7 +1499,7 @@ function generateAnimationUtilities(
  * @param resolvedConfig - Resolved Tailwind configuration
  * @returns Set of all generated utility classes
  */
-function generateUtilityClasses(
+export function generateUtilityClasses(
   resolvedConfig: ResolvedTailwindConfig,
 ): Set<string> {
   const allUtilities = new Set<string>()

@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals'
-import plugin from './index.js'
+import plugin from 'src/index'
 
 describe('eslint-plugin-valid-class-name', () => {
   it('should export a valid ESLint plugin', () => {

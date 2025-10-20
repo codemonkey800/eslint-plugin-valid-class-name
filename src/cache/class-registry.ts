@@ -1,12 +1,18 @@
 import fg from 'fast-glob'
 import fs from 'fs'
+import { createRequire } from 'module'
 import path from 'path'
-
 import {
   extractClassNamesFromCss,
   extractClassNamesFromScss,
-} from '../parsers/css-parser.js'
-import type { TailwindConfig } from '../types/options.js'
+} from 'src/parsers/css-parser'
+import {
+  extractSafelistClasses,
+  findTailwindConfigPath,
+  generateUtilityClasses,
+  type ResolvedTailwindConfig,
+} from 'src/parsers/tailwind-parser'
+import type { TailwindConfig } from 'src/types/options'
 
 /**
  * Helper function to check if a class name matches a glob-style pattern
@@ -213,13 +219,8 @@ function loadTailwindClassesSync(
   tailwindConfig: boolean | TailwindConfig,
   cwd: string,
 ): Set<string> {
-  // For now, we'll use require() to load the config synchronously
-  // This works because Tailwind configs are typically .js files
-
-  const {
-    findTailwindConfigPath,
-    extractSafelistClasses,
-  } = require('../parsers/tailwind-parser.js')
+  // Create a require function for loading CommonJS modules from ES modules
+  const require = createRequire(import.meta.url)
 
   const configPath =
     typeof tailwindConfig === 'object' ? tailwindConfig.config : undefined
@@ -235,17 +236,23 @@ function loadTailwindClassesSync(
 
   try {
     // Use require for synchronous loading (CommonJS/ESM compatible)
-     
     const configModule = require(resolvedConfigPath)
     const userConfig = configModule.default || configModule
 
     // Use Tailwind's resolveConfig
-     
     const resolveConfig = require('tailwindcss/resolveConfig')
-    const resolved = resolveConfig(userConfig)
+    const resolved = resolveConfig(userConfig) as ResolvedTailwindConfig
 
     // Extract safelist classes
-    return extractSafelistClasses(resolved.safelist || [])
+    const safelistClasses = extractSafelistClasses(resolved.safelist || [])
+
+    // Generate utility classes from theme configuration
+    const utilityClasses = generateUtilityClasses(resolved)
+
+    // Combine safelist and generated utilities
+    const allClasses = new Set<string>([...safelistClasses, ...utilityClasses])
+
+    return allClasses
   } catch (error) {
     console.warn(
       `Warning: Failed to load Tailwind config from "${resolvedConfigPath}":`,

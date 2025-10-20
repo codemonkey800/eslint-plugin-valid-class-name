@@ -1,7 +1,7 @@
-import postcss from "postcss";
-import selectorParser from "postcss-selector-parser";
-import * as sass from "sass";
-import path from "path";
+import postcss from 'postcss'
+import selectorParser from 'postcss-selector-parser'
+import * as sass from 'sass'
+import path from 'path'
 
 /**
  * Extracts CSS class names from CSS content using PostCSS
@@ -9,33 +9,33 @@ import path from "path";
  * @returns Set of class names found in the CSS
  */
 export function extractClassNamesFromCss(cssContent: string): Set<string> {
-  const classNames = new Set<string>();
+  const classNames = new Set<string>()
 
   try {
-    const root = postcss.parse(cssContent);
+    const root = postcss.parse(cssContent)
 
-    root.walkRules((rule) => {
+    root.walkRules(rule => {
       try {
-        selectorParser((selectors) => {
-          selectors.walkClasses((classNode) => {
+        selectorParser(selectors => {
+          selectors.walkClasses(classNode => {
             // Extract just the class name without the dot
-            classNames.add(classNode.value);
-          });
-        }).processSync(rule.selector);
+            classNames.add(classNode.value)
+          })
+        }).processSync(rule.selector)
       } catch (selectorError) {
         // Log warning but continue processing other selectors
         console.warn(
           `Warning: Failed to parse selector "${rule.selector}":`,
           selectorError,
-        );
+        )
       }
-    });
+    })
   } catch (parseError) {
     // Log warning but return what we have so far
-    console.warn("Warning: Failed to parse CSS content:", parseError);
+    console.warn('Warning: Failed to parse CSS content:', parseError)
   }
 
-  return classNames;
+  return classNames
 }
 
 /**
@@ -53,17 +53,17 @@ export function extractClassNamesFromScss(
     const result = sass.compileString(scssContent, {
       loadPaths: [path.dirname(filePath)],
       // Use legacy API for better compatibility
-      syntax: "scss",
-    });
+      syntax: 'scss',
+    })
 
     // Extract class names from compiled CSS
-    return extractClassNamesFromCss(result.css);
+    return extractClassNamesFromCss(result.css)
   } catch (compileError) {
     // Log warning but return empty set on compilation errors
     console.warn(
       `Warning: Failed to compile SCSS file "${filePath}":`,
       compileError,
-    );
-    return new Set<string>();
+    )
+    return new Set<string>()
   }
 }

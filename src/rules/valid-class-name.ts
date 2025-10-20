@@ -1,34 +1,34 @@
-import type { Rule } from "eslint";
-import type { RuleOptions } from "../types/options.js";
-import { getClassRegistry } from "../cache/class-registry.js";
+import type { Rule } from 'eslint'
+import type { RuleOptions } from '../types/options.js'
+import { getClassRegistry } from '../cache/class-registry.js'
 
 /**
  * Type definitions for JSX AST nodes
  */
 interface JSXIdentifier {
-  type: "JSXIdentifier";
-  name: string;
+  type: 'JSXIdentifier'
+  name: string
 }
 
 interface Literal {
-  type: "Literal";
-  value: string | number | boolean | null;
+  type: 'Literal'
+  value: string | number | boolean | null
 }
 
 interface JSXExpressionContainer {
-  type: "JSXExpressionContainer";
-  expression: Literal | Expression;
+  type: 'JSXExpressionContainer'
+  expression: Literal | Expression
 }
 
 interface Expression {
-  type: string;
-  [key: string]: unknown;
+  type: string
+  [key: string]: unknown
 }
 
 interface JSXAttribute {
-  type: "JSXAttribute";
-  name: JSXIdentifier;
-  value: Literal | JSXExpressionContainer | null;
+  type: 'JSXAttribute'
+  name: JSXIdentifier
+  value: Literal | JSXExpressionContainer | null
 }
 
 /**
@@ -43,8 +43,8 @@ interface JSXAttribute {
 function extractClassNamesFromString(classString: string): string[] {
   return classString
     .split(/\s+/)
-    .map((className) => className.trim())
-    .filter((className) => className.length > 0);
+    .map(className => className.trim())
+    .filter(className => className.length > 0)
 }
 
 /**
@@ -56,11 +56,11 @@ function extractClassNamesFromString(classString: string): string[] {
  */
 function matchesPattern(className: string, pattern: string): boolean {
   // Escape special regex characters except *
-  const escapedPattern = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+  const escapedPattern = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&')
   // Replace * with .*
-  const regexPattern = escapedPattern.replace(/\*/g, ".*");
-  const regex = new RegExp(`^${regexPattern}$`);
-  return regex.test(className);
+  const regexPattern = escapedPattern.replace(/\*/g, '.*')
+  const regex = new RegExp(`^${regexPattern}$`)
+  return regex.test(className)
 }
 
 /**
@@ -73,15 +73,15 @@ function isClassNameIgnored(
   className: string,
   ignorePatterns: string[],
 ): boolean {
-  return ignorePatterns.some((pattern) => matchesPattern(className, pattern));
+  return ignorePatterns.some(pattern => matchesPattern(className, pattern))
 }
 
 const rule: Rule.RuleModule = {
   meta: {
-    type: "problem",
+    type: 'problem',
     docs: {
       description:
-        "Validates CSS class names against actual CSS/SCSS files, Tailwind config, and whitelists",
+        'Validates CSS class names against actual CSS/SCSS files, Tailwind config, and whitelists',
       recommended: true,
     },
     messages: {
@@ -90,63 +90,63 @@ const rule: Rule.RuleModule = {
     },
     schema: [
       {
-        type: "object",
+        type: 'object',
         properties: {
           sources: {
-            type: "object",
+            type: 'object',
             properties: {
               css: {
-                type: "array",
-                items: { type: "string" },
-                description: "Glob patterns for CSS files to validate against",
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Glob patterns for CSS files to validate against',
               },
               scss: {
-                type: "array",
-                items: { type: "string" },
-                description: "Glob patterns for SCSS files to validate against",
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Glob patterns for SCSS files to validate against',
               },
               tailwind: {
                 oneOf: [
-                  { type: "boolean" },
+                  { type: 'boolean' },
                   {
-                    type: "object",
+                    type: 'object',
                     properties: {
                       config: {
-                        type: "string",
-                        description: "Path to Tailwind configuration file",
+                        type: 'string',
+                        description: 'Path to Tailwind configuration file',
                       },
                     },
                     additionalProperties: false,
                   },
                 ],
                 description:
-                  "Enable Tailwind CSS validation or provide configuration",
+                  'Enable Tailwind CSS validation or provide configuration',
               },
               cssModules: {
-                type: "boolean",
-                description: "Enable CSS Modules support",
+                type: 'boolean',
+                description: 'Enable CSS Modules support',
               },
             },
             additionalProperties: false,
           },
           validation: {
-            type: "object",
+            type: 'object',
             properties: {
               whitelist: {
-                type: "array",
-                items: { type: "string" },
+                type: 'array',
+                items: { type: 'string' },
                 description:
-                  "Array of class name patterns that are always considered valid",
+                  'Array of class name patterns that are always considered valid',
               },
               blacklist: {
-                type: "array",
-                items: { type: "string" },
-                description: "Array of class name patterns that are forbidden",
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Array of class name patterns that are forbidden',
               },
               ignorePatterns: {
-                type: "array",
-                items: { type: "string" },
-                description: "Array of patterns to skip validation for",
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Array of patterns to skip validation for',
               },
             },
             additionalProperties: false,
@@ -158,14 +158,14 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     // Get configuration options with proper typing
-    const options: RuleOptions = context.options[0] || {};
-    const cssPatterns = options.sources?.css || [];
-    const scssPatterns = options.sources?.scss || [];
-    const allCssPatterns = [...cssPatterns, ...scssPatterns];
-    const tailwindConfig = options.sources?.tailwind;
-    const whitelist = options.validation?.whitelist || [];
-    const ignorePatterns = options.validation?.ignorePatterns || [];
-    const cwd = context.getCwd ? context.getCwd() : process.cwd();
+    const options: RuleOptions = context.options[0] || {}
+    const cssPatterns = options.sources?.css || []
+    const scssPatterns = options.sources?.scss || []
+    const allCssPatterns = [...cssPatterns, ...scssPatterns]
+    const tailwindConfig = options.sources?.tailwind
+    const whitelist = options.validation?.whitelist || []
+    const ignorePatterns = options.validation?.ignorePatterns || []
+    const cwd = context.getCwd ? context.getCwd() : process.cwd()
 
     // Get the class registry (with CSS, SCSS, Tailwind parsing and caching)
     const classRegistry = getClassRegistry(
@@ -173,31 +173,31 @@ const rule: Rule.RuleModule = {
       whitelist,
       tailwindConfig,
       cwd,
-    );
+    )
 
     return {
       JSXAttribute(node: JSXAttribute) {
         // Only process className attributes
-        if (node.name.name !== "className") {
-          return;
+        if (node.name.name !== 'className') {
+          return
         }
 
         // Extract the class string from the attribute value
-        let classString: string | null = null;
+        let classString: string | null = null
 
-        if (node.value?.type === "Literal") {
+        if (node.value?.type === 'Literal') {
           // Handle direct string literal: <div className="foo bar" />
-          const value = node.value.value;
-          if (typeof value === "string") {
-            classString = value;
+          const value = node.value.value
+          if (typeof value === 'string') {
+            classString = value
           }
-        } else if (node.value?.type === "JSXExpressionContainer") {
+        } else if (node.value?.type === 'JSXExpressionContainer') {
           // Handle JSXExpressionContainer: <div className={"foo bar"} />
-          const expression = node.value.expression;
-          if (expression.type === "Literal") {
-            const value = (expression as Literal).value;
-            if (typeof value === "string") {
-              classString = value;
+          const expression = node.value.expression
+          if (expression.type === 'Literal') {
+            const value = (expression as Literal).value
+            if (typeof value === 'string') {
+              classString = value
             }
           }
           // For other expression types (variables, template literals, etc.),
@@ -206,17 +206,17 @@ const rule: Rule.RuleModule = {
 
         // If we couldn't extract a class string, skip validation
         if (classString === null) {
-          return;
+          return
         }
 
         // Extract individual class names from the string
-        const classNames = extractClassNamesFromString(classString);
+        const classNames = extractClassNamesFromString(classString)
 
         // Validate each class name
         for (const className of classNames) {
           // Skip if the class name matches an ignore pattern
           if (isClassNameIgnored(className, ignorePatterns)) {
-            continue;
+            continue
           }
 
           // Check if the class name is valid using the registry
@@ -224,16 +224,16 @@ const rule: Rule.RuleModule = {
           if (!classRegistry.isValid(className)) {
             context.report({
               node,
-              messageId: "invalidClassName",
+              messageId: 'invalidClassName',
               data: {
                 className,
               },
-            });
+            })
           }
         }
       },
-    };
+    }
   },
-};
+}
 
-export default rule;
+export default rule

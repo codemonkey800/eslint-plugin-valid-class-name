@@ -9,12 +9,12 @@ export interface RuleOptions {
   /**
    * Configuration for source files to validate against
    */
-  sources?: SourcesConfig;
+  sources?: SourcesConfig
 
   /**
    * Validation rules and patterns
    */
-  validation?: ValidationConfig;
+  validation?: ValidationConfig
 }
 
 /**
@@ -25,26 +25,26 @@ export interface SourcesConfig {
    * Glob patterns for CSS files to validate against
    * @example ["src/styles/**\/*.css"]
    */
-  css?: string[];
+  css?: string[]
 
   /**
    * Glob patterns for SCSS files to validate against
    * @example ["src/styles/**\/*.scss"]
    */
-  scss?: string[];
+  scss?: string[]
 
   /**
    * Enable Tailwind CSS validation or provide configuration
    * - Set to `true` to auto-detect tailwind.config.js
    * - Provide an object to specify custom configuration
    */
-  tailwind?: boolean | TailwindConfig;
+  tailwind?: boolean | TailwindConfig
 
   /**
    * Enable CSS Modules support
    * When enabled, validates class names against CSS Module files
    */
-  cssModules?: boolean;
+  cssModules?: boolean
 }
 
 /**
@@ -55,7 +55,7 @@ export interface TailwindConfig {
    * Path to Tailwind configuration file
    * @example "./tailwind.config.js"
    */
-  config?: string;
+  config?: string
 }
 
 /**
@@ -67,19 +67,19 @@ export interface ValidationConfig {
    * Supports glob patterns and regular expressions
    * @example ["custom-*", "app-*"]
    */
-  whitelist?: string[];
+  whitelist?: string[]
 
   /**
    * Array of class name patterns that are forbidden
    * Supports glob patterns and regular expressions
    * @example ["legacy-*", "deprecated-*"]
    */
-  blacklist?: string[];
+  blacklist?: string[]
 
   /**
    * Array of patterns to skip validation for
    * Useful for dynamic or generated class names
    * @example ["dynamic-*", "state-*"]
    */
-  ignorePatterns?: string[];
+  ignorePatterns?: string[]
 }

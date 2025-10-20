@@ -1,47 +1,47 @@
-import { RuleTester } from "eslint";
-import rule from "./valid-class-name.js";
-import fs from "fs";
-import path from "path";
-import os from "os";
-import { clearCache } from "../cache/class-registry.js";
+import { RuleTester } from 'eslint'
+import rule from './valid-class-name.js'
+import fs from 'fs'
+import path from 'path'
+import os from 'os'
+import { clearCache } from '../cache/class-registry.js'
 
 const ruleTester = new RuleTester({
   languageOptions: {
     ecmaVersion: 2022,
-    sourceType: "module",
+    sourceType: 'module',
     parserOptions: {
       ecmaFeatures: {
         jsx: true,
       },
     },
   },
-});
+})
 
 // RuleTester internally uses describe/it blocks, so we don't wrap it in our own
-ruleTester.run("valid-class-name", rule, {
+ruleTester.run('valid-class-name', rule, {
   valid: [
     // Dynamic expressions are skipped
     {
-      code: "<div className={dynamicClass} />",
-      filename: "test.jsx",
+      code: '<div className={dynamicClass} />',
+      filename: 'test.jsx',
     },
     {
-      code: "<div className={`dynamic-${foo}`} />",
-      filename: "test.jsx",
+      code: '<div className={`dynamic-${foo}`} />',
+      filename: 'test.jsx',
     },
     // No className attribute
     {
-      code: "<div />",
-      filename: "test.jsx",
+      code: '<div />',
+      filename: 'test.jsx',
     },
     // With whitelist - exact matches
     {
       code: '<div className="custom-class" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ["custom-class"],
+            whitelist: ['custom-class'],
           },
         },
       ],
@@ -49,11 +49,11 @@ ruleTester.run("valid-class-name", rule, {
     // With whitelist - multiple classes, all valid
     {
       code: '<div className="foo bar baz" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ["foo", "bar", "baz"],
+            whitelist: ['foo', 'bar', 'baz'],
           },
         },
       ],
@@ -61,22 +61,22 @@ ruleTester.run("valid-class-name", rule, {
     // With whitelist - glob pattern matching
     {
       code: '<div className="btn-primary" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ["btn-*"],
+            whitelist: ['btn-*'],
           },
         },
       ],
     },
     {
       code: '<div className="text-red-500" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ["text-*"],
+            whitelist: ['text-*'],
           },
         },
       ],
@@ -84,12 +84,12 @@ ruleTester.run("valid-class-name", rule, {
     // With ignore patterns
     {
       code: '<div className="dynamic-123" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ["static-class"],
-            ignorePatterns: ["dynamic-*"],
+            whitelist: ['static-class'],
+            ignorePatterns: ['dynamic-*'],
           },
         },
       ],
@@ -97,11 +97,11 @@ ruleTester.run("valid-class-name", rule, {
     // JSXExpressionContainer with string literal
     {
       code: '<div className={"foo bar"} />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ["foo", "bar"],
+            whitelist: ['foo', 'bar'],
           },
         },
       ],
@@ -109,16 +109,16 @@ ruleTester.run("valid-class-name", rule, {
     // Edge cases - empty string
     {
       code: '<div className="" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
     },
     // Edge cases - multiple spaces
     {
       code: '<div className="foo  bar   baz" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ["foo", "bar", "baz"],
+            whitelist: ['foo', 'bar', 'baz'],
           },
         },
       ],
@@ -126,11 +126,11 @@ ruleTester.run("valid-class-name", rule, {
     // Edge cases - leading/trailing spaces
     {
       code: '<div className="  foo bar  " />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ["foo", "bar"],
+            whitelist: ['foo', 'bar'],
           },
         },
       ],
@@ -138,11 +138,11 @@ ruleTester.run("valid-class-name", rule, {
     // Complex glob patterns
     {
       code: '<div className="prefix-middle-suffix" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ["*-middle-*"],
+            whitelist: ['*-middle-*'],
           },
         },
       ],
@@ -152,42 +152,42 @@ ruleTester.run("valid-class-name", rule, {
     // No whitelist - all class names are invalid
     {
       code: '<div className="any-class" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       errors: [
         {
-          messageId: "invalidClassName",
+          messageId: 'invalidClassName',
           data: {
-            className: "any-class",
+            className: 'any-class',
           },
         },
       ],
     },
     {
       code: '<button className="btn primary" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       errors: [
         {
-          messageId: "invalidClassName",
+          messageId: 'invalidClassName',
           data: {
-            className: "btn",
+            className: 'btn',
           },
         },
         {
-          messageId: "invalidClassName",
+          messageId: 'invalidClassName',
           data: {
-            className: "primary",
+            className: 'primary',
           },
         },
       ],
     },
     {
       code: '<span className="text-center" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       errors: [
         {
-          messageId: "invalidClassName",
+          messageId: 'invalidClassName',
           data: {
-            className: "text-center",
+            className: 'text-center',
           },
         },
       ],
@@ -195,19 +195,19 @@ ruleTester.run("valid-class-name", rule, {
     // With whitelist - class not in list
     {
       code: '<div className="invalid-class" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ["valid-class"],
+            whitelist: ['valid-class'],
           },
         },
       ],
       errors: [
         {
-          messageId: "invalidClassName",
+          messageId: 'invalidClassName',
           data: {
-            className: "invalid-class",
+            className: 'invalid-class',
           },
         },
       ],
@@ -215,19 +215,19 @@ ruleTester.run("valid-class-name", rule, {
     // Multiple classes, some invalid
     {
       code: '<div className="foo bar baz" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ["foo", "baz"],
+            whitelist: ['foo', 'baz'],
           },
         },
       ],
       errors: [
         {
-          messageId: "invalidClassName",
+          messageId: 'invalidClassName',
           data: {
-            className: "bar",
+            className: 'bar',
           },
         },
       ],
@@ -235,25 +235,25 @@ ruleTester.run("valid-class-name", rule, {
     // Multiple classes, all invalid
     {
       code: '<div className="invalid-1 invalid-2" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ["valid-*"],
+            whitelist: ['valid-*'],
           },
         },
       ],
       errors: [
         {
-          messageId: "invalidClassName",
+          messageId: 'invalidClassName',
           data: {
-            className: "invalid-1",
+            className: 'invalid-1',
           },
         },
         {
-          messageId: "invalidClassName",
+          messageId: 'invalidClassName',
           data: {
-            className: "invalid-2",
+            className: 'invalid-2',
           },
         },
       ],
@@ -261,19 +261,19 @@ ruleTester.run("valid-class-name", rule, {
     // Glob pattern doesn't match
     {
       code: '<div className="text-red-500" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ["btn-*"],
+            whitelist: ['btn-*'],
           },
         },
       ],
       errors: [
         {
-          messageId: "invalidClassName",
+          messageId: 'invalidClassName',
           data: {
-            className: "text-red-500",
+            className: 'text-red-500',
           },
         },
       ],
@@ -281,19 +281,19 @@ ruleTester.run("valid-class-name", rule, {
     // JSXExpressionContainer with invalid class
     {
       code: '<div className={"invalid-class"} />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ["valid-class"],
+            whitelist: ['valid-class'],
           },
         },
       ],
       errors: [
         {
-          messageId: "invalidClassName",
+          messageId: 'invalidClassName',
           data: {
-            className: "invalid-class",
+            className: 'invalid-class',
           },
         },
       ],
@@ -301,40 +301,40 @@ ruleTester.run("valid-class-name", rule, {
     // Ignored pattern doesn't prevent whitelist validation
     {
       code: '<div className="other-class" />',
-      filename: "test.jsx",
+      filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ["valid-class"],
-            ignorePatterns: ["dynamic-*"],
+            whitelist: ['valid-class'],
+            ignorePatterns: ['dynamic-*'],
           },
         },
       ],
       errors: [
         {
-          messageId: "invalidClassName",
+          messageId: 'invalidClassName',
           data: {
-            className: "other-class",
+            className: 'other-class',
           },
         },
       ],
     },
   ],
-});
+})
 
 // Additional tests for CSS file validation
 // Note: These tests create temporary CSS files to test the integration
-(() => {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "eslint-test-"));
+;(() => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'eslint-test-'))
 
   // Create test CSS files
-  const cssFile = path.join(tempDir, "styles.css");
-  fs.writeFileSync(cssFile, ".btn { color: red; } .card { padding: 10px; }");
+  const cssFile = path.join(tempDir, 'styles.css')
+  fs.writeFileSync(cssFile, '.btn { color: red; } .card { padding: 10px; }')
 
-  const cssFile2 = path.join(tempDir, "styles2.css");
-  fs.writeFileSync(cssFile2, ".btn { color: red; }");
+  const cssFile2 = path.join(tempDir, 'styles2.css')
+  fs.writeFileSync(cssFile2, '.btn { color: red; }')
 
-  const complexCssFile = path.join(tempDir, "complex.css");
+  const complexCssFile = path.join(tempDir, 'complex.css')
   fs.writeFileSync(
     complexCssFile,
     `
@@ -342,68 +342,68 @@ ruleTester.run("valid-class-name", rule, {
     .card.active { border: 1px solid red; }
     .parent .child { margin: 0; }
   `,
-  );
+  )
 
   // Clear cache before tests
-  clearCache();
+  clearCache()
 
   const cssRuleTester = new RuleTester({
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: "module",
+      sourceType: 'module',
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
         },
       },
     },
-  });
+  })
 
-  cssRuleTester.run("valid-class-name with CSS files", rule, {
+  cssRuleTester.run('valid-class-name with CSS files', rule, {
     valid: [
       {
         code: '<div className="btn" />',
-        filename: path.join(tempDir, "test.jsx"),
+        filename: path.join(tempDir, 'test.jsx'),
         options: [
           {
             sources: {
-              css: [path.join(tempDir, "styles.css")],
+              css: [path.join(tempDir, 'styles.css')],
             },
           },
         ],
       },
       {
         code: '<div className="btn card" />',
-        filename: path.join(tempDir, "test.jsx"),
+        filename: path.join(tempDir, 'test.jsx'),
         options: [
           {
             sources: {
-              css: [path.join(tempDir, "styles.css")],
+              css: [path.join(tempDir, 'styles.css')],
             },
           },
         ],
       },
       {
         code: '<div className="btn custom-class" />',
-        filename: path.join(tempDir, "test.jsx"),
+        filename: path.join(tempDir, 'test.jsx'),
         options: [
           {
             sources: {
-              css: [path.join(tempDir, "styles2.css")],
+              css: [path.join(tempDir, 'styles2.css')],
             },
             validation: {
-              whitelist: ["custom-*"],
+              whitelist: ['custom-*'],
             },
           },
         ],
       },
       {
         code: '<div className="btn active card parent child" />',
-        filename: path.join(tempDir, "test.jsx"),
+        filename: path.join(tempDir, 'test.jsx'),
         options: [
           {
             sources: {
-              css: [path.join(tempDir, "complex.css")],
+              css: [path.join(tempDir, 'complex.css')],
             },
           },
         ],
@@ -412,46 +412,46 @@ ruleTester.run("valid-class-name", rule, {
     invalid: [
       {
         code: '<div className="invalid-class" />',
-        filename: path.join(tempDir, "test.jsx"),
+        filename: path.join(tempDir, 'test.jsx'),
         options: [
           {
             sources: {
-              css: [path.join(tempDir, "styles.css")],
+              css: [path.join(tempDir, 'styles.css')],
             },
           },
         ],
         errors: [
           {
-            messageId: "invalidClassName",
-            data: { className: "invalid-class" },
+            messageId: 'invalidClassName',
+            data: { className: 'invalid-class' },
           },
         ],
       },
       {
         code: '<div className="btn invalid-class" />',
-        filename: path.join(tempDir, "test.jsx"),
+        filename: path.join(tempDir, 'test.jsx'),
         options: [
           {
             sources: {
-              css: [path.join(tempDir, "styles2.css")],
+              css: [path.join(tempDir, 'styles2.css')],
             },
             validation: {
-              whitelist: ["custom-*"],
+              whitelist: ['custom-*'],
             },
           },
         ],
         errors: [
           {
-            messageId: "invalidClassName",
-            data: { className: "invalid-class" },
+            messageId: 'invalidClassName',
+            data: { className: 'invalid-class' },
           },
         ],
       },
     ],
-  });
+  })
 
   // Cleanup - NOTE: Files need to exist when tests actually run
   // So we can't cleanup immediately. This is a known limitation of RuleTester.
   // In practice, temp files will be cleaned by OS eventually.
   // fs.rmSync(tempDir, { recursive: true, force: true });
-})();
+})()

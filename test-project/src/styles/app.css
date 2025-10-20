@@ -1,0 +1,21 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.header {
+  background-color: #f3f4f6;
+  padding: 1rem 0;
+}
+
+.footer {
+  background-color: #e5e7eb;
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.main-content {
+  min-height: 400px;
+  padding: 2rem 0;
+}

@@ -263,14 +263,6 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
 - [x] Handle custom utilities and components (via build-based extraction with execSync)
 - [ ] Implement JIT mode support
 
-### Dynamic Class Handling
-
-- [ ] Parse template literals
-- [ ] Handle conditional expressions
-- [ ] Support clsx/classnames utility patterns
-- [ ] Process computed property names
-- [ ] Implement configurable dynamic handling
-
 ### Performance Optimization
 
 - [ ] Create in-memory cache system
@@ -399,6 +391,14 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
 - Design token validation
 - Unused class detection
 - Class name refactoring tools
+
+### Dynamic Class Handling (Nice to Have)
+
+- Parse template literals with static/dynamic parts
+- Handle conditional expressions
+- Support clsx/classnames utility patterns
+- Process computed property names
+- Implement configurable dynamic handling
 
 ### Ecosystem Integration
 

@@ -1,6 +1,7 @@
 import type { Rule } from 'eslint'
 import { getClassRegistry } from 'src/cache/class-registry'
 import type { RuleOptions } from 'src/types/options'
+import { matchesPattern } from 'src/utils/pattern-matcher'
 import {
   isValidArbitraryValue,
   parseClassName,
@@ -46,26 +47,15 @@ interface JSXAttribute {
  * @returns Array of individual class names
  */
 function extractClassNamesFromString(classString: string): string[] {
+  // Input validation: ensure classString is a string
+  if (!classString || typeof classString !== 'string') {
+    return []
+  }
+
   return classString
     .split(/\s+/)
     .map(className => className.trim())
     .filter(className => className.length > 0)
-}
-
-/**
- * Checks if a class name matches a glob-style pattern
- * Supports * wildcard for pattern matching
- * @param className - The class name to test
- * @param pattern - The pattern to match against (supports * wildcard)
- * @returns true if the class name matches the pattern
- */
-function matchesPattern(className: string, pattern: string): boolean {
-  // Escape special regex characters except *
-  const escapedPattern = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&')
-  // Replace * with .*
-  const regexPattern = escapedPattern.replace(/\*/g, '.*')
-  const regex = new RegExp(`^${regexPattern}$`)
-  return regex.test(className)
 }
 
 /**
@@ -238,7 +228,8 @@ const rule: Rule.RuleModule = {
 
           // Validate variants if present
           const validVariants = classRegistry.getValidVariants()
-          const hasTailwindVariants = variants.length > 0 && validVariants.size > 0
+          const hasTailwindVariants =
+            variants.length > 0 && validVariants.size > 0
 
           if (hasTailwindVariants) {
             const { valid, invalidVariant } = validateVariants(

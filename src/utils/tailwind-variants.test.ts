@@ -344,4 +344,3 @@ describe('isValidArbitraryValue', () => {
     expect(isValidArbitraryValue('w-100px]')).toBe(false)
   })
 })
-

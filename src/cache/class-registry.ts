@@ -14,22 +14,10 @@ import {
   type ResolvedTailwindConfig,
 } from 'src/parsers/tailwind-parser'
 import type { TailwindConfig } from 'src/types/options'
+import { logger } from 'src/utils/logger'
+import { matchesPattern } from 'src/utils/pattern-matcher'
 import { DEFAULT_TAILWIND_VARIANTS } from 'src/utils/tailwind-variants'
-
-/**
- * Helper function to check if a class name matches a glob-style pattern
- * @param className - The class name to test
- * @param pattern - The pattern to match against (supports * wildcard)
- * @returns true if the class name matches the pattern
- */
-function matchesPattern(className: string, pattern: string): boolean {
-  // Escape special regex characters except *
-  const escapedPattern = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&')
-  // Replace * with .*
-  const regexPattern = escapedPattern.replace(/\*/g, '.*')
-  const regex = new RegExp(`^${regexPattern}$`)
-  return regex.test(className)
-}
+import { isResolvedTailwindConfig } from 'src/utils/type-guards'
 
 /**
  * Interface for the class registry
@@ -113,19 +101,24 @@ function resolveFilesWithMtimes(
           return { path: file, mtime: stats.mtimeMs }
         } catch (error) {
           // If we can't stat the file, skip it
-          console.warn(`Warning: Failed to stat file "${file}":`, error)
+          logger.warn(`Failed to stat file "${file}"`, error)
           return null
         }
       })
       .filter((file): file is ResolvedFile => file !== null)
   } catch (globError) {
-    console.warn('Warning: Failed to find CSS files:', globError)
+    logger.warn('Failed to find CSS files', globError)
     return []
   }
 }
 
 /**
  * Creates a cache key from configuration and resolved files
+ *
+ * Note: This cache key automatically invalidates when files are added/removed
+ * because resolveFilesWithMtimes() is called on each lint run, returning the
+ * current file set. Any changes to files (additions, removals, or modifications)
+ * will result in a different cache key, triggering cache invalidation.
  */
 function createCacheKey(
   resolvedFiles: ResolvedFile[],
@@ -141,6 +134,11 @@ function createCacheKey(
 
 /**
  * Builds a class registry from CSS files, Tailwind config, and whitelist patterns
+ *
+ * Note: Uses synchronous file I/O (fs.readFileSync) because ESLint rules must be
+ * synchronous. Performance impact is mitigated by the caching strategy - files are
+ * only read when the cache is invalid (i.e., when configuration or files change).
+ *
  * @param resolvedFiles - Pre-resolved CSS files with paths and mtimes
  * @param whitelist - Array of class name patterns (supports wildcards)
  * @param tailwindClasses - Pre-loaded Tailwind classes (optional)
@@ -174,10 +172,7 @@ function buildClassRegistry(
 
       classes.forEach(cls => cssClasses.add(cls))
     } catch (readError) {
-      console.warn(
-        `Warning: Failed to read CSS/SCSS file "${file.path}":`,
-        readError,
-      )
+      logger.warn(`Failed to read CSS/SCSS file "${file.path}"`, readError)
     }
   }
 
@@ -285,7 +280,7 @@ export function getClassRegistry(
       tailwindClasses = tailwindData.classes
       validVariants = tailwindData.variants
     } catch (error) {
-      console.warn('Warning: Failed to load Tailwind classes:', error)
+      logger.warn('Failed to load Tailwind classes', error)
     }
   }
 
@@ -329,8 +324,14 @@ function loadTailwindClassesSync(
   const resolvedConfigPath = findTailwindConfigPath(configPath, cwd)
 
   if (!resolvedConfigPath) {
-    console.warn(
-      'Warning: Tailwind config file not found, skipping Tailwind validation',
+    logger.warn('Tailwind config file not found, skipping Tailwind validation')
+    return { classes: new Set(), variants: new Set() }
+  }
+
+  // Defensive check: ensure file still exists before requiring
+  if (!fs.existsSync(resolvedConfigPath)) {
+    logger.warn(
+      `Tailwind config file no longer exists at "${resolvedConfigPath}"`,
     )
     return { classes: new Set(), variants: new Set() }
   }
@@ -342,19 +343,29 @@ function loadTailwindClassesSync(
 
     // Use Tailwind's resolveConfig
     const resolveConfig = require('tailwindcss/resolveConfig')
-    const resolved = resolveConfig(userConfig) as ResolvedTailwindConfig
+    const resolved = resolveConfig(userConfig)
+
+    // Validate the resolved config structure
+    if (!isResolvedTailwindConfig(resolved)) {
+      logger.warn(
+        'Invalid Tailwind config structure returned from resolveConfig',
+      )
+      return { classes: new Set(), variants: new Set() }
+    }
+
+    const validResolved = resolved as ResolvedTailwindConfig
 
     // Extract safelist classes
-    const safelistClasses = extractSafelistClasses(resolved.safelist || [])
+    const safelistClasses = extractSafelistClasses(validResolved.safelist || [])
 
     // Generate utility classes from theme configuration
-    const utilityClasses = generateUtilityClasses(resolved)
+    const utilityClasses = generateUtilityClasses(validResolved)
 
     // Combine safelist and generated utilities
     const allClasses = new Set<string>([...safelistClasses, ...utilityClasses])
 
     // Extract custom variants from config
-    const customVariants = extractVariantsFromConfig(resolved)
+    const customVariants = extractVariantsFromConfig(validResolved)
 
     // Combine default variants with custom variants
     const allVariants = new Set([
@@ -364,8 +375,8 @@ function loadTailwindClassesSync(
 
     return { classes: allClasses, variants: allVariants }
   } catch (error) {
-    console.warn(
-      `Warning: Failed to load Tailwind config from "${resolvedConfigPath}":`,
+    logger.warn(
+      `Failed to load Tailwind config from "${resolvedConfigPath}"`,
       error,
     )
     return { classes: new Set(), variants: new Set() }

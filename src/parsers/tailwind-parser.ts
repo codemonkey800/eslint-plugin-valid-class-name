@@ -1,6 +1,15 @@
 import fs from 'fs'
 import path from 'path'
 import type { TailwindConfig } from 'src/types/options'
+import {
+  DEFAULT_GRID_COL_START_END_RANGE,
+  DEFAULT_GRID_COLS_RANGE,
+  DEFAULT_GRID_ROW_START_END_RANGE,
+  DEFAULT_GRID_ROWS_RANGE,
+  MAX_THEME_DEPTH,
+} from 'src/utils/constants'
+import { logger } from 'src/utils/logger'
+import { isResolvedTailwindConfig, isThemeScale } from 'src/utils/type-guards'
 
 /**
  * Resolved Tailwind configuration structure
@@ -24,20 +33,12 @@ interface SafelistPattern {
  * Type representing a value in the Tailwind theme
  * Can be a primitive or nested object
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ThemeValue = string | number | Record<string, any>
+type ThemeValue = string | number | Record<string, unknown>
 
 /**
  * Type representing a scale in the Tailwind theme (e.g., colors, spacing)
  */
 type ThemeScale = Record<string, ThemeValue>
-
-/**
- * Type guard to check if a value is a valid theme scale
- */
-function isThemeScale(value: unknown): value is ThemeScale {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
 
 /**
  * Default Tailwind config file names to search for
@@ -68,7 +69,7 @@ export function findTailwindConfigPath(
       return absolutePath
     }
 
-    console.warn(`Warning: Tailwind config file not found at "${configPath}"`)
+    logger.warn(`Tailwind config file not found at "${configPath}"`)
     return null
   }
 
@@ -101,14 +102,19 @@ export async function loadTailwindConfig(
     const { default: resolveConfig } = await import('tailwindcss/resolveConfig')
 
     // Resolve the config with Tailwind defaults
-    const resolved = resolveConfig(userConfig) as ResolvedTailwindConfig
+    const resolved = resolveConfig(userConfig)
 
-    return resolved
+    // Validate the resolved config structure
+    if (!isResolvedTailwindConfig(resolved)) {
+      logger.warn(
+        'Invalid Tailwind config structure returned from resolveConfig',
+      )
+      return null
+    }
+
+    return resolved as ResolvedTailwindConfig
   } catch (error) {
-    console.warn(
-      `Warning: Failed to load Tailwind config from "${configPath}":`,
-      error,
-    )
+    logger.warn(`Failed to load Tailwind config from "${configPath}"`, error)
     return null
   }
 }
@@ -148,16 +154,18 @@ export function extractSafelistClasses(
 
 /**
  * Flattens a nested theme object into a map of class suffixes to values
- * Handles edge cases: circular references, functions, and invalid values
+ * Handles edge cases: circular references, functions, invalid values, and excessive depth
  * @param themeSection - Theme section (e.g., colors, spacing)
  * @param prefix - Optional prefix for nested keys
  * @param visited - Set tracking visited objects to prevent circular references
+ * @param depth - Current recursion depth (for depth limiting)
  * @returns Map of flattened keys to values
  */
 function flattenThemeObject(
   themeSection: Record<string, unknown> | undefined,
   prefix = '',
   visited: WeakSet<object> = new WeakSet(),
+  depth = 0,
 ): Map<string, ThemeValue> {
   const result = new Map<string, ThemeValue>()
 
@@ -165,10 +173,18 @@ function flattenThemeObject(
     return result
   }
 
+  // Check for excessive depth (prevents stack overflow and extremely deep nesting)
+  if (depth >= MAX_THEME_DEPTH) {
+    logger.warn(
+      `Maximum theme depth (${MAX_THEME_DEPTH}) exceeded${prefix ? ` at key '${prefix}'` : ''}. Stopping traversal.`,
+    )
+    return result
+  }
+
   // Check for circular reference
   if (visited.has(themeSection)) {
-    console.warn(
-      `Warning: Circular reference detected in theme section${prefix ? ` at key '${prefix}'` : ''}. Skipping to prevent infinite loop.`,
+    logger.warn(
+      `Circular reference detected in theme section${prefix ? ` at key '${prefix}'` : ''}. Skipping to prevent infinite loop.`,
     )
     return result
   }
@@ -189,8 +205,8 @@ function flattenThemeObject(
 
     // Skip function values (not valid theme values)
     if (typeof value === 'function') {
-      console.warn(
-        `Warning: Function value detected in theme at key '${prefix ? prefix + '-' : ''}${key}'. Functions are not valid theme values and will be skipped.`,
+      logger.warn(
+        `Function value detected in theme at key '${prefix ? prefix + '-' : ''}${key}'. Functions are not valid theme values and will be skipped.`,
       )
       continue
     }
@@ -202,17 +218,22 @@ function flattenThemeObject(
     if (typeof value === 'object' && !Array.isArray(value)) {
       // If key is 'DEFAULT', add without suffix
       if (key === 'DEFAULT') {
-        result.set(prefix || 'DEFAULT', value)
+        result.set(prefix || 'DEFAULT', value as ThemeValue)
       } else {
-        // Recursively flatten nested objects, passing visited set
-        const nested = flattenThemeObject(value as ThemeScale, fullKey, visited)
+        // Recursively flatten nested objects, passing visited set and depth
+        const nested = flattenThemeObject(
+          value as ThemeScale,
+          fullKey,
+          visited,
+          depth + 1,
+        )
         for (const [nestedKey, nestedValue] of nested) {
           result.set(nestedKey, nestedValue)
         }
       }
     } else {
       // Primitive value or array (arrays are valid for some theme values like fontFamily)
-      result.set(fullKey, value)
+      result.set(fullKey, value as ThemeValue)
     }
   }
 
@@ -513,8 +534,8 @@ function generateTypographyUtilities(
     for (const [key] of flatFontFamily) {
       // Detect and warn about collisions with fontWeight keys
       if (fontWeightKeys.has(key)) {
-        console.warn(
-          `Warning: Theme collision detected - fontFamily key '${key}' conflicts with fontWeight key '${key}'. Both generate 'font-${key}' utility. The fontFamily value will overwrite fontWeight in the generated class set.`,
+        logger.warn(
+          `Theme collision detected - fontFamily key '${key}' conflicts with fontWeight key '${key}'. Both generate 'font-${key}' utility. The fontFamily value will overwrite fontWeight in the generated class set.`,
         )
       }
       utilities.add(`font-${key}`)
@@ -709,12 +730,6 @@ function generateGridUtilities(theme: Record<string, unknown>): Set<string> {
     'auto-rows-fr',
   ]
   staticGridUtils.forEach(util => utilities.add(util))
-
-  // Default ranges for grid utilities (matching Tailwind's defaults)
-  const DEFAULT_GRID_COLS_RANGE = 12
-  const DEFAULT_GRID_ROWS_RANGE = 6
-  const DEFAULT_GRID_COL_START_END_RANGE = 13
-  const DEFAULT_GRID_ROW_START_END_RANGE = 7
 
   // Grid template columns utilities (grid-cols-*)
   const gridTemplateColumns = theme.gridTemplateColumns as
@@ -1527,19 +1542,27 @@ export function generateUtilityClasses(
   const animationUtilities = generateAnimationUtilities(theme)
 
   // Combine all utilities
-  for (const utility of colorUtilities) allUtilities.add(utility)
-  for (const utility of spacingUtilities) allUtilities.add(utility)
-  for (const utility of sizingUtilities) allUtilities.add(utility)
-  for (const utility of typographyUtilities) allUtilities.add(utility)
-  for (const utility of staticUtilities) allUtilities.add(utility)
-  for (const utility of gridUtilities) allUtilities.add(utility)
-  for (const utility of borderUtilities) allUtilities.add(utility)
-  for (const utility of effectUtilities) allUtilities.add(utility)
-  for (const utility of transformUtilities) allUtilities.add(utility)
-  for (const utility of filterUtilities) allUtilities.add(utility)
-  for (const utility of backdropFilterUtilities) allUtilities.add(utility)
-  for (const utility of transitionUtilities) allUtilities.add(utility)
-  for (const utility of animationUtilities) allUtilities.add(utility)
+  const allSets = [
+    colorUtilities,
+    spacingUtilities,
+    sizingUtilities,
+    typographyUtilities,
+    staticUtilities,
+    gridUtilities,
+    borderUtilities,
+    effectUtilities,
+    transformUtilities,
+    filterUtilities,
+    backdropFilterUtilities,
+    transitionUtilities,
+    animationUtilities,
+  ]
+
+  for (const set of allSets) {
+    for (const utility of set) {
+      allUtilities.add(utility)
+    }
+  }
 
   return allUtilities
 }
@@ -1574,9 +1597,7 @@ export async function getTailwindClasses(
   const resolvedConfigPath = findTailwindConfigPath(configPath, cwd)
 
   if (!resolvedConfigPath) {
-    console.warn(
-      'Warning: Tailwind config file not found, skipping Tailwind validation',
-    )
+    logger.warn('Tailwind config file not found, skipping Tailwind validation')
     return new Set()
   }
 
@@ -1619,4 +1640,3 @@ export function extractVariantsFromConfig(
 
   return customVariants
 }
-

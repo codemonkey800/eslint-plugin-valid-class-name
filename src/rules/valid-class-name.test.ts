@@ -812,289 +812,284 @@ describe('Tailwind variant validation', () => {
 })
 
 describe('Tailwind arbitrary value support', () => {
-  ruleTester.run(
-    'valid-class-name (arbitrary values)',
-    rule,
-    {
-      valid: [
-        // Simple arbitrary values
-        {
-          code: '<div className="w-[100px]" />',
-          filename: 'test.jsx',
-          options: [
-            {
-              sources: {
-                tailwind: {
-                  config: path.join(
-                    process.cwd(),
-                    'test-project/tailwind.config.cjs',
-                  ),
-                },
+  ruleTester.run('valid-class-name (arbitrary values)', rule, {
+    valid: [
+      // Simple arbitrary values
+      {
+        code: '<div className="w-[100px]" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
               },
             },
-          ],
-        },
-        {
-          code: '<div className="h-[50vh]" />',
-          filename: 'test.jsx',
-          options: [
-            {
-              sources: {
-                tailwind: {
-                  config: path.join(
-                    process.cwd(),
-                    'test-project/tailwind.config.cjs',
-                  ),
-                },
+          },
+        ],
+      },
+      {
+        code: '<div className="h-[50vh]" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
               },
             },
-          ],
-        },
-        // Arbitrary color values
-        {
-          code: '<div className="bg-[#1da1f2]" />',
-          filename: 'test.jsx',
-          options: [
-            {
-              sources: {
-                tailwind: {
-                  config: path.join(
-                    process.cwd(),
-                    'test-project/tailwind.config.cjs',
-                  ),
-                },
+          },
+        ],
+      },
+      // Arbitrary color values
+      {
+        code: '<div className="bg-[#1da1f2]" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
               },
             },
-          ],
-        },
-        {
-          code: '<div className="text-[#ff0000]" />',
-          filename: 'test.jsx',
-          options: [
-            {
-              sources: {
-                tailwind: {
-                  config: path.join(
-                    process.cwd(),
-                    'test-project/tailwind.config.cjs',
-                  ),
-                },
+          },
+        ],
+      },
+      {
+        code: '<div className="text-[#ff0000]" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
               },
             },
-          ],
-        },
-        // Multi-part prefixes
-        {
-          code: '<div className="min-w-[100px]" />',
-          filename: 'test.jsx',
-          options: [
-            {
-              sources: {
-                tailwind: {
-                  config: path.join(
-                    process.cwd(),
-                    'test-project/tailwind.config.cjs',
-                  ),
-                },
+          },
+        ],
+      },
+      // Multi-part prefixes
+      {
+        code: '<div className="min-w-[100px]" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
               },
             },
-          ],
-        },
-        {
-          code: '<div className="grid-cols-[200px_1fr]" />',
-          filename: 'test.jsx',
-          options: [
-            {
-              sources: {
-                tailwind: {
-                  config: path.join(
-                    process.cwd(),
-                    'test-project/tailwind.config.cjs',
-                  ),
-                },
+          },
+        ],
+      },
+      {
+        code: '<div className="grid-cols-[200px_1fr]" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
               },
             },
-          ],
-        },
-        // Complex arbitrary values
-        {
-          code: '<div className="grid-cols-[200px_minmax(900px,_1fr)_100px]" />',
-          filename: 'test.jsx',
-          options: [
-            {
-              sources: {
-                tailwind: {
-                  config: path.join(
-                    process.cwd(),
-                    'test-project/tailwind.config.cjs',
-                  ),
-                },
+          },
+        ],
+      },
+      // Complex arbitrary values
+      {
+        code: '<div className="grid-cols-[200px_minmax(900px,_1fr)_100px]" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
               },
             },
-          ],
-        },
-        // Arbitrary values with variants
-        {
-          code: '<div className="hover:w-[100px]" />',
-          filename: 'test.jsx',
-          options: [
-            {
-              sources: {
-                tailwind: {
-                  config: path.join(
-                    process.cwd(),
-                    'test-project/tailwind.config.cjs',
-                  ),
-                },
+          },
+        ],
+      },
+      // Arbitrary values with variants
+      {
+        code: '<div className="hover:w-[100px]" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
               },
             },
-          ],
-        },
-        {
-          code: '<div className="md:text-[18px]" />',
-          filename: 'test.jsx',
-          options: [
-            {
-              sources: {
-                tailwind: {
-                  config: path.join(
-                    process.cwd(),
-                    'test-project/tailwind.config.cjs',
-                  ),
-                },
+          },
+        ],
+      },
+      {
+        code: '<div className="md:text-[18px]" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
               },
             },
-          ],
-        },
-        {
-          code: '<div className="hover:focus:bg-[#1da1f2]" />',
-          filename: 'test.jsx',
-          options: [
-            {
-              sources: {
-                tailwind: {
-                  config: path.join(
-                    process.cwd(),
-                    'test-project/tailwind.config.cjs',
-                  ),
-                },
+          },
+        ],
+      },
+      {
+        code: '<div className="hover:focus:bg-[#1da1f2]" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
               },
             },
-          ],
-        },
-        // Multiple arbitrary values
-        {
-          code: '<div className="w-[100px] h-[50vh] bg-[#1da1f2]" />',
-          filename: 'test.jsx',
-          options: [
-            {
-              sources: {
-                tailwind: {
-                  config: path.join(
-                    process.cwd(),
-                    'test-project/tailwind.config.cjs',
-                  ),
-                },
+          },
+        ],
+      },
+      // Multiple arbitrary values
+      {
+        code: '<div className="w-[100px] h-[50vh] bg-[#1da1f2]" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
               },
             },
-          ],
-        },
-        // Mixed arbitrary and regular values
-        {
-          code: '<div className="w-[100px] h-full bg-blue-500" />',
-          filename: 'test.jsx',
-          options: [
-            {
-              sources: {
-                tailwind: {
-                  config: path.join(
-                    process.cwd(),
-                    'test-project/tailwind.config.cjs',
-                  ),
-                },
+          },
+        ],
+      },
+      // Mixed arbitrary and regular values
+      {
+        code: '<div className="w-[100px] h-full bg-blue-500" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
               },
             },
-          ],
-        },
-      ],
-      invalid: [
-        // Invalid prefix
-        {
-          code: '<div className="invalid-[100px]" />',
-          filename: 'test.jsx',
-          options: [
-            {
-              sources: {
-                tailwind: {
-                  config: path.join(
-                    process.cwd(),
-                    'test-project/tailwind.config.cjs',
-                  ),
-                },
+          },
+        ],
+      },
+    ],
+    invalid: [
+      // Invalid prefix
+      {
+        code: '<div className="invalid-[100px]" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
               },
             },
-          ],
-          errors: [
-            {
-              messageId: 'invalidClassName',
-              data: {
-                className: 'invalid-[100px]',
+          },
+        ],
+        errors: [
+          {
+            messageId: 'invalidClassName',
+            data: {
+              className: 'invalid-[100px]',
+            },
+          },
+        ],
+      },
+      // Empty value
+      {
+        code: '<div className="w-[]" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
               },
             },
-          ],
-        },
-        // Empty value
-        {
-          code: '<div className="w-[]" />',
-          filename: 'test.jsx',
-          options: [
-            {
-              sources: {
-                tailwind: {
-                  config: path.join(
-                    process.cwd(),
-                    'test-project/tailwind.config.cjs',
-                  ),
-                },
+          },
+        ],
+        errors: [
+          {
+            messageId: 'invalidClassName',
+            data: {
+              className: 'w-[]',
+            },
+          },
+        ],
+      },
+      // Invalid prefix with variant
+      {
+        code: '<div className="hover:invalid-[100px]" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'test-project/tailwind.config.cjs',
+                ),
               },
             },
-          ],
-          errors: [
-            {
-              messageId: 'invalidClassName',
-              data: {
-                className: 'w-[]',
-              },
+          },
+        ],
+        errors: [
+          {
+            messageId: 'invalidClassName',
+            data: {
+              className: 'invalid-[100px]',
             },
-          ],
-        },
-        // Invalid prefix with variant
-        {
-          code: '<div className="hover:invalid-[100px]" />',
-          filename: 'test.jsx',
-          options: [
-            {
-              sources: {
-                tailwind: {
-                  config: path.join(
-                    process.cwd(),
-                    'test-project/tailwind.config.cjs',
-                  ),
-                },
-              },
-            },
-          ],
-          errors: [
-            {
-              messageId: 'invalidClassName',
-              data: {
-                className: 'invalid-[100px]',
-              },
-            },
-          ],
-        },
-      ],
-    },
-  )
+          },
+        ],
+      },
+    ],
+  })
 })
-

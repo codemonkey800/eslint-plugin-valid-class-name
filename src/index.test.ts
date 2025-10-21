@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals'
-import plugin from 'src/index'
+import plugin from './index'
 
 describe('eslint-plugin-valid-class-name', () => {
   it('should export a valid ESLint plugin', () => {
@@ -26,8 +26,17 @@ describe('eslint-plugin-valid-class-name', () => {
 
   it('should have recommended config with correct structure', () => {
     const { recommended } = plugin.configs
-    expect(recommended.plugins).toContain('valid-class-name')
-    expect(recommended.rules).toBeDefined()
-    expect(typeof recommended.rules).toBe('object')
+    expect(Array.isArray(recommended)).toBe(false)
+    expect(typeof recommended).toBe('object')
+    expect(recommended).toBeDefined()
+
+    // Type assertion after runtime checks
+    const config = recommended as {
+      plugins: string[]
+      rules: Record<string, unknown>
+    }
+    expect(config.plugins).toContain('valid-class-name')
+    expect(config.rules).toBeDefined()
+    expect(typeof config.rules).toBe('object')
   })
 })

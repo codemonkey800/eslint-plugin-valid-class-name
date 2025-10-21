@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import {
   extractClassNamesFromCss,
   extractClassNamesFromScss,
-} from './css-parser.js'
+} from './css-parser'
 import path from 'path'
 import { fileURLToPath } from 'url'
 

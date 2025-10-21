@@ -66,6 +66,12 @@ When modifying files, run linters only for changed files to save time.
 - Uses synchronous loading (required by ESLint's synchronous rule execution)
 - **Note**: Does NOT generate arbitrary value utilities (e.g., `w-[100px]`, `bg-[#ff0000]`)
 
+**5. Tailwind Variants** ([src/utils/tailwind-variants.ts](src/utils/tailwind-variants.ts))
+- Parses class names with variants (e.g., `hover:first:mt-2`)
+- Validates variants against known Tailwind variants
+- Handles arbitrary variants (e.g., `[&:nth-child(3)]:mt-2`)
+- Validates arbitrary value classes (e.g., `w-[100px]`, `bg-[#1da1f2]`)
+
 ### Key Design Patterns
 
 **Caching Strategy**:
@@ -84,6 +90,17 @@ When modifying files, run linters only for changed files to save time.
 - Flattens nested theme objects (e.g., `colors.blue.500` → `blue-500`)
 - Handles negative values for spacing utilities (margin, inset, etc.)
 - Detects and warns about theme collisions (e.g., fontWeight and fontFamily with same keys)
+
+**Variant Validation**:
+- Separates variants from base utility (e.g., `hover:first:mt-2` → variants: `['hover', 'first']`, base: `'mt-2'`)
+- When variants are present, only validates base against Tailwind classes (not CSS classes)
+- Supports arbitrary variants with bracket notation
+- Group and peer variants are validated by checking their suffix (e.g., `group-hover` checks if `hover` is valid)
+
+**Arbitrary Value Handling**:
+- Arbitrary values bypass registry validation (e.g., `w-[100px]`, `bg-[#1da1f2]`)
+- Validates that the prefix is a known Tailwind utility that supports arbitrary values
+- Validates that the value is not empty
 
 ## Configuration
 
@@ -128,13 +145,14 @@ src/
 │   └── valid-class-name.ts        # Main rule implementation
 ├── types/
 │   └── options.ts                 # TypeScript types for rule options
+├── utils/
+│   └── tailwind-variants.ts       # Tailwind variant parsing and validation
 └── index.ts                       # Plugin entry point
 ```
 
 ## Important Notes
 
 - The plugin uses ES modules (`type: "module"` in package.json)
-- All imports should use `.js` extensions even for TypeScript files
 - Tailwind class loading is synchronous and blocks during initial load (by design, due to ESLint constraints)
 - The rule currently only validates static string literals in className attributes
 - Dynamic class names (template literals, variables, etc.) are skipped

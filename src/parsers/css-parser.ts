@@ -2,6 +2,7 @@ import path from 'path'
 import postcss from 'postcss'
 import selectorParser from 'postcss-selector-parser'
 import * as sass from 'sass'
+import { logger } from 'src/utils/logger'
 
 /**
  * Extracts CSS class names from CSS content using PostCSS
@@ -23,16 +24,20 @@ export function extractClassNamesFromCss(cssContent: string): Set<string> {
           })
         }).processSync(rule.selector)
       } catch (selectorError) {
-        // Log warning but continue processing other selectors
-        console.warn(
-          `Warning: Failed to parse selector "${rule.selector}":`,
+        // Error recovery: Log warning but continue processing other selectors
+        // This allows partial extraction of valid classes even when some
+        // selectors have syntax errors
+        logger.warn(
+          `Failed to parse selector "${rule.selector}"`,
           selectorError,
         )
       }
     })
   } catch (parseError) {
-    // Log warning but return what we have so far
-    console.warn('Warning: Failed to parse CSS content:', parseError)
+    // Error recovery: Return partial results collected so far
+    // This allows extraction of classes from valid CSS rules even if
+    // the overall file has syntax errors
+    logger.warn('Failed to parse CSS content', parseError)
   }
 
   return classNames
@@ -59,11 +64,9 @@ export function extractClassNamesFromScss(
     // Extract class names from compiled CSS
     return extractClassNamesFromCss(result.css)
   } catch (compileError) {
-    // Log warning but return empty set on compilation errors
-    console.warn(
-      `Warning: Failed to compile SCSS file "${filePath}":`,
-      compileError,
-    )
+    // SCSS compilation failure: Cannot proceed with CSS parsing
+    // Return empty set since there's no compiled CSS to extract from
+    logger.warn(`Failed to compile SCSS file "${filePath}"`, compileError)
     return new Set<string>()
   }
 }

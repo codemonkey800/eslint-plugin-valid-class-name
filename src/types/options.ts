@@ -56,6 +56,20 @@ export interface TailwindConfig {
    * @example "./tailwind.config.js"
    */
   config?: string
+
+  /**
+   * Whether to include plugin-generated classes via Tailwind build process
+   * When enabled, processes CSS through Tailwind's PostCSS plugin to capture:
+   * - Classes from Tailwind plugins
+   * - Classes from @layer utilities
+   * - Classes from @layer components
+   *
+   * Default: true (recommended for complete validation)
+   * Set to false for faster performance if you don't use plugins or @layer directives
+   *
+   * @default true
+   */
+  includePluginClasses?: boolean
 }
 
 /**

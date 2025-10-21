@@ -24,5 +24,29 @@ module.exports = {
     'p-4',
     'rounded',
   ],
-  plugins: [],
+  plugins: [
+    // Sample plugin that adds custom 3D transform utilities
+    function ({ addUtilities }) {
+      addUtilities({
+        '.rotate-y-180': {
+          transform: 'rotateY(180deg)',
+        },
+        '.rotate-x-180': {
+          transform: 'rotateX(180deg)',
+        },
+        '.preserve-3d': {
+          transformStyle: 'preserve-3d',
+        },
+        '.backface-hidden': {
+          backfaceVisibility: 'hidden',
+        },
+        '.backface-visible': {
+          backfaceVisibility: 'visible',
+        },
+        '.perspective-1000': {
+          perspective: '1000px',
+        },
+      })
+    },
+  ],
 }

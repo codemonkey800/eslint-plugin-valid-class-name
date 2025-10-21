@@ -10,6 +10,7 @@ import {
   extractSafelistClasses,
   extractVariantsFromConfig,
   findTailwindConfigPath,
+  generateTailwindBuildClassesSync,
   generateUtilityClasses,
   type ResolvedTailwindConfig,
 } from 'src/parsers/tailwind-parser'
@@ -355,14 +356,31 @@ function loadTailwindClassesSync(
 
     const validResolved = resolved as ResolvedTailwindConfig
 
+    // Determine if we should include plugin classes
+    const includePluginClasses =
+      typeof tailwindConfig === 'object'
+        ? tailwindConfig.includePluginClasses !== false // Default to true
+        : true
+
     // Extract safelist classes
     const safelistClasses = extractSafelistClasses(validResolved.safelist || [])
 
     // Generate utility classes from theme configuration
     const utilityClasses = generateUtilityClasses(validResolved)
 
-    // Combine safelist and generated utilities
-    const allClasses = new Set<string>([...safelistClasses, ...utilityClasses])
+    // Generate classes from Tailwind build (includes plugin-generated classes)
+    // Only if includePluginClasses is enabled
+    let buildClasses = new Set<string>()
+    if (includePluginClasses) {
+      buildClasses = generateTailwindBuildClassesSync(resolvedConfigPath)
+    }
+
+    // Combine all sources: safelist, static generation, and build
+    const allClasses = new Set<string>([
+      ...safelistClasses,
+      ...utilityClasses,
+      ...buildClasses,
+    ])
 
     // Extract custom variants from config
     const customVariants = extractVariantsFromConfig(validResolved)

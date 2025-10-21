@@ -212,6 +212,186 @@ describe('extractClassNamesFromCss', () => {
     expect(classes.has('btn')).toBe(true)
     expect(classes.size).toBe(1)
   })
+
+  describe('@layer directives', () => {
+    it('should extract classes from @layer utilities', () => {
+      const css = `
+        @layer utilities {
+          .text-shadow-sm {
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+          }
+          .text-shadow-lg {
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          }
+        }
+      `
+      const classes = extractClassNamesFromCss(css)
+      expect(classes.has('text-shadow-sm')).toBe(true)
+      expect(classes.has('text-shadow-lg')).toBe(true)
+      expect(classes.size).toBe(2)
+    })
+
+    it('should extract classes from @layer components', () => {
+      const css = `
+        @layer components {
+          .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+          }
+          .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+          }
+          .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+          }
+        }
+      `
+      const classes = extractClassNamesFromCss(css)
+      expect(classes.has('btn')).toBe(true)
+      expect(classes.has('btn-primary')).toBe(true)
+      expect(classes.has('card')).toBe(true)
+      expect(classes.size).toBe(3)
+    })
+
+    it('should extract classes from @layer base', () => {
+      const css = `
+        @layer base {
+          .reset {
+            margin: 0;
+            padding: 0;
+          }
+        }
+      `
+      const classes = extractClassNamesFromCss(css)
+      expect(classes.has('reset')).toBe(true)
+      expect(classes.size).toBe(1)
+    })
+
+    it('should extract classes from multiple @layer blocks', () => {
+      const css = `
+        @layer utilities {
+          .utility-1 {
+            display: flex;
+          }
+        }
+
+        @layer components {
+          .component-1 {
+            padding: 1rem;
+          }
+        }
+
+        @layer utilities {
+          .utility-2 {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+      `
+      const classes = extractClassNamesFromCss(css)
+      expect(classes.has('utility-1')).toBe(true)
+      expect(classes.has('utility-2')).toBe(true)
+      expect(classes.has('component-1')).toBe(true)
+      expect(classes.size).toBe(3)
+    })
+
+    it('should extract classes from nested selectors within @layer', () => {
+      const css = `
+        @layer components {
+          .btn {
+            padding: 1rem;
+          }
+          .btn:hover {
+            opacity: 0.8;
+          }
+          .btn.active {
+            font-weight: bold;
+          }
+        }
+      `
+      const classes = extractClassNamesFromCss(css)
+      expect(classes.has('btn')).toBe(true)
+      expect(classes.has('active')).toBe(true)
+      expect(classes.size).toBe(2)
+    })
+
+    it('should handle @layer with complex selectors', () => {
+      const css = `
+        @layer components {
+          .card .header .title {
+            font-size: 1.5rem;
+          }
+          .card > .body {
+            padding: 1rem;
+          }
+        }
+      `
+      const classes = extractClassNamesFromCss(css)
+      expect(classes.has('card')).toBe(true)
+      expect(classes.has('header')).toBe(true)
+      expect(classes.has('title')).toBe(true)
+      expect(classes.has('body')).toBe(true)
+      expect(classes.size).toBe(4)
+    })
+
+    it('should extract classes from @layer with media queries', () => {
+      const css = `
+        @layer utilities {
+          @media (min-width: 768px) {
+            .md-flex {
+              display: flex;
+            }
+            .md-hidden {
+              display: none;
+            }
+          }
+        }
+      `
+      const classes = extractClassNamesFromCss(css)
+      expect(classes.has('md-flex')).toBe(true)
+      expect(classes.has('md-hidden')).toBe(true)
+      expect(classes.size).toBe(2)
+    })
+
+    it('should handle empty @layer blocks', () => {
+      const css = `
+        @layer utilities {
+        }
+
+        .btn {
+          padding: 1rem;
+        }
+      `
+      const classes = extractClassNamesFromCss(css)
+      expect(classes.has('btn')).toBe(true)
+      expect(classes.size).toBe(1)
+    })
+
+    it('should extract classes both inside and outside @layer', () => {
+      const css = `
+        .regular-class {
+          color: red;
+        }
+
+        @layer components {
+          .layer-class {
+            color: blue;
+          }
+        }
+
+        .another-regular {
+          color: green;
+        }
+      `
+      const classes = extractClassNamesFromCss(css)
+      expect(classes.has('regular-class')).toBe(true)
+      expect(classes.has('layer-class')).toBe(true)
+      expect(classes.has('another-regular')).toBe(true)
+      expect(classes.size).toBe(3)
+    })
+  })
 })
 
 describe('extractClassNamesFromScss', () => {

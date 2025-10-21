@@ -741,6 +741,7 @@ describe('Tailwind variant validation', () => {
                       process.cwd(),
                       'test-project/tailwind.config.cjs',
                     ),
+                    includePluginClasses: false, // Disable to test CSS-only validation
                   },
                 },
               },
@@ -1052,6 +1053,7 @@ describe('Tailwind arbitrary value support', () => {
                   process.cwd(),
                   'test-project/tailwind.config.cjs',
                 ),
+                includePluginClasses: false, // Disable to avoid interference
               },
             },
           },

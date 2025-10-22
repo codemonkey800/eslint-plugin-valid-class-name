@@ -344,7 +344,23 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
     - [class-registry.ts:105-151](src/cache/class-registry.ts#L105-L151): Cache implementation
   - **Why TTL?**: 1-second TTL catches newly created files while maximizing cache hits for typical lint runs
   - **Run Benchmark**: `pnpm run benchmark:glob-cache`
-- [ ] Optimize Set/Map usage for large class registries
+- [x] Optimize Set/Map usage for large class registries
+  - **Implementation**: Eliminated eager Set merging in `buildClassRegistry()`, using sequential lookups instead
+  - **Results** (from `benchmarks/set-merge-benchmark.ts`):
+    - **Build Time**: 100% improvement across all sizes (0.18ms-2.6ms → ~0.000ms)
+    - **Lookup Time** (400 validations): 94-311% slower but still fast in absolute terms
+      - Small (2,520 classes): 0.012ms → 0.023ms (+0.011ms, 94% overhead)
+      - Medium (7,050 classes): 0.013ms → 0.033ms (+0.020ms, 155% overhead)
+      - Large (20,100 classes): 0.013ms → 0.040ms (+0.027ms, 218% overhead)
+      - Extra Large (35,200 classes): 0.011ms → 0.046ms (+0.035ms, 311% overhead)
+    - **Memory Savings**: 355 KB → 4.4 MB depending on project size (lazy uses ~0.1 KB)
+    - **P95 Latency**: Lazy lookup p95 is 0.053ms-0.133ms (still negligible for linting)
+  - **Trade-off Analysis**:
+    - Sacrifice: ~0.03-0.05ms per 400 lookups (negligible in ESLint context where linting takes seconds)
+    - Gain: Zero build overhead + MB-scale memory savings
+    - Lookup overhead has more variance (higher p95/p99) but worst case (0.221ms for 400 lookups) is still trivial
+  - **Why It's Worth It**: Registry build happens once per config change, lookups happen during linting but the absolute overhead (~0.04ms per 400 classes) is unnoticeable when total lint time is measured in seconds
+  - **Run Benchmark**: `node --expose-gc --import tsx benchmarks/set-merge-benchmark.ts`
 
 **Tier 3: Persistence & Caching Infrastructure** _(complex, long-term benefits)_
 

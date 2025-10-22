@@ -296,29 +296,28 @@ function buildClassRegistry(
     tailwindClasses.forEach(cls => tailwindLiteralClasses.add(cls))
   }
 
-  // Combine all literal classes for general validation
-  const allLiteralClasses = new Set<string>([
-    ...cssClasses,
-    ...tailwindLiteralClasses,
-    ...whitelistLiteralClasses,
-  ])
-
-  // Combine Tailwind and whitelist for Tailwind-only validation
-  const tailwindOnlyLiteralClasses = new Set<string>([
-    ...tailwindLiteralClasses,
-    ...whitelistLiteralClasses,
-  ])
-
   // Extract wildcard patterns from whitelist and compile them to RegExp
   const wildcardPatterns = whitelist.filter(pattern => pattern.includes('*'))
   const compiledWildcardPatterns = wildcardPatterns
     .map(compilePattern)
     .filter((regex): regex is RegExp => regex !== null)
 
+  // Performance optimization: Keep source Sets separate instead of merging them.
+  // This avoids O(n) Set creation overhead during registry build.
+  // Trade-off: Validation performs 2-3 sequential Set.has() checks (still O(1))
+  // instead of a single check, but the constant factor overhead (~20ns) is
+  // negligible compared to the registry build time savings.
   return {
     isValid(className: string): boolean {
-      // Check literal classes first (O(1) lookup)
-      if (allLiteralClasses.has(className)) {
+      // Check source Sets in order of likelihood for early returns:
+      // 1. Whitelist (often matches dynamic patterns)
+      // 2. Tailwind (most common in modern projects)
+      // 3. CSS (project-specific classes)
+      if (
+        whitelistLiteralClasses.has(className) ||
+        tailwindLiteralClasses.has(className) ||
+        cssClasses.has(className)
+      ) {
         return true
       }
 
@@ -327,8 +326,11 @@ function buildClassRegistry(
     },
 
     isTailwindClass(className: string): boolean {
-      // Check Tailwind + whitelist literal classes first (O(1) lookup)
-      if (tailwindOnlyLiteralClasses.has(className)) {
+      // Check only Tailwind and whitelist sources (excludes CSS)
+      if (
+        whitelistLiteralClasses.has(className) ||
+        tailwindLiteralClasses.has(className)
+      ) {
         return true
       }
 
@@ -337,7 +339,12 @@ function buildClassRegistry(
     },
 
     getAllClasses(): Set<string> {
-      return new Set(allLiteralClasses)
+      // Create merged Set on-demand (only used in tests, not hot path)
+      const allClasses = new Set<string>()
+      cssClasses.forEach(cls => allClasses.add(cls))
+      tailwindLiteralClasses.forEach(cls => allClasses.add(cls))
+      whitelistLiteralClasses.forEach(cls => allClasses.add(cls))
+      return allClasses
     },
 
     getValidVariants(): Set<string> {

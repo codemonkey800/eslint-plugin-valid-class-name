@@ -1,4 +1,12 @@
 /**
+ * Memoization caches for variant parsing functions
+ * These caches improve performance by avoiding redundant parsing of the same class names
+ */
+const parseClassNameCache = new Map<string, ParsedClassName>()
+const parseArbitraryValueCache = new Map<string, ParsedArbitraryValue | null>()
+const isValidArbitraryValueCache = new Map<string, boolean>()
+
+/**
  * All default Tailwind v3 variants
  * These are the built-in variants that Tailwind CSS supports out of the box
  */
@@ -113,6 +121,7 @@ export interface VariantValidationResult {
 /**
  * Parses a Tailwind class name into variants and base utility
  * Handles arbitrary variants like [&:nth-child(3)]:mt-2
+ * Results are cached for performance
  * @param className - The class name to parse (e.g., "hover:first:mt-2")
  * @returns Parsed structure with variants and base
  * @example
@@ -121,6 +130,12 @@ export interface VariantValidationResult {
  * parseClassName("[&:nth-child(3)]:mt-2") // { variants: ["[&:nth-child(3)]"], base: "mt-2" }
  */
 export function parseClassName(className: string): ParsedClassName {
+  // Check cache first
+  const cached = parseClassNameCache.get(className)
+  if (cached) {
+    return cached
+  }
+
   const variants: string[] = []
   let remaining = className
 
@@ -161,7 +176,12 @@ export function parseClassName(className: string): ParsedClassName {
   // Whatever is left is the base utility
   const base = remaining
 
-  return { variants, base }
+  const result = { variants, base }
+
+  // Cache the result
+  parseClassNameCache.set(className, result)
+
+  return result
 }
 
 /**
@@ -445,6 +465,7 @@ export function isArbitraryValue(className: string): boolean {
 
 /**
  * Parses an arbitrary value class name into prefix and value
+ * Results are cached for performance
  * @param className - The class name to parse (e.g., "w-[100px]")
  * @returns Parsed structure with prefix and value, or null if not an arbitrary value
  * @example
@@ -455,13 +476,21 @@ export function isArbitraryValue(className: string): boolean {
 export function parseArbitraryValue(
   className: string,
 ): ParsedArbitraryValue | null {
+  // Check cache first
+  const cached = parseArbitraryValueCache.get(className)
+  if (cached !== undefined) {
+    return cached
+  }
+
   if (!isArbitraryValue(className)) {
+    parseArbitraryValueCache.set(className, null)
     return null
   }
 
   // Find the last occurrence of "-[" to handle multi-part prefixes like "grid-cols"
   const bracketIndex = className.lastIndexOf('-[')
   if (bracketIndex === -1) {
+    parseArbitraryValueCache.set(className, null)
     return null
   }
 
@@ -470,17 +499,24 @@ export function parseArbitraryValue(
 
   // Extract value from brackets
   if (!valueWithBrackets.startsWith('[') || !valueWithBrackets.endsWith(']')) {
+    parseArbitraryValueCache.set(className, null)
     return null
   }
 
   const value = valueWithBrackets.slice(1, -1)
 
-  return { prefix, value }
+  const result = { prefix, value }
+
+  // Cache the result
+  parseArbitraryValueCache.set(className, result)
+
+  return result
 }
 
 /**
  * Validates an arbitrary value class name
  * Checks if the prefix is a valid Tailwind utility that supports arbitrary values
+ * Results are cached for performance
  * @param className - The class name to validate (e.g., "w-[100px]")
  * @returns true if the arbitrary value is valid
  * @example
@@ -489,8 +525,15 @@ export function parseArbitraryValue(
  * isValidArbitraryValue("w-full") // false (not an arbitrary value)
  */
 export function isValidArbitraryValue(className: string): boolean {
+  // Check cache first
+  const cached = isValidArbitraryValueCache.get(className)
+  if (cached !== undefined) {
+    return cached
+  }
+
   const parsed = parseArbitraryValue(className)
   if (!parsed) {
+    isValidArbitraryValueCache.set(className, false)
     return false
   }
 
@@ -498,13 +541,16 @@ export function isValidArbitraryValue(className: string): boolean {
 
   // Check if prefix is valid
   if (!ARBITRARY_VALUE_PREFIXES.has(prefix)) {
+    isValidArbitraryValueCache.set(className, false)
     return false
   }
 
   // Check if value is not empty
   if (!value || value.trim().length === 0) {
+    isValidArbitraryValueCache.set(className, false)
     return false
   }
 
+  isValidArbitraryValueCache.set(className, true)
   return true
 }

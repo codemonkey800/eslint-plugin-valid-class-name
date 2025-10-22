@@ -344,3 +344,92 @@ describe('isValidArbitraryValue', () => {
     expect(isValidArbitraryValue('w-100px]')).toBe(false)
   })
 })
+
+describe('Memoization', () => {
+  describe('parseClassName cache', () => {
+    it('should return the same object reference for repeated calls', () => {
+      const className = 'hover:first:mt-2'
+      const result1 = parseClassName(className)
+      const result2 = parseClassName(className)
+
+      // Should return the exact same object from cache
+      expect(result1).toBe(result2)
+    })
+
+    it('should cache different class names separately', () => {
+      const result1 = parseClassName('hover:mt-2')
+      const result2 = parseClassName('focus:mt-4')
+
+      expect(result1).not.toBe(result2)
+      expect(result1).toEqual({ variants: ['hover'], base: 'mt-2' })
+      expect(result2).toEqual({ variants: ['focus'], base: 'mt-4' })
+    })
+
+    it('should cache edge cases correctly', () => {
+      const emptyResult1 = parseClassName(':mt-2')
+      const emptyResult2 = parseClassName(':mt-2')
+      expect(emptyResult1).toBe(emptyResult2)
+
+      const trailingResult1 = parseClassName('hover:')
+      const trailingResult2 = parseClassName('hover:')
+      expect(trailingResult1).toBe(trailingResult2)
+    })
+  })
+
+  describe('parseArbitraryValue cache', () => {
+    it('should return the same object reference for repeated calls', () => {
+      const className = 'w-[100px]'
+      const result1 = parseArbitraryValue(className)
+      const result2 = parseArbitraryValue(className)
+
+      // Should return the exact same object from cache
+      expect(result1).toBe(result2)
+    })
+
+    it('should cache null results for non-arbitrary values', () => {
+      const className = 'w-full'
+      const result1 = parseArbitraryValue(className)
+      const result2 = parseArbitraryValue(className)
+
+      expect(result1).toBeNull()
+      expect(result2).toBeNull()
+    })
+
+    it('should cache different arbitrary values separately', () => {
+      const result1 = parseArbitraryValue('w-[100px]')
+      const result2 = parseArbitraryValue('h-[50vh]')
+
+      expect(result1).not.toBe(result2)
+      expect(result1).toEqual({ prefix: 'w', value: '100px' })
+      expect(result2).toEqual({ prefix: 'h', value: '50vh' })
+    })
+  })
+
+  describe('isValidArbitraryValue cache', () => {
+    it('should return the same boolean value for repeated calls', () => {
+      const className = 'w-[100px]'
+      const result1 = isValidArbitraryValue(className)
+      const result2 = isValidArbitraryValue(className)
+
+      expect(result1).toBe(true)
+      expect(result2).toBe(true)
+    })
+
+    it('should cache false results', () => {
+      const className = 'invalid-[100px]'
+      const result1 = isValidArbitraryValue(className)
+      const result2 = isValidArbitraryValue(className)
+
+      expect(result1).toBe(false)
+      expect(result2).toBe(false)
+    })
+
+    it('should cache different class names separately', () => {
+      const result1 = isValidArbitraryValue('w-[100px]')
+      const result2 = isValidArbitraryValue('invalid-[100px]')
+
+      expect(result1).toBe(true)
+      expect(result2).toBe(false)
+    })
+  })
+})

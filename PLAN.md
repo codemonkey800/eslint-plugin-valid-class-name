@@ -297,7 +297,14 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
     - 10 patterns, 10,000 classes: 17.7x faster (24.15ms → 1.36ms)
     - 20 patterns, 10,000 classes: 21.5x faster (44.72ms → 2.08ms)
   - **Implementation**: Pre-compile wildcard patterns to RegExp at registry creation, reuse compiled patterns for all validations
-- [ ] Implement memoization for variant parsing results
+- [x] Implement memoization for variant parsing results
+  - **Impact**: 1.9x speedup for repeated class validation (48.3% time reduction)
+  - **Details**:
+    - Added Map-based caches for `parseClassName()`, `parseArbitraryValue()`, and `isValidArbitraryValue()`
+    - Cache hits are ~100x faster than parsing (0.01μs vs 0.6μs)
+    - In typical projects (99% cache hit rate), saves ~48% of variant parsing time
+    - Benchmarks: `benchmarks/variant-parsing-benchmark.ts` and `benchmarks/variant-parsing-comparison.ts`
+  - **Implementation**: Module-level Map caches with className as key, no size limit (classes are finite per project)
 - [ ] Reduce string allocations in class name extraction
 
 **Tier 2: Startup/Load Time Optimizations** _(one-time cost per lint session)_

@@ -278,6 +278,14 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
 
 - [x] Optimize cache key generation (use hash instead of JSON.stringify)
 - [x] Compile wildcard patterns to RegExp and cache compiled patterns
+  - **Performance Impact**: 14.3x average speedup (8.0x - 21.5x depending on pattern count)
+  - **Benchmark Results**:
+    - 1 pattern, 100 classes: 8.0x faster (158.93μs → 19.96μs)
+    - 5 patterns, 1,000 classes: 6.0x faster (1.87ms → 310.09μs)
+    - 10 patterns, 1,000 classes: 18.1x faster (2.84ms → 156.82μs)
+    - 10 patterns, 10,000 classes: 17.7x faster (24.15ms → 1.36ms)
+    - 20 patterns, 10,000 classes: 21.5x faster (44.72ms → 2.08ms)
+  - **Implementation**: Pre-compile wildcard patterns to RegExp at registry creation, reuse compiled patterns for all validations
 - [ ] Implement memoization for variant parsing results
 - [ ] Reduce string allocations in class name extraction
 

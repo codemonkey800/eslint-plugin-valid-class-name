@@ -160,6 +160,15 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
 - Stream large files instead of loading entirely
 - Clean up resources after validation
 
+### Implementation Techniques
+
+- Compile glob patterns and wildcard matchers to RegExp once
+- Memoize expensive parsing operations (variants, class splitting)
+- Use hash-based cache keys for large configurations
+- Parallelize independent file operations
+- Implement copy-on-write for registry updates
+- Use typed arrays or bit flags for boolean checks at scale
+
 ## Testing Strategy
 
 ### Unit Tests
@@ -272,6 +281,14 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
 - [ ] Implement lazy loading strategy
 - [ ] Add cache size management
 - [ ] Create cache invalidation logic
+- [ ] Compile wildcard patterns to RegExp and cache compiled patterns
+- [ ] Implement memoization for variant parsing results
+- [ ] Cache glob resolution results with mtime validation
+- [ ] Optimize cache key generation (use hash instead of JSON.stringify)
+- [ ] Add parallel CSS/SCSS file parsing with Promise.all
+- [ ] Implement file watching for CSS/SCSS source files
+- [ ] Reduce string allocations in class name extraction
+- [ ] Optimize Set/Map usage for large class registries
 
 ### Framework Support
 

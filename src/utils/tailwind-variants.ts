@@ -207,8 +207,13 @@ export function isValidVariant(
 
   // Group and peer variants: extract suffix and validate it
   // e.g., "group-hover" -> check if "hover" is valid
-  if (variant.startsWith('group-') || variant.startsWith('peer-')) {
-    const suffix = variant.replace(/^(group|peer)-/, '')
+  // Optimized: use substring instead of replace to avoid regex overhead and string allocation
+  if (variant.startsWith('group-')) {
+    const suffix = variant.substring(6) // 'group-'.length = 6
+    return validVariants.has(suffix)
+  }
+  if (variant.startsWith('peer-')) {
+    const suffix = variant.substring(5) // 'peer-'.length = 5
     return validVariants.has(suffix)
   }
 

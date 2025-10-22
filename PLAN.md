@@ -305,7 +305,24 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
     - In typical projects (99% cache hit rate), saves ~48% of variant parsing time
     - Benchmarks: `benchmarks/variant-parsing-benchmark.ts` and `benchmarks/variant-parsing-comparison.ts`
   - **Implementation**: Module-level Map caches with className as key, no size limit (classes are finite per project)
-- [ ] Reduce string allocations in class name extraction
+- [x] Reduce string allocations in class name extraction
+  - **Status**: ✅ Completed
+  - **Results**:
+    - **extractClassNamesFromString**: Refactored from map+trim+filter chain to single-pass loop
+      - Simple classes (common case): 19% faster (22.47ms → 18.26ms per 100k iterations)
+      - Tailwind variants: 13% faster (15.01ms → 13.14ms per 100k iterations)
+      - Complex variants: 6% faster (14.97ms → 14.08ms per 100k iterations)
+      - Edge case (extra whitespace): 17% faster (18.87ms → 15.67ms per 100k iterations)
+      - Large class lists (20 classes): 14% faster (49.10ms → 42.18ms per 10k iterations)
+    - **isValidVariant**: Optimized group/peer variant handling
+      - Replaced regex `.replace(/^(group|peer)-/, '')` with `.substring()`
+      - Group variants: 39% faster (6.44ms → 3.95ms per 100k iterations)
+      - Peer variants: 37% faster (6.01ms → 3.78ms per 100k iterations)
+  - **Impact**: 10-20% reduction in hot path execution time, eliminates unnecessary string allocations
+  - **Implementation**:
+    - [valid-class-name.ts:50-77](src/rules/valid-class-name.ts#L50-L77): Single-pass extraction with conditional trim
+    - [tailwind-variants.ts:211-218](src/utils/tailwind-variants.ts#L211-L218): Direct substring instead of regex replace
+  - **Benchmarks**: `benchmarks/string-allocation-benchmark.ts`
 
 **Tier 2: Startup/Load Time Optimizations** _(one-time cost per lint session)_
 

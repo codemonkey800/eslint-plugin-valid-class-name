@@ -64,28 +64,134 @@ The plugin is configured to validate class names against:
 4. **Whitelist patterns**: `custom-*` (any class starting with "custom-")
 5. **Ignore patterns**: `dynamic-*` (skips validation for classes starting with "dynamic-")
 
-### Tailwind Limitation
+### Tailwind Features
 
-**Note**: The plugin currently only extracts classes from Tailwind's `safelist` configuration. Automatic utility generation from the theme configuration (e.g., generating `bg-blue-500` from `theme.colors.blue.500`) is not yet implemented. To use Tailwind utilities in your project, you must explicitly add them to the `safelist` in your Tailwind config.
+The plugin fully supports:
+- ✅ **Automatic utility generation** from theme configuration (colors, spacing, typography, etc.)
+- ✅ **All Tailwind variants** (hover, focus, responsive, dark mode, group, peer, etc.)
+- ✅ **Arbitrary values** (`w-[100px]`, `bg-[#ff0000]`, etc.)
+- ✅ **Arbitrary variants** (`[&:nth-child(3)]:mt-2`, `[@media(min-width:900px)]:flex`)
+- ✅ **Plugin-generated classes** (from Tailwind plugins)
+- ✅ **@layer utilities and components** (custom utilities and components)
+- ✅ **Safelist classes** (explicitly safelisted in config)
 
 ## Test Cases
 
-### ValidComponent.tsx
+### Valid Test Components (Should Pass - 0 Errors)
 
-Uses valid class names from:
+#### ValidComponent.tsx
+Basic valid classes from multiple sources:
 - CSS: `container`, `header`, `main-content`
 - SCSS: `button-primary`, `card`, `alert`
-- Tailwind safelist: `flex`, `items-center`, `justify-between`, `gap-4`, `bg-blue-500`, `text-white`, `p-4`, `rounded`, `text-brand-500`
-- Whitelist: `custom-widget`
-- Ignored: `dynamic-loader` (doesn't exist but won't error)
+- Tailwind utilities: `flex`, `items-center`, `justify-between`, `gap-4`, `bg-blue-500`, `text-white`, `p-4`, `rounded`, `mb-2`
+- Custom theme: `text-brand-500`
+- Whitelist: `custom-widget` (matches `custom-*`)
+- Ignored: `dynamic-loader` (matches `dynamic-*`, skips validation)
 
-### InvalidComponent.tsx
+Run: `pnpm run test:valid`
 
-Uses invalid class names that don't exist in any source:
+#### CustomClassesComponent.tsx
+Tests custom classes from:
+- @layer utilities: `text-shadow-*`, `scrollbar-hide`, `pt-safe`, `pb-safe`, `aspect-golden`
+- @layer components: `card`, `card-header`, `card-footer`, `btn`, `btn-primary`, `btn-secondary`, `badge`, `badge-success`, `badge-error`
+- Tailwind plugins: `rotate-y-180`, `preserve-3d`, `backface-hidden`, `perspective-1000`
+
+Run: `pnpm run test:custom-classes`
+
+#### TailwindUtilitiesValid.tsx
+Comprehensive Tailwind utilities from theme:
+- Colors (bg, text, border, ring, fill, stroke)
+- Spacing (margin, padding, gap, space, inset)
+- Negative spacing (-m, -mt, -ml, etc.)
+- Sizing (width, height, min/max)
+- Typography (text, font, leading, tracking)
+- Layout (flex, grid, display, position)
+- Borders, effects, transitions, transforms, filters
+
+Run: `pnpm run test:tailwind-utilities`
+
+#### TailwindVariantsValid.tsx
+All Tailwind variant combinations:
+- Interactive: `hover:`, `focus:`, `active:`, `visited:`
+- Input states: `disabled:`, `checked:`, `invalid:`, `placeholder-shown:`
+- Child selectors: `first:`, `last:`, `odd:`, `even:`
+- Responsive: `sm:`, `md:`, `lg:`, `xl:`, `2xl:`
+- Dark mode: `dark:`
+- Group/Peer: `group-hover:`, `peer-checked:`
+- Multiple variants: `hover:first:`, `md:hover:`, `dark:md:text-white`
+
+Run: `pnpm run test:tailwind-variants`
+
+#### ArbitraryValuesValid.tsx
+Arbitrary value syntax:
+- Spacing: `w-[100px]`, `h-[50vh]`, `m-[2rem]`
+- Colors: `bg-[#ff0000]`, `text-[rgb(255,0,0)]`, `bg-[hsl(200,50%,50%)]`
+- URLs: `bg-[url('/img.png')]`
+- Content: `content-['hello']`
+- With variants: `hover:w-[200px]`, `md:bg-[#00ff00]`
+- Negative: `-mt-[10px]`, `-ml-[2rem]`
+
+Run: `pnpm run test:arbitrary-values`
+
+#### ArbitraryVariantsValid.tsx
+Arbitrary variant syntax:
+- Arbitrary selectors: `[&:nth-child(3)]:mt-2`, `[&>*]:p-4`
+- Arbitrary at-rules: `[@media(min-width:900px)]:flex`
+- Combined: `hover:[&:nth-child(3)]:bg-blue-500`
+- Attribute selectors: `[&[data-active]]:bg-blue-500`
+
+Run: `pnpm run test:arbitrary-variants`
+
+#### EdgeCasesValid.tsx
+Edge cases that should pass:
+- Important modifier: `!bg-blue-500`, `!text-white`
+- Zero values: `m-0`, `p-0`, `w-0`, `h-0`
+- Auto values: `m-auto`, `w-auto`
+- Full/screen: `w-full`, `h-screen`
+- Fractions: `w-1/2`, `h-1/3`
+- Negative: `-m-4`, `-mt-2`
+
+Run: `pnpm run test:edge-cases`
+
+### Invalid Test Components (Should Fail with Errors)
+
+#### InvalidComponent.tsx (4 errors expected)
+Basic invalid classes:
 - `does-not-exist`
 - `missing-class`
-- `typo-flx` (likely meant to be `flex`)
+- `typo-flx` (typo of `flex`)
 - `non-existent-button`
+
+Run: `pnpm run test:invalid`
+
+#### ComprehensiveInvalid.tsx (~60+ errors expected)
+Comprehensive invalid cases:
+- Nonexistent Tailwind utilities: `flx`, `bg-ultraviolet-500`, `txt-lg`
+- Invalid variants: `hoverr:`, `foucus:`, `mediumm:`
+- Typos: `bg-blu-500`, `text-gren-600`, `gird`
+- Empty arbitrary values: `w-[]`, `bg-[]`
+- Malformed: `hover::bg-blue`, `:hover:bg-blue`, `bg-blue-`
+- CSS/SCSS typos: `containr`, `buton-primary`, `crd`
+- Non-whitelisted: `random-class-123`, `not-in-css`
+
+Run: `pnpm run test:comprehensive-invalid`
+
+### Test All Components
+
+Run all valid components (should pass):
+```bash
+pnpm run test:all-valid
+```
+
+Run all invalid components (should show errors):
+```bash
+pnpm run test:all-invalid
+```
+
+Run everything:
+```bash
+pnpm lint
+```
 
 ## Making Changes
 

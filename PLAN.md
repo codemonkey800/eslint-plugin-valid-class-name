@@ -277,6 +277,17 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
 **Tier 1: Critical Path Optimizations** _(affects every class validation)_
 
 - [x] Optimize cache key generation (use hash instead of JSON.stringify)
+  - **Primary Benefit**: Constant 64-byte output size vs 1KB-85KB for JSON.stringify
+  - **Tradeoff**: ~1.5-2x slower generation, uses more heap during generation (crypto overhead)
+  - **Why It's Worth It**: Cache keys are stored and compared repeatedly across lint runs. Smaller keys = faster comparisons and better memory efficiency long-term
+  - **Benchmark Results** (output size reduction):
+    - Small (10 files): 1.13 KB → 64 B (18x smaller, 94.5% reduction)
+    - Medium (50 files): 4.63 KB → 64 B (74x smaller, 98.6% reduction)
+    - Large (200 files): 17.15 KB → 64 B (274x smaller, 99.6% reduction)
+    - Very Large (500 files): 42.30 KB → 64 B (677x smaller, 99.9% reduction)
+    - Extreme (1000 files): 84.71 KB → 64 B (1355x smaller, 99.9% reduction)
+  - **Implementation**: Use crypto.createHash('sha256') with incremental updates instead of JSON.stringify
+  - **Run Benchmark**: `pnpm run bench`
 - [x] Compile wildcard patterns to RegExp and cache compiled patterns
   - **Performance Impact**: 14.3x average speedup (8.0x - 21.5x depending on pattern count)
   - **Benchmark Results**:

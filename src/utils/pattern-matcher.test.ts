@@ -1,5 +1,9 @@
 import { describe, expect, it } from '@jest/globals'
-import { compilePattern, matchesPattern, validatePattern } from './pattern-matcher'
+import {
+  compilePattern,
+  matchesPattern,
+  validatePattern,
+} from './pattern-matcher'
 
 describe('validatePattern', () => {
   it('should accept valid simple patterns', () => {
@@ -193,4 +197,3 @@ describe('compilePattern', () => {
     })
   })
 })
-

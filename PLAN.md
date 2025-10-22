@@ -274,21 +274,28 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
 
 ### Performance Optimization
 
-- [ ] Create in-memory cache system
+**Tier 1: Critical Path Optimizations** *(affects every class validation)*
+- [ ] Optimize cache key generation (use hash instead of JSON.stringify)
+- [ ] Compile wildcard patterns to RegExp and cache compiled patterns
+- [ ] Implement memoization for variant parsing results
+- [ ] Reduce string allocations in class name extraction
+
+**Tier 2: Startup/Load Time Optimizations** *(one-time cost per lint session)*
+- [ ] Add parallel CSS/SCSS file parsing with Promise.all
+- [ ] Cache glob resolution results with mtime validation
+- [ ] Optimize Set/Map usage for large class registries
+
+**Tier 3: Persistence & Caching Infrastructure** *(complex, long-term benefits)*
 - [ ] Implement disk-based cache persistence
 - [ ] Add file modification tracking
+- [ ] Create cache invalidation logic
+- [ ] Create in-memory cache system
+
+**Tier 4: Watch Mode & Advanced Features** *(nice to have for dev workflows)*
+- [ ] Implement file watching for CSS/SCSS source files
 - [ ] Build incremental update system
 - [ ] Implement lazy loading strategy
 - [ ] Add cache size management
-- [ ] Create cache invalidation logic
-- [ ] Compile wildcard patterns to RegExp and cache compiled patterns
-- [ ] Implement memoization for variant parsing results
-- [ ] Cache glob resolution results with mtime validation
-- [ ] Optimize cache key generation (use hash instead of JSON.stringify)
-- [ ] Add parallel CSS/SCSS file parsing with Promise.all
-- [ ] Implement file watching for CSS/SCSS source files
-- [ ] Reduce string allocations in class name extraction
-- [ ] Optimize Set/Map usage for large class registries
 
 ### Framework Support
 

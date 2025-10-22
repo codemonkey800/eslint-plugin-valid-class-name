@@ -326,7 +326,6 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
 
 **Tier 2: Startup/Load Time Optimizations** _(one-time cost per lint session)_
 
-- [ ] Add parallel CSS/SCSS file parsing with Promise.all
 - [ ] Cache glob resolution results with mtime validation
 - [ ] Optimize Set/Map usage for large class registries
 

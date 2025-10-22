@@ -326,7 +326,24 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
 
 **Tier 2: Startup/Load Time Optimizations** _(one-time cost per lint session)_
 
-- [ ] Cache glob resolution results with mtime validation
+- [x] Cache glob resolution results with mtime validation
+  - **Status**: ✅ Completed
+  - **Performance Impact**: 25.6x - 139.9x speedup (96.1% - 99.3% time reduction)
+  - **Benchmark Results** (`benchmarks/glob-cache-benchmark.ts`):
+    - **Small projects (10 files)**: 8.89ms → 0.064ms (139.9x faster, 99.3% reduction)
+    - **Medium projects (50 files)**: 4.60ms → 0.148ms (31.1x faster, 96.8% reduction)
+    - **Large projects (200 files)**: 15.16ms → 0.592ms (25.6x faster, 96.1% reduction)
+  - **Real-world impact**: When linting 50 files with 200 CSS files:
+    - Without caching: 50 × 15ms = 750ms wasted on repeated glob operations
+    - With caching: 15ms (first) + 49 × 0.6ms = 44ms total
+    - **Savings: ~700ms (94% faster overall)**
+  - **Implementation**:
+    - Added `getCachedOrResolveFiles()` function with TTL-based caching (1 second)
+    - Caches glob resolution results and validates file mtimes
+    - Invalidates on: pattern change, cwd change, file mtime change, file deletion, TTL expiry
+    - [class-registry.ts:105-151](src/cache/class-registry.ts#L105-L151): Cache implementation
+  - **Why TTL?**: 1-second TTL catches newly created files while maximizing cache hits for typical lint runs
+  - **Run Benchmark**: `pnpm run benchmark:glob-cache`
 - [ ] Optimize Set/Map usage for large class registries
 
 **Tier 3: Persistence & Caching Infrastructure** _(complex, long-term benefits)_

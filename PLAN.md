@@ -277,7 +277,7 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
 **Tier 1: Critical Path Optimizations** _(affects every class validation)_
 
 - [x] Optimize cache key generation (use hash instead of JSON.stringify)
-- [ ] Compile wildcard patterns to RegExp and cache compiled patterns
+- [x] Compile wildcard patterns to RegExp and cache compiled patterns
 - [ ] Implement memoization for variant parsing results
 - [ ] Reduce string allocations in class name extraction
 

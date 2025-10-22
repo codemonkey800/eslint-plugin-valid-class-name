@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
-import { matchesPattern, validatePattern } from './pattern-matcher'
+import { compilePattern, matchesPattern, validatePattern } from './pattern-matcher'
 
 describe('validatePattern', () => {
   it('should accept valid simple patterns', () => {
@@ -101,3 +101,96 @@ describe('matchesPattern', () => {
     expect(matchesPattern('btn-', 'btn-*')).toBe(true)
   })
 })
+
+describe('compilePattern', () => {
+  it('should compile valid simple patterns', () => {
+    const regex1 = compilePattern('btn-*')
+    expect(regex1).not.toBeNull()
+    expect(regex1?.test('btn-primary')).toBe(true)
+    expect(regex1?.test('btn-secondary')).toBe(true)
+    expect(regex1?.test('card')).toBe(false)
+
+    const regex2 = compilePattern('*-primary')
+    expect(regex2).not.toBeNull()
+    expect(regex2?.test('btn-primary')).toBe(true)
+    expect(regex2?.test('link-primary')).toBe(true)
+    expect(regex2?.test('btn-secondary')).toBe(false)
+  })
+
+  it('should compile exact match patterns', () => {
+    const regex = compilePattern('btn-primary')
+    expect(regex).not.toBeNull()
+    expect(regex?.test('btn-primary')).toBe(true)
+    expect(regex?.test('btn-secondary')).toBe(false)
+  })
+
+  it('should compile patterns with multiple wildcards', () => {
+    const regex = compilePattern('custom-*-*-primary')
+    expect(regex).not.toBeNull()
+    expect(regex?.test('custom-btn-large-primary')).toBe(true)
+    expect(regex?.test('custom-link-small-primary')).toBe(true)
+    expect(regex?.test('custom-primary')).toBe(false)
+  })
+
+  it('should return null for invalid patterns', () => {
+    // Too long
+    expect(compilePattern('a'.repeat(201))).toBeNull()
+
+    // Multiple consecutive wildcards
+    expect(compilePattern('a***')).toBeNull()
+
+    // Nested quantifiers
+    expect(compilePattern('(a+)+')).toBeNull()
+  })
+
+  it('should handle special regex characters', () => {
+    const regex1 = compilePattern('btn.primary')
+    expect(regex1).not.toBeNull()
+    expect(regex1?.test('btn.primary')).toBe(true)
+    expect(regex1?.test('btnXprimary')).toBe(false)
+
+    const regex2 = compilePattern('btn[0]')
+    expect(regex2).not.toBeNull()
+    expect(regex2?.test('btn[0]')).toBe(true)
+    expect(regex2?.test('btn0')).toBe(false)
+
+    const regex3 = compilePattern('btn(test)')
+    expect(regex3).not.toBeNull()
+    expect(regex3?.test('btn(test)')).toBe(true)
+  })
+
+  it('should handle empty pattern', () => {
+    const regex = compilePattern('')
+    expect(regex).not.toBeNull()
+    expect(regex?.test('')).toBe(true)
+    expect(regex?.test('test')).toBe(false)
+  })
+
+  it('should return same matching behavior as matchesPattern', () => {
+    const patterns = [
+      'btn-*',
+      '*-primary',
+      'custom-*-*',
+      'exact-match',
+      'btn.*',
+    ]
+    const testCases = [
+      'btn-primary',
+      'btn-secondary',
+      'link-primary',
+      'custom-a-b',
+      'exact-match',
+      'btn.test',
+    ]
+
+    patterns.forEach(pattern => {
+      const regex = compilePattern(pattern)
+      testCases.forEach(testCase => {
+        const matchesResult = matchesPattern(testCase, pattern)
+        const compileResult = regex ? regex.test(testCase) : false
+        expect(compileResult).toBe(matchesResult)
+      })
+    })
+  })
+})
+

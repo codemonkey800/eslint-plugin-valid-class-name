@@ -17,7 +17,7 @@ import {
 } from 'src/parsers/tailwind-parser'
 import type { TailwindConfig } from 'src/types/options'
 import { logger } from 'src/utils/logger'
-import { matchesPattern } from 'src/utils/pattern-matcher'
+import { compilePattern } from 'src/utils/pattern-matcher'
 import { DEFAULT_TAILWIND_VARIANTS } from 'src/utils/tailwind-variants'
 import { isResolvedTailwindConfig } from 'src/utils/type-guards'
 
@@ -228,8 +228,11 @@ function buildClassRegistry(
     ...whitelistLiteralClasses,
   ])
 
-  // Extract wildcard patterns from whitelist
+  // Extract wildcard patterns from whitelist and compile them to RegExp
   const wildcardPatterns = whitelist.filter(pattern => pattern.includes('*'))
+  const compiledWildcardPatterns = wildcardPatterns
+    .map(compilePattern)
+    .filter((regex): regex is RegExp => regex !== null)
 
   return {
     isValid(className: string): boolean {
@@ -238,10 +241,8 @@ function buildClassRegistry(
         return true
       }
 
-      // Check wildcard patterns
-      return wildcardPatterns.some(pattern =>
-        matchesPattern(className, pattern),
-      )
+      // Check wildcard patterns using pre-compiled RegExp
+      return compiledWildcardPatterns.some(regex => regex.test(className))
     },
 
     isTailwindClass(className: string): boolean {
@@ -250,10 +251,8 @@ function buildClassRegistry(
         return true
       }
 
-      // Check wildcard patterns
-      return wildcardPatterns.some(pattern =>
-        matchesPattern(className, pattern),
-      )
+      // Check wildcard patterns using pre-compiled RegExp
+      return compiledWildcardPatterns.some(regex => regex.test(className))
     },
 
     getAllClasses(): Set<string> {

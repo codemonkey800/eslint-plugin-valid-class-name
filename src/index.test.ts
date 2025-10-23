@@ -1,4 +1,4 @@
-import { describe, expect,it } from '@jest/globals'
+import { describe, expect, it } from '@jest/globals'
 
 import plugin from './index'
 
@@ -10,8 +10,8 @@ describe('eslint-plugin-valid-class-name', () => {
 
   it('should have meta information', () => {
     expect(plugin.meta).toBeDefined()
-    expect(plugin.meta.name).toBe('eslint-plugin-valid-class-name')
-    expect(plugin.meta.version).toBe('0.1.0')
+    expect(plugin.meta?.name).toBe('eslint-plugin-valid-class-name')
+    expect(plugin.meta?.version).toBe('0.1.0')
   })
 
   it('should have a rules object', () => {
@@ -22,11 +22,11 @@ describe('eslint-plugin-valid-class-name', () => {
   it('should have a configs object', () => {
     expect(plugin.configs).toBeDefined()
     expect(typeof plugin.configs).toBe('object')
-    expect(plugin.configs.recommended).toBeDefined()
+    expect(plugin.configs?.recommended).toBeDefined()
   })
 
   it('should have recommended config with correct structure', () => {
-    const { recommended } = plugin.configs
+    const recommended = plugin.configs?.recommended
     expect(Array.isArray(recommended)).toBe(false)
     expect(typeof recommended).toBe('object')
     expect(recommended).toBeDefined()

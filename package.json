@@ -14,7 +14,8 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit && tsc --noEmit --project tsconfig.test.json",
+    "type-check:test": "tsc --noEmit --project tsconfig.test.json"
   },
   "keywords": [
     "eslint",

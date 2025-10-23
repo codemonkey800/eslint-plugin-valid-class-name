@@ -7,7 +7,7 @@ An ESLint plugin that validates CSS class names in HTML and JSX files by checkin
 ## Core Objectives
 
 - Detect invalid CSS class names at lint time
-- Support multiple CSS sources (CSS files, SCSS, Tailwind, CSS Modules)
+- Support multiple CSS sources (CSS files, SCSS, Tailwind)
 - Provide helpful error messages with suggestions for typos
 - Maintain high performance through caching
 - Support popular frameworks (React, Vue, Angular)
@@ -43,7 +43,6 @@ An ESLint plugin that validates CSS class names in HTML and JSX files by checkin
 - **SCSS Compiler**: Convert SCSS to CSS using Sass compiler
 - **Selector Extractor**: Extract class names from parsed AST
 - **Fallback Parser**: Regex-based extraction when parsing fails
-- **CSS Modules Handler**: Track module-scoped classes
 
 ### 5. Tailwind Integration
 
@@ -116,7 +115,7 @@ Extend support to Vue templates, Angular templates, and HTML files. Handle frame
 
 ### Phase 7: Advanced Features
 
-Implement intelligent suggestions for typos, CSS Modules support, and performance optimizations. Add detailed configuration options.
+Implement intelligent suggestions for typos and performance optimizations. Add detailed configuration options.
 
 ## Configuration Design
 
@@ -126,7 +125,6 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
   - **css**: Array of glob patterns for CSS files
   - **scss**: Array of glob patterns for SCSS files
   - **tailwind**: Boolean or config object
-  - **cssModules**: Boolean to enable CSS Modules support
 
 - **validation**: Control validation behavior
   - **whitelist**: Array of always-valid class patterns
@@ -405,7 +403,6 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
 
 - [ ] Build typo detection algorithm
 - [ ] Create suggestion generation
-- [ ] Add CSS Modules support
 - [ ] Implement pattern-based ignoring
 - [ ] Support workspace/monorepo setups
 - [ ] Add detailed error messages

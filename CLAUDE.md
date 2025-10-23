@@ -132,8 +132,7 @@ The rule accepts the following options:
   sources: {
     css: ['src/**/*.css'],           // CSS file patterns
     scss: ['src/**/*.scss'],         // SCSS file patterns
-    tailwind: true,                  // or { config: 'path/to/tailwind.config.js' }
-    cssModules: false                // Not yet implemented
+    tailwind: true                   // or { config: 'path/to/tailwind.config.js' }
   },
   validation: {
     whitelist: ['custom-*'],         // Always valid patterns (supports wildcards)
@@ -142,6 +141,8 @@ The rule accepts the following options:
   }
 }
 ```
+
+**Note**: CSS/SCSS modules are out of scope for this plugin. Use dedicated type generation tools like [typed-css-modules](https://github.com/Quramy/typed-css-modules) or [typed-scss-modules](https://github.com/skovy/typed-scss-modules) for that purpose.
 
 ## Testing
 

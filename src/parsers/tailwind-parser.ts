@@ -1644,12 +1644,56 @@ export function generateTailwindBuildClassesSync(
       stdio: ['pipe', 'pipe', 'ignore'],
     })
 
-    // Tailwind may output debug info before the CSS - filter it out
-    // CSS starts with a rule or @-rule, so find the first occurrence
-    const cssStartIndex = css.search(/^(\.|@|\*|[a-z])/m)
-    if (cssStartIndex > 0) {
-      css = css.slice(cssStartIndex)
+    // Tailwind JIT may output debug info to stdout - filter it out
+    // The debug output typically contains lines like:
+    // "Source path: undefined", "Setting up new context...", "Finding changed files: X.XXXms", etc.
+    // CSS content starts with proper CSS syntax (selectors, @rules, etc.)
+
+    // Remove any lines that are clearly debug output
+    const lines = css.split('\n')
+    let cssStartLineIndex = 0
+
+    // Find the first line that looks like CSS
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim()
+
+      // Skip empty lines and debug output patterns
+      if (
+        line === '' ||
+        line.includes('Source path:') ||
+        line.includes('Setting up new context') ||
+        line.includes('Finding changed files:') ||
+        line.includes('Reading changed files:') ||
+        line.includes('Sorting candidates:') ||
+        line.includes('Generate rules:') ||
+        line.includes('Build stylesheet:') ||
+        line.includes('Potential classes:') ||
+        line.includes('Active contexts:') ||
+        line.includes('JIT TOTAL:') ||
+        /^\d+\.\d+ms$/.test(line) // Lines that are just timing info
+      ) {
+        cssStartLineIndex = i + 1
+        continue
+      }
+
+      // Check if line looks like CSS
+      if (
+        line.startsWith('.') || // Class selector
+        line.startsWith('#') || // ID selector
+        line.startsWith('@') || // At-rule
+        line.startsWith('*') || // Universal selector
+        line.startsWith(':') || // Pseudo-class/element
+        line.startsWith('[') || // Attribute selector
+        /^[a-z]/i.test(line) // Element selector
+      ) {
+        break
+      }
+
+      cssStartLineIndex = i + 1
     }
+
+    // Join the remaining lines to get clean CSS
+    css = lines.slice(cssStartLineIndex).join('\n')
 
     // Extract class names from the generated CSS
     const classes = extractClassNamesFromCss(css)

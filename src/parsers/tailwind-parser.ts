@@ -11,7 +11,7 @@ import {
   MAX_THEME_DEPTH,
 } from 'src/utils/constants'
 import { logger } from 'src/utils/logger'
-import { isResolvedTailwindConfig, isThemeScale } from 'src/utils/type-guards'
+import { isObject, isResolvedTailwindConfig } from 'src/utils/type-guards'
 
 /**
  * Resolved Tailwind configuration structure
@@ -171,7 +171,7 @@ function flattenThemeObject(
 ): Map<string, ThemeValue> {
   const result = new Map<string, ThemeValue>()
 
-  if (!isThemeScale(themeSection)) {
+  if (!isObject(themeSection)) {
     return result
   }
 

@@ -4,45 +4,11 @@
  */
 
 /**
- * Type guard to check if a value is a string
- * @param value - The value to check
- * @returns true if the value is a string
- */
-export function isString(value: unknown): value is string {
-  return typeof value === 'string'
-}
-
-/**
  * Type guard to check if a value is a non-null object
  * @param value - The value to check
  * @returns true if the value is an object (and not null or array)
  */
 export function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-/**
- * Type guard to check if a value is a valid theme value
- * Theme values can be strings, numbers, or nested objects
- * @param value - The value to check
- * @returns true if the value is a valid theme value
- */
-export function isThemeValue(
-  value: unknown,
-): value is string | number | Record<string, unknown> {
-  return (
-    typeof value === 'string' ||
-    typeof value === 'number' ||
-    (typeof value === 'object' && value !== null && !Array.isArray(value))
-  )
-}
-
-/**
- * Type guard to check if a value is a theme scale (object with string keys)
- * @param value - The value to check
- * @returns true if the value is a valid theme scale
- */
-export function isThemeScale(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 

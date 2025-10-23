@@ -7,10 +7,7 @@ import {
   getCachedOrResolveFiles,
 } from './file-resolver'
 import { buildClassRegistry, type ClassRegistry } from './registry-builder'
-import {
-  loadTailwindClassesSync,
-  type TailwindLoadResult,
-} from './tailwind-loader'
+import { createTailwindValidator } from './tailwind-loader'
 
 // Re-export ClassRegistry interface for backward compatibility
 export type { ClassRegistry }
@@ -60,14 +57,14 @@ export function getClassRegistry(
     return cachedRegistry
   }
 
-  // Load Tailwind classes and variants synchronously if enabled
+  // Create Tailwind validator synchronously if enabled
   // Note: This blocks, but only once per config change due to caching
-  let tailwindData: TailwindLoadResult | undefined
+  let tailwindUtils = null
   if (tailwindConfig) {
     try {
-      tailwindData = loadTailwindClassesSync(tailwindConfig, cwd)
+      tailwindUtils = createTailwindValidator(tailwindConfig, cwd)
     } catch (error) {
-      logger.warn('Failed to load Tailwind classes', error)
+      logger.warn('Failed to create Tailwind validator', error)
     }
   }
 
@@ -76,8 +73,7 @@ export function getClassRegistry(
     resolvedFiles,
     allowlist,
     blocklist,
-    tailwindData?.classes,
-    tailwindData?.variants,
+    tailwindUtils,
     cwd,
   )
   cacheKey = currentCacheKey

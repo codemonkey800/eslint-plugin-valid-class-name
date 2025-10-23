@@ -12,6 +12,31 @@ An ESLint plugin that validates CSS class names in HTML and JSX files by checkin
 - Maintain high performance through caching
 - Support popular frameworks (React, Vue, Angular)
 
+## Recent Updates
+
+### Tailwind Validation Refactoring (January 2025)
+
+**Major architectural improvement**: Migrated from upfront class generation to on-demand validation using the official Tailwind API via `tailwind-api-utils`.
+
+**Impact:**
+
+- ✅ Removed ~1,800 lines of complex generation code
+- ✅ Reduced `tailwind-parser.ts` from 1,838 lines to 49 lines
+- ✅ Better accuracy using Tailwind's own validation logic
+- ✅ Automatic support for plugins, variants, and arbitrary values
+- ✅ Lower memory footprint (no need to store thousands of classes)
+- ✅ Faster initialization (lazy validation vs eager generation)
+
+**Files Modified:**
+
+- `src/registry/tailwind-loader.ts`: Now creates `TailwindUtils` instance
+- `src/registry/registry-builder.ts`: Updated to use API validation
+- `src/registry/class-registry.ts`: Passes TailwindUtils instead of class sets
+- `src/parsers/tailwind-parser.ts`: Kept only config path finder
+- `package.json`: Added `tailwind-api-utils` dependency
+
+**Current Status:** Phases 1-5 complete (production code ready). Test updates (Phase 6) and documentation (Phase 7) still pending.
+
 ## Architecture Components
 
 ### 1. Plugin Structure
@@ -46,12 +71,16 @@ An ESLint plugin that validates CSS class names in HTML and JSX files by checkin
 
 ### 5. Tailwind Integration
 
-- **Config Loader**: Read and parse tailwind.config.js
-- **Class Generator**: Generate all possible Tailwind utility classes
-- **Variant Builder**: Create variant combinations (hover:, sm:, dark:)
-- **Arbitrary Value Handler**: Support JIT mode bracket syntax
-- **Safelist Processor**: Include safelisted patterns and classes
-- **Component Class Extractor**: Find custom component classes
+**Note**: As of January 2025, this component uses `tailwind-api-utils` for on-demand validation instead of upfront generation.
+
+- **Config Finder**: Locate tailwind.config.js in project directory
+- **Validator Factory**: Create `TailwindUtils` instance for validation
+- **API Integration**: Use Tailwind's official `isValidClassName()` for validation
+  - Handles all utility classes automatically
+  - Validates variants (hover:, sm:, dark:, etc.)
+  - Supports arbitrary values (w-[100px], bg-[#ff0000])
+  - Processes safelist patterns
+  - Validates plugin-generated classes
 
 ### 6. Validation Engine
 
@@ -84,9 +113,11 @@ Add CSS file parsing using PostCSS. Implement file discovery, class extraction, 
 
 Integrate Sass compiler for SCSS files. Handle SCSS-specific features like nesting, mixins, and variables. Implement fallback strategies for compilation errors.
 
-### Phase 4: Tailwind Integration
+### Phase 4: Tailwind Integration (✅ Complete - Refactored January 2025)
 
-Connect to Tailwind configuration and generate utility classes. Support variants, arbitrary values, and custom utilities. Handle both JIT and AOT modes.
+~~Connect to Tailwind configuration and generate utility classes. Support variants, arbitrary values, and custom utilities. Handle both JIT and AOT modes.~~
+
+**Updated Implementation**: Refactored to use `tailwind-api-utils` for on-demand validation instead of upfront class generation. This provides better accuracy, simpler code, and automatic support for all Tailwind features including variants, arbitrary values, and plugin-generated classes.
 
 ### Phase 5: Dynamic Classes (Partially Complete)
 
@@ -262,30 +293,40 @@ Implement intelligent suggestions for typos and performance optimizations. Add d
 
 ### Tailwind Support
 
-- [x] Load and parse Tailwind configuration
-- [x] Generate utility classes from config
-  - [x] Implement theme value flattening for nested objects
-  - [x] Generate color utilities (bg-, text-, border-, ring-, etc.)
-  - [x] Generate spacing utilities (padding, margin, gap, inset)
-  - [x] Generate sizing utilities (width, height, min/max variants)
-  - [x] Generate typography utilities (font, text, leading, tracking)
-  - [x] Generate layout utilities (display, position, visibility, z-index)
-  - [x] Generate flexbox and grid utilities
-  - [x] Generate border utilities (width, radius, style, divide, ring, outline)
-  - [x] Generate effect utilities (shadow, opacity, blend modes)
-  - [x] Generate transform utilities (translate, rotate, scale, skew)
-  - [x] Generate filter utilities (blur, brightness, contrast, grayscale, etc.)
-  - [x] Generate backdrop filter utilities
-  - [x] Generate background utilities (size, position, repeat, attachment, clip, origin)
-  - [x] Generate transition and animation utilities
-  - [x] Generate interactivity utilities (cursor, pointer-events, resize, scroll, etc.)
-  - [x] Generate SVG utilities (fill, stroke)
-  - [x] Generate accessibility utilities (sr-only)
-- [x] Build variant combinations (infrastructure in place)
-- [x] Support arbitrary value syntax
-- [x] Process safelist patterns
-- [x] Handle custom utilities and components (via build-based extraction with execSync)
-- [ ] Implement JIT mode support
+**✅ Refactored to use `tailwind-api-utils` (January 2025)**
+
+The plugin now uses the official Tailwind API via `tailwind-api-utils` for validation instead of generating all classes upfront. This provides several benefits:
+
+- **Lazy validation**: Classes are validated on-demand using Tailwind's own internal logic
+- **Simpler codebase**: Removed ~1,800 lines of custom generation code
+- **Better accuracy**: Uses Tailwind's official validation, handles all variants and arbitrary values correctly
+- **Plugin support**: Automatically validates plugin-generated classes without manual extraction
+- **Lower memory usage**: No need to store thousands of generated classes in memory
+
+**Implementation Status:**
+
+- [x] Load and parse Tailwind configuration using `tailwind-api-utils`
+- [x] On-demand validation via `TailwindUtils.isValidClassName()` API
+- [x] Support arbitrary value syntax (handled by API)
+- [x] Support all variant combinations (handled by API)
+- [x] Handle custom utilities and plugins (handled by API)
+- [x] Process safelist patterns (handled by API)
+- [x] Tailwind CSS v3 support (synchronous config loading)
+- [ ] Tailwind CSS v4 support (requires async initialization wrapper)
+
+**Deprecated/Removed:**
+
+- ~~Manual utility class generation from theme config~~
+- ~~execSync-based build extraction for plugin classes~~
+- ~~Custom variant validation logic~~
+- ~~Safelist extraction code~~
+
+**Files Changed:**
+
+- `src/registry/tailwind-loader.ts`: Refactored to create `TailwindUtils` instance
+- `src/registry/registry-builder.ts`: Updated to use API for validation
+- `src/registry/class-registry.ts`: Updated to pass `TailwindUtils` instance
+- `src/parsers/tailwind-parser.ts`: Reduced from 1,838 lines to 49 lines (kept only config path finder)
 
 ### Performance Optimization
 

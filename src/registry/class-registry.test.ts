@@ -31,6 +31,7 @@ describe('ClassRegistry', () => {
       const registry = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
@@ -56,6 +57,7 @@ describe('ClassRegistry', () => {
       const registry = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
@@ -79,6 +81,7 @@ describe('ClassRegistry', () => {
       const registry = getClassRegistry(
         [path.join(tempDir, '**/*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
@@ -90,6 +93,7 @@ describe('ClassRegistry', () => {
     it('should handle missing CSS files gracefully', () => {
       const registry = getClassRegistry(
         [path.join(tempDir, 'nonexistent.css')],
+        [],
         [],
         undefined,
         tempDir,
@@ -108,6 +112,7 @@ describe('ClassRegistry', () => {
       const registry = getClassRegistry(
         [path.join(tempDir, '**/*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
@@ -121,6 +126,7 @@ describe('ClassRegistry', () => {
       const registry = getClassRegistry(
         [],
         ['custom-class', 'another-class'],
+        [],
         undefined,
         tempDir,
       )
@@ -134,6 +140,7 @@ describe('ClassRegistry', () => {
       const registry = getClassRegistry(
         [],
         ['custom-*', '*-suffix'],
+        [],
         undefined,
         tempDir,
       )
@@ -145,7 +152,7 @@ describe('ClassRegistry', () => {
     })
 
     it('should validate complex wildcard patterns', () => {
-      const registry = getClassRegistry([], ['*-btn-*'], undefined, tempDir)
+      const registry = getClassRegistry([], ['*-btn-*'], [], undefined, tempDir)
 
       expect(registry.isValid('primary-btn-large')).toBe(true)
       expect(registry.isValid('secondary-btn-small')).toBe(true)
@@ -157,6 +164,7 @@ describe('ClassRegistry', () => {
       const registry = getClassRegistry(
         [],
         ['custom-*', 'app-*', '*-utility'],
+        [],
         undefined,
         tempDir,
       )
@@ -176,6 +184,7 @@ describe('ClassRegistry', () => {
       const registry = getClassRegistry(
         [path.join(tempDir, '*.css')],
         ['custom-*'],
+        [],
         undefined,
         tempDir,
       )
@@ -192,6 +201,7 @@ describe('ClassRegistry', () => {
       const registry = getClassRegistry(
         [path.join(tempDir, '*.css')],
         ['btn', 'custom-*'],
+        [],
         undefined,
         tempDir,
       )
@@ -209,11 +219,13 @@ describe('ClassRegistry', () => {
       const registry1 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
       const registry2 = getClassRegistry(
         [path.join(tempDir, '*.css')],
+        [],
         [],
         undefined,
         tempDir,
@@ -229,12 +241,14 @@ describe('ClassRegistry', () => {
       const registry1 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
       const registry2 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         ['custom-*'],
+        [],
         undefined,
         tempDir,
       )
@@ -252,11 +266,13 @@ describe('ClassRegistry', () => {
       const registry1 = getClassRegistry(
         [path.join(tempDir, 'buttons.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
       const registry2 = getClassRegistry(
         [path.join(tempDir, '*.css')],
+        [],
         [],
         undefined,
         tempDir,
@@ -274,11 +290,13 @@ describe('ClassRegistry', () => {
       const registry1 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
       const registry2 = getClassRegistry(
         [path.join(tempDir, '*.css')],
+        [],
         [],
         undefined,
         '/different/path',
@@ -294,17 +312,20 @@ describe('ClassRegistry', () => {
       const registry1 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         true,
         tempDir,
       )
       const registry2 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         false,
         tempDir,
       )
       const registry3 = getClassRegistry(
         [path.join(tempDir, '*.css')],
+        [],
         [],
         { config: 'custom.js' },
         tempDir,
@@ -324,6 +345,7 @@ describe('ClassRegistry', () => {
       const registry = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
@@ -338,6 +360,7 @@ describe('ClassRegistry', () => {
       const registry = getClassRegistry(
         [],
         ['literal-class'],
+        [],
         undefined,
         tempDir,
       )
@@ -348,7 +371,13 @@ describe('ClassRegistry', () => {
     })
 
     it('should not include wildcard patterns in getAllClasses', () => {
-      const registry = getClassRegistry([], ['custom-*'], undefined, tempDir)
+      const registry = getClassRegistry(
+        [],
+        ['custom-*'],
+        [],
+        undefined,
+        tempDir,
+      )
       const allClasses = registry.getAllClasses()
 
       expect(allClasses.size).toBe(0)
@@ -357,7 +386,7 @@ describe('ClassRegistry', () => {
 
   describe('edge cases', () => {
     it('should handle empty CSS patterns and whitelist', () => {
-      const registry = getClassRegistry([], [], undefined, tempDir)
+      const registry = getClassRegistry([], [], [], undefined, tempDir)
 
       expect(registry.isValid('anything')).toBe(false)
       expect(registry.getAllClasses().size).toBe(0)
@@ -369,6 +398,7 @@ describe('ClassRegistry', () => {
 
       const registry = getClassRegistry(
         [path.join(tempDir, '*.css')],
+        [],
         [],
         undefined,
         tempDir,
@@ -384,6 +414,7 @@ describe('ClassRegistry', () => {
 
       const registry = getClassRegistry(
         [path.join(tempDir, '*.css')],
+        [],
         [],
         undefined,
         tempDir,
@@ -402,6 +433,7 @@ describe('ClassRegistry', () => {
       const registry1 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
@@ -409,6 +441,7 @@ describe('ClassRegistry', () => {
       // Second call with same patterns - should use cached glob results
       const registry2 = getClassRegistry(
         [path.join(tempDir, '*.css')],
+        [],
         [],
         undefined,
         tempDir,
@@ -430,6 +463,7 @@ describe('ClassRegistry', () => {
       const registry1 = getClassRegistry(
         [path.join(tempDir, 'buttons.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
@@ -437,6 +471,7 @@ describe('ClassRegistry', () => {
       // Second call with different pattern - should invalidate cache
       const registry2 = getClassRegistry(
         [path.join(tempDir, '*.css')],
+        [],
         [],
         undefined,
         tempDir,
@@ -455,6 +490,7 @@ describe('ClassRegistry', () => {
       const registry1 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
@@ -462,6 +498,7 @@ describe('ClassRegistry', () => {
       // Second call with different cwd - should invalidate cache
       const registry2 = getClassRegistry(
         [path.join(tempDir, '*.css')],
+        [],
         [],
         undefined,
         '/different/path',
@@ -478,6 +515,7 @@ describe('ClassRegistry', () => {
       const registry1 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
@@ -490,6 +528,7 @@ describe('ClassRegistry', () => {
       // Second call within TTL - should use cached registry
       const registry2 = getClassRegistry(
         [path.join(tempDir, '*.css')],
+        [],
         [],
         undefined,
         tempDir,
@@ -507,6 +546,7 @@ describe('ClassRegistry', () => {
       const registry1 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
@@ -519,6 +559,7 @@ describe('ClassRegistry', () => {
       // Second call within TTL - should use cached registry
       const registry2 = getClassRegistry(
         [path.join(tempDir, '*.css')],
+        [],
         [],
         undefined,
         tempDir,
@@ -544,6 +585,7 @@ describe('ClassRegistry', () => {
       const registry1 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
@@ -554,6 +596,7 @@ describe('ClassRegistry', () => {
       // Second call - should still use cache
       const registry2 = getClassRegistry(
         [path.join(tempDir, '*.css')],
+        [],
         [],
         undefined,
         tempDir,
@@ -569,6 +612,7 @@ describe('ClassRegistry', () => {
       const registry3 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
@@ -583,8 +627,8 @@ describe('ClassRegistry', () => {
 
     it('should handle empty patterns efficiently', () => {
       // Should return empty result immediately without caching
-      const registry1 = getClassRegistry([], [], undefined, tempDir)
-      const registry2 = getClassRegistry([], [], undefined, tempDir)
+      const registry1 = getClassRegistry([], [], [], undefined, tempDir)
+      const registry2 = getClassRegistry([], [], [], undefined, tempDir)
 
       expect(registry1).toBe(registry2)
       expect(registry1.getAllClasses().size).toBe(0)
@@ -602,6 +646,7 @@ describe('ClassRegistry', () => {
       // First call - caches results with only file1
       const registry1 = getClassRegistry(
         [path.join(tempDir, '*.css')],
+        [],
         [],
         undefined,
         tempDir,
@@ -621,6 +666,7 @@ describe('ClassRegistry', () => {
       const registry2 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
@@ -635,6 +681,7 @@ describe('ClassRegistry', () => {
       const registry3 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
+        [],
         undefined,
         tempDir,
       )
@@ -646,146 +693,8 @@ describe('ClassRegistry', () => {
   })
 
   describe('with Tailwind configuration', () => {
-    it('should load and validate classes from Tailwind safelist', () => {
-      // Create actual tailwind.config.js
-      const configFile = path.join(tempDir, 'tailwind.config.js')
-      fs.writeFileSync(
-        configFile,
-        `
-        module.exports = {
-          content: [],
-          safelist: ['bg-red-500', 'text-blue-600', 'hover:bg-green-400']
-        }
-      `,
-      )
-
-      const registry = getClassRegistry(
-        [], // no CSS
-        [], // no whitelist
-        true, // enable Tailwind
-        tempDir,
-      )
-
-      expect(registry.isValid('bg-red-500')).toBe(true)
-      expect(registry.isValid('text-blue-600')).toBe(true)
-      expect(registry.isValid('hover:bg-green-400')).toBe(true)
-      expect(registry.isValid('nonexistent')).toBe(false)
-    })
-
-    it('should merge Tailwind classes with CSS classes', () => {
-      // Create CSS file
-      const cssFile = path.join(tempDir, 'styles.css')
-      fs.writeFileSync(cssFile, '.custom-btn { color: red; }')
-
-      // Create Tailwind config
-      const configFile = path.join(tempDir, 'tailwind.config.js')
-      fs.writeFileSync(
-        configFile,
-        `
-        module.exports = {
-          content: [],
-          safelist: ['bg-blue-500']
-        }
-      `,
-      )
-
-      const registry = getClassRegistry(
-        [path.join(tempDir, '*.css')],
-        [],
-        true,
-        tempDir,
-      )
-
-      expect(registry.isValid('custom-btn')).toBe(true)
-      expect(registry.isValid('bg-blue-500')).toBe(true)
-      expect(registry.isValid('nonexistent')).toBe(false)
-    })
-
-    it('should merge Tailwind classes with allowlist patterns', () => {
-      // Create Tailwind config
-      const configFile = path.join(tempDir, 'tailwind.config.js')
-      fs.writeFileSync(
-        configFile,
-        `
-        module.exports = {
-          content: [],
-          safelist: ['bg-red-500']
-        }
-      `,
-      )
-
-      const registry = getClassRegistry([], ['custom-*'], true, tempDir)
-
-      expect(registry.isValid('bg-red-500')).toBe(true)
-      expect(registry.isValid('custom-button')).toBe(true)
-      expect(registry.isValid('nonexistent')).toBe(false)
-    })
-
-    it('should handle empty safelist', () => {
-      const configFile = path.join(tempDir, 'tailwind.config.js')
-      fs.writeFileSync(
-        configFile,
-        `
-        module.exports = {
-          content: [],
-          safelist: []
-        }
-      `,
-      )
-
-      const registry = getClassRegistry([], [], true, tempDir)
-
-      // Even with empty safelist, Tailwind generates utilities from default theme
-      // The getAllClasses() should contain theme-based utilities
-      expect(registry.getAllClasses().size).toBeGreaterThan(1000)
-
-      // Common Tailwind utilities should be valid
-      expect(registry.isValid('flex')).toBe(true)
-      expect(registry.isValid('bg-blue-500')).toBe(true)
-      expect(registry.isValid('p-4')).toBe(true)
-
-      // Non-existent classes should be invalid
-      expect(registry.isValid('nonexistent-class-xyz')).toBe(false)
-    })
-
-    it('should handle config with no safelist property', () => {
-      const configFile = path.join(tempDir, 'tailwind.config.js')
-      fs.writeFileSync(
-        configFile,
-        `
-        module.exports = {
-          content: [],
-          theme: {}
-        }
-      `,
-      )
-
-      const registry = getClassRegistry([], [], true, tempDir)
-
-      expect(registry.isValid('anything')).toBe(false)
-    })
-
-    it('should handle explicit config path', () => {
-      const configFile = path.join(tempDir, 'custom.tailwind.config.js')
-      fs.writeFileSync(
-        configFile,
-        `
-        module.exports = {
-          content: [],
-          safelist: ['custom-class']
-        }
-      `,
-      )
-
-      const registry = getClassRegistry(
-        [],
-        [],
-        { config: 'custom.tailwind.config.js' },
-        tempDir,
-      )
-
-      expect(registry.isValid('custom-class')).toBe(true)
-    })
+    // Note: Tailwind integration tests are in src/rules/valid-class-name.test.ts
+    // and src/registry/registry-builder.test.ts (with mocked TailwindUtils)
 
     it('should handle Tailwind config disabled', () => {
       const configFile = path.join(tempDir, 'tailwind.config.js')
@@ -799,53 +708,9 @@ describe('ClassRegistry', () => {
       `,
       )
 
-      const registry = getClassRegistry([], [], false, tempDir)
+      const registry = getClassRegistry([], [], [], false, tempDir)
 
       expect(registry.isValid('bg-red-500')).toBe(false)
-    })
-
-    it('should merge all sources: CSS + SCSS + Tailwind + whitelist', () => {
-      // Create CSS file
-      const cssFile = path.join(tempDir, 'styles.css')
-      fs.writeFileSync(cssFile, '.css-class { color: red; }')
-
-      // Create SCSS file
-      const scssFile = path.join(tempDir, 'styles.scss')
-      fs.writeFileSync(
-        scssFile,
-        `
-        .scss-class {
-          color: blue;
-          &-nested { color: green; }
-        }
-      `,
-      )
-
-      // Create Tailwind config
-      const configFile = path.join(tempDir, 'tailwind.config.js')
-      fs.writeFileSync(
-        configFile,
-        `
-        module.exports = {
-          content: [],
-          safelist: ['tw-class']
-        }
-      `,
-      )
-
-      const registry = getClassRegistry(
-        [path.join(tempDir, '**/*.{css,scss}')],
-        ['whitelist-*'],
-        true,
-        tempDir,
-      )
-
-      expect(registry.isValid('css-class')).toBe(true)
-      expect(registry.isValid('scss-class')).toBe(true)
-      expect(registry.isValid('scss-class-nested')).toBe(true)
-      expect(registry.isValid('tw-class')).toBe(true)
-      expect(registry.isValid('whitelist-anything')).toBe(true)
-      expect(registry.isValid('nonexistent')).toBe(false)
     })
   })
 })

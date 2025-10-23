@@ -2,11 +2,7 @@ import type { Rule } from 'eslint'
 
 import { getClassRegistry } from '../registry/class-registry'
 import type { RuleOptions } from '../types/options'
-import {
-  isValidArbitraryValue,
-  parseClassName,
-  validateVariants,
-} from '../utils/tailwind-variants'
+import { parseClassName } from '../utils/tailwind-variants'
 import { isObjectExpression } from './ast-guards'
 import type { JSXAttribute } from './ast-types'
 import {
@@ -30,10 +26,10 @@ export const validClassNameRule: Rule.RuleModule = {
     messages: {
       invalidClassName:
         'Class name "{{className}}" is not defined in any CSS files or configuration',
-      invalidVariant:
-        "Variant '{{variant}}' is not a valid Tailwind variant in class '{{className}}'",
       blockedClassName:
         'Class name "{{className}}" is blocked by the blocklist configuration',
+      invalidVariant:
+        'Variant "{{variant}}" in class "{{className}}" is not a valid Tailwind variant',
     },
     schema: [
       {
@@ -197,8 +193,21 @@ export const validClassNameRule: Rule.RuleModule = {
 
           // Validate each class name
           for (const className of classNames) {
-            // Parse className to extract variants and base utility
+            // Parse className to extract base utility and variants
             const { variants, base } = parseClassName(className)
+
+            // Check for empty arbitrary values (e.g., w-[], bg-[])
+            // These should always be invalid
+            if (/^[\w-]+-\[\]$/.test(base)) {
+              context.report({
+                node,
+                messageId: 'invalidClassName',
+                data: {
+                  className: base,
+                },
+              })
+              continue
+            }
 
             // Skip if the BASE matches an ignore pattern (not full className)
             if (isClassNameIgnored(base, ignorePatterns)) {
@@ -217,52 +226,73 @@ export const validClassNameRule: Rule.RuleModule = {
               continue
             }
 
-            // Validate variants if present
-            const validVariants = classRegistry.getValidVariants()
-            const hasTailwindVariants =
-              variants.length > 0 && validVariants.size > 0
+            // If className has variants, validate the full className with variants
+            if (variants.length > 0) {
+              // First check if base is valid (Tailwind, CSS, or allowlist)
+              const isBaseValid = classRegistry.isValid(base)
 
-            if (hasTailwindVariants) {
-              const { valid, invalidVariant } = validateVariants(
-                variants,
-                validVariants,
-              )
-
-              if (!valid && invalidVariant) {
+              if (!isBaseValid) {
+                // Base itself is invalid
                 context.report({
                   node,
-                  messageId: 'invalidVariant',
+                  messageId: 'invalidClassName',
                   data: {
-                    variant: invalidVariant,
-                    className,
+                    className: base,
                   },
                 })
                 continue
               }
-            }
 
-            // Check if the base utility uses arbitrary value syntax
-            // Arbitrary values (e.g., w-[100px], bg-[#1da1f2]) bypass registry validation
-            if (isValidArbitraryValue(base)) {
-              // Valid arbitrary value, skip further validation
-              continue
-            }
+              // Base is valid - determine if it's CSS, allowlist, or Tailwind
+              const isCssClass = classRegistry.isCssClass(base)
 
-            // Validate base utility
-            // When Tailwind variants are present, only validate against Tailwind classes
-            // Otherwise, validate against all sources (CSS, Tailwind, allowlist)
-            const isValidBase = hasTailwindVariants
-              ? classRegistry.isTailwindClass(base)
-              : classRegistry.isValid(base)
+              if (isCssClass) {
+                // It's a pure CSS class - cannot be used with Tailwind variants
+                context.report({
+                  node,
+                  messageId: 'invalidClassName',
+                  data: {
+                    className: base,
+                  },
+                })
+              } else {
+                // Base is Tailwind or allowlist
+                const isTailwindOnly = classRegistry.isTailwindOnly(base)
 
-            if (!isValidBase) {
-              context.report({
-                node,
-                messageId: 'invalidClassName',
-                data: {
-                  className: base,
-                },
-              })
+                if (isTailwindOnly) {
+                  // Base is a pure Tailwind class, validate the full className with variants
+                  const isValidWithVariants = classRegistry.isValid(className)
+
+                  if (!isValidWithVariants) {
+                    // Full className is not valid - variant is invalid
+                    for (const variant of variants) {
+                      context.report({
+                        node,
+                        messageId: 'invalidVariant',
+                        data: {
+                          variant,
+                          className,
+                        },
+                      })
+                      break // Only report the first invalid variant
+                    }
+                  }
+                }
+                // If it's allowlist, allow it with variants (no validation needed)
+              }
+            } else {
+              // No variants - validate base utility against all sources
+              const isValidBase = classRegistry.isValid(base)
+
+              if (!isValidBase) {
+                context.report({
+                  node,
+                  messageId: 'invalidClassName',
+                  data: {
+                    className: base,
+                  },
+                })
+              }
             }
           }
         }

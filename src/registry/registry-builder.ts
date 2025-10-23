@@ -7,6 +7,7 @@ import {
 import type { ResolvedFile } from 'src/registry/file-resolver'
 import { logger } from 'src/utils/logger'
 import { compilePattern } from 'src/utils/pattern-matcher'
+import type { TailwindUtils } from 'tailwind-api-utils'
 
 /**
  * Interface for the class registry
@@ -28,14 +29,33 @@ export interface ClassRegistry {
   isTailwindClass(className: string): boolean
 
   /**
+   * Checks if a class name is ONLY from Tailwind (not CSS or allowlist)
+   * Used to determine if we should validate variants through TailwindUtils API
+   * @param className - The class name to validate
+   * @returns true if the class name is validated by TailwindUtils only
+   */
+  isTailwindOnly(className: string): boolean
+
+  /**
+   * Checks if a class name is from CSS files
+   * @param className - The class name to check
+   * @returns true if the class name is from a CSS file
+   */
+  isCssClass(className: string): boolean
+
+  /**
    * Gets all literal class names in the registry (excludes patterns)
+   * Note: When using Tailwind API mode, this only returns CSS and allowlist classes,
+   * not Tailwind classes (as they cannot be enumerated)
    * @returns Set of all literal class names
    */
   getAllClasses(): Set<string>
 
   /**
-   * Gets all valid Tailwind variants (for variant validation)
-   * @returns Set of all valid variant names
+   * Gets all valid Tailwind variants
+   * Note: When using Tailwind API mode, this returns an empty set as variant validation
+   * is handled by the API along with the full class name
+   * @returns Set of all valid variant names (empty when using API mode)
    */
   getValidVariants(): Set<string>
 }
@@ -50,8 +70,7 @@ export interface ClassRegistry {
  * @param resolvedFiles - Pre-resolved CSS files with paths and mtimes
  * @param allowlist - Array of class name patterns (supports wildcards)
  * @param blocklist - Array of class name patterns to forbid (supports wildcards)
- * @param tailwindClasses - Pre-loaded Tailwind classes (optional)
- * @param validVariants - Pre-loaded valid Tailwind variants (optional)
+ * @param tailwindUtils - TailwindUtils instance for validating Tailwind classes (optional)
  * @param cwd - Current working directory for resolving SCSS imports
  * @returns ClassRegistry instance
  */
@@ -59,13 +78,11 @@ export function buildClassRegistry(
   resolvedFiles: ResolvedFile[],
   allowlist: string[],
   blocklist: string[],
-  tailwindClasses: Set<string> | undefined,
-  validVariants: Set<string> | undefined,
+  tailwindUtils: TailwindUtils | null | undefined,
   cwd: string,
 ): ClassRegistry {
-  // Separate CSS classes from Tailwind classes
+  // Separate CSS classes from allowlist/blocklist
   const cssClasses = new Set<string>()
-  const tailwindLiteralClasses = new Set<string>()
   const allowlistLiteralClasses = new Set<string>()
   const blocklistLiteralClasses = new Set<string>()
 
@@ -103,11 +120,6 @@ export function buildClassRegistry(
     }
   })
 
-  // Add Tailwind classes if provided
-  if (tailwindClasses) {
-    tailwindClasses.forEach(cls => tailwindLiteralClasses.add(cls))
-  }
-
   // Extract wildcard patterns from allowlist and compile them to RegExp
   const wildcardPatterns = allowlist.filter(pattern => pattern.includes('*'))
   const compiledWildcardPatterns = wildcardPatterns
@@ -124,9 +136,7 @@ export function buildClassRegistry(
 
   // Performance optimization: Keep source Sets separate instead of merging them.
   // This avoids O(n) Set creation overhead during registry build.
-  // Trade-off: Validation performs 2-3 sequential Set.has() checks (still O(1))
-  // instead of a single check, but the constant factor overhead (~20ns) is
-  // negligible compared to the registry build time savings.
+  // Validation checks happen in order of likelihood for early returns.
   return {
     isValid(className: string): boolean {
       // Check blocklist first - blocked classes are always invalid
@@ -141,14 +151,14 @@ export function buildClassRegistry(
       }
 
       // Check source Sets in order of likelihood for early returns:
-      // 1. Allowlist (often matches dynamic patterns)
-      // 2. Tailwind (most common in modern projects)
-      // 3. CSS (project-specific classes)
-      if (
-        allowlistLiteralClasses.has(className) ||
-        tailwindLiteralClasses.has(className) ||
-        cssClasses.has(className)
-      ) {
+      // 1. Literal allowlist (often matches dynamic patterns)
+      // 2. CSS classes (project-specific classes)
+      if (allowlistLiteralClasses.has(className) || cssClasses.has(className)) {
+        return true
+      }
+
+      // Check Tailwind classes via API (if enabled)
+      if (tailwindUtils?.isValidClassName(className)) {
         return true
       }
 
@@ -168,11 +178,13 @@ export function buildClassRegistry(
         return false
       }
 
-      // Check only Tailwind and allowlist sources (excludes CSS)
-      if (
-        allowlistLiteralClasses.has(className) ||
-        tailwindLiteralClasses.has(className)
-      ) {
+      // Check literal allowlist first
+      if (allowlistLiteralClasses.has(className)) {
+        return true
+      }
+
+      // Check Tailwind classes via API (if enabled)
+      if (tailwindUtils?.isValidClassName(className)) {
         return true
       }
 
@@ -180,17 +192,39 @@ export function buildClassRegistry(
       return compiledWildcardPatterns.some(regex => regex.test(className))
     },
 
+    isTailwindOnly(className: string): boolean {
+      // Check blocklist first
+      if (blocklistLiteralClasses.has(className)) {
+        return false
+      }
+
+      if (compiledBlocklistPatterns.some(regex => regex.test(className))) {
+        return false
+      }
+
+      // Don't check allowlist - we only want pure Tailwind classes
+      // Check Tailwind classes via API (if enabled)
+      return tailwindUtils?.isValidClassName(className) ?? false
+    },
+
+    isCssClass(className: string): boolean {
+      // Check if the class is from a CSS file (not allowlist)
+      return cssClasses.has(className)
+    },
+
     getAllClasses(): Set<string> {
       // Create merged Set on-demand (only used in tests, not hot path)
+      // Note: Does not include Tailwind classes when using API mode
       const allClasses = new Set<string>()
       cssClasses.forEach(cls => allClasses.add(cls))
-      tailwindLiteralClasses.forEach(cls => allClasses.add(cls))
       allowlistLiteralClasses.forEach(cls => allClasses.add(cls))
       return allClasses
     },
 
     getValidVariants(): Set<string> {
-      return validVariants || new Set()
+      // Return empty set when using API mode
+      // Variant validation is handled by the TailwindUtils API
+      return new Set()
     },
   }
 }

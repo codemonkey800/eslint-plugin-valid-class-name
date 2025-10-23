@@ -1,5 +1,5 @@
 import type { Rule } from 'eslint'
-import { getClassRegistry } from 'src/cache/class-registry'
+import { getClassRegistry } from 'src/registry/class-registry'
 import type { RuleOptions } from 'src/types/options'
 import { matchesPattern } from 'src/utils/pattern-matcher'
 import {

@@ -1,10 +1,10 @@
 import fs from 'fs'
 import path from 'path'
-import type { ResolvedFile } from 'src/cache/file-resolver'
 import {
   extractClassNamesFromCss,
   extractClassNamesFromScss,
 } from 'src/parsers/css-parser'
+import type { ResolvedFile } from 'src/registry/file-resolver'
 import { logger } from 'src/utils/logger'
 import { compilePattern } from 'src/utils/pattern-matcher'
 

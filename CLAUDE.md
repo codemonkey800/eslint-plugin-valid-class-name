@@ -53,9 +53,9 @@ When modifying files, run linters only for changed files to save time.
 - Integrates with the class registry for validation
 - Supports ignore patterns and whitelist patterns with glob-style wildcards
 
-**2. Class Registry** ([src/cache/class-registry.ts](src/cache/class-registry.ts))
+**2. Class Registry** ([src/registry/class-registry.ts](src/registry/class-registry.ts))
 
-- Central caching layer that aggregates class names from all sources
+- Central registry that aggregates class names from all sources
 - Combines CSS/SCSS parsed classes, Tailwind utilities, and whitelist patterns
 - Uses a single cache that invalidates when configuration changes
 - Returns a `ClassRegistry` interface with `isValid()` and `getAllClasses()` methods
@@ -151,8 +151,12 @@ Key testing utilities:
 
 ```
 src/
-├── cache/
-│   └── class-registry.ts          # Central caching and registry
+├── registry/
+│   ├── cache-key.ts               # Cache key generation
+│   ├── class-registry.ts          # Central registry and caching
+│   ├── file-resolver.ts           # File path resolution
+│   ├── registry-builder.ts        # Registry building logic
+│   └── tailwind-loader.ts         # Tailwind class loading
 ├── parsers/
 │   ├── css-parser.ts              # CSS/SCSS parsing
 │   └── tailwind-parser.ts         # Tailwind config parsing and utility generation

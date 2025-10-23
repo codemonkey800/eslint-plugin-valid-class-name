@@ -147,6 +147,155 @@ ruleTester.run('valid-class-name', rule, {
         },
       ],
     },
+    // Array syntax within function calls
+    {
+      code: '<div className={clsx(["foo", "bar"])} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['foo', 'bar'],
+          },
+        },
+      ],
+    },
+    {
+      code: '<div className={classnames(["btn-primary", "btn-large"])} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['btn-*'],
+          },
+        },
+      ],
+    },
+    // Object syntax within function calls
+    {
+      code: '<div className={clsx({ foo: true, bar: false })} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['foo', 'bar'],
+          },
+        },
+      ],
+    },
+    {
+      code: '<div className={clsx({ "btn-primary": true, "text-large": condition })} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['btn-*', 'text-*'],
+          },
+        },
+      ],
+    },
+    // Mixed array and object syntax
+    {
+      code: '<div className={clsx(["foo", { bar: true, baz: false }])} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['foo', 'bar', 'baz'],
+          },
+        },
+      ],
+    },
+    {
+      code: '<div className={cns("base", ["container"], { active: true })} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['base', 'container', 'active'],
+          },
+        },
+      ],
+    },
+    // Nested arrays
+    {
+      code: '<div className={clsx(["foo", ["bar", "baz"]])} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['foo', 'bar', 'baz'],
+          },
+        },
+      ],
+    },
+    // Array with conditionals
+    {
+      code: '<div className={clsx(["foo", condition && "bar"])} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['foo', 'bar'],
+          },
+        },
+      ],
+    },
+    {
+      code: '<div className={clsx(["foo", condition ? "bar" : "baz"])} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['foo', 'bar', 'baz'],
+          },
+        },
+      ],
+    },
+    // Complex nested patterns
+    {
+      code: '<div className={clsx(["flex", ["items-center", { "bg-blue-500": isActive }]])} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['flex', 'items-center', 'bg-*'],
+          },
+        },
+      ],
+    },
+    // Empty array and object (should not cause errors)
+    {
+      code: '<div className={clsx([])} />',
+      filename: 'test.jsx',
+    },
+    {
+      code: '<div className={clsx({})} />',
+      filename: 'test.jsx',
+    },
+    // Sparse arrays
+    {
+      code: '<div className={clsx(["foo",, "bar"])} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['foo', 'bar'],
+          },
+        },
+      ],
+    },
+    // Object with identifier keys (shorthand)
+    {
+      code: '<div className={clsx({ foo, bar })} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['foo', 'bar'],
+          },
+        },
+      ],
+    },
   ],
   invalid: [
     // No whitelist - all class names are invalid
@@ -315,6 +464,106 @@ ruleTester.run('valid-class-name', rule, {
           messageId: 'invalidClassName',
           data: {
             className: 'other-class',
+          },
+        },
+      ],
+    },
+    // Array with invalid class
+    {
+      code: '<div className={clsx(["invalid-class"])} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['valid-class'],
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: 'invalidClassName',
+          data: {
+            className: 'invalid-class',
+          },
+        },
+      ],
+    },
+    // Object with invalid class key
+    {
+      code: '<div className={clsx({ "invalid-class": true })} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['valid-class'],
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: 'invalidClassName',
+          data: {
+            className: 'invalid-class',
+          },
+        },
+      ],
+    },
+    // Mixed valid and invalid in array
+    {
+      code: '<div className={clsx(["valid-class", "invalid-class"])} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['valid-class'],
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: 'invalidClassName',
+          data: {
+            className: 'invalid-class',
+          },
+        },
+      ],
+    },
+    // Nested array with invalid class
+    {
+      code: '<div className={clsx(["valid-class", ["invalid-nested"]])} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['valid-class'],
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: 'invalidClassName',
+          data: {
+            className: 'invalid-nested',
+          },
+        },
+      ],
+    },
+    // Mixed array/object with invalid class in object
+    {
+      code: '<div className={clsx(["valid-class", { "invalid-class": true }])} />',
+      filename: 'test.jsx',
+      options: [
+        {
+          validation: {
+            whitelist: ['valid-class'],
+          },
+        },
+      ],
+      errors: [
+        {
+          messageId: 'invalidClassName',
+          data: {
+            className: 'invalid-class',
           },
         },
       ],

@@ -58,6 +58,34 @@ interface TemplateLiteral {
   expressions: Expression[]
 }
 
+interface Identifier {
+  type: 'Identifier'
+  name: string
+}
+
+interface ArrayExpression {
+  type: 'ArrayExpression'
+  elements: Array<Expression | null>
+}
+
+interface SpreadElement {
+  type: 'SpreadElement'
+  argument: Expression
+}
+
+interface Property {
+  type: 'Property'
+  key: Expression | Identifier
+  value: Expression
+  computed: boolean
+  shorthand: boolean
+}
+
+interface ObjectExpression {
+  type: 'ObjectExpression'
+  properties: Array<Property | SpreadElement>
+}
+
 // Catch-all for expression types we don't explicitly handle
 // These will be skipped during validation (e.g., variables, complex expressions)
 interface UnknownExpression {
@@ -71,6 +99,8 @@ type Expression =
   | LogicalExpression
   | CallExpression
   | TemplateLiteral
+  | ArrayExpression
+  | ObjectExpression
   | UnknownExpression
 
 interface JSXAttribute {
@@ -175,6 +205,24 @@ function isCallExpression(
 }
 
 /**
+ * Type guard to check if an expression is an ArrayExpression
+ */
+function isArrayExpression(
+  expression: Expression,
+): expression is ArrayExpression {
+  return expression.type === 'ArrayExpression'
+}
+
+/**
+ * Type guard to check if an expression is an ObjectExpression
+ */
+function isObjectExpression(
+  expression: Expression,
+): expression is ObjectExpression {
+  return expression.type === 'ObjectExpression'
+}
+
+/**
  * Recursively extracts all static string literals from an expression tree
  * This enables validation of class names in dynamic expressions like:
  * - Ternary: condition ? 'class1' : 'class2'
@@ -230,6 +278,45 @@ function extractClassStringsFromExpression(expression: Expression): string[] {
     // Recursively extract from all arguments
     for (const arg of expression.arguments) {
       results.push(...extractClassStringsFromExpression(arg))
+    }
+    return results
+  }
+
+  // Handle array expressions (e.g., ['class1', 'class2'])
+  // Note: Arrays are typically used within function calls like clsx(['class1', 'class2'])
+  // Direct usage in className (e.g., className={['foo']}) won't work in React
+  if (isArrayExpression(expression)) {
+    // Recursively extract from all array elements
+    for (const element of expression.elements) {
+      // Skip null elements (sparse arrays like ['foo',, 'bar'])
+      if (element === null) continue
+      results.push(...extractClassStringsFromExpression(element))
+    }
+    return results
+  }
+
+  // Handle object expressions (e.g., { 'class1': true, 'class2': false })
+  // Note: Objects are typically used within function calls like clsx({ active: true })
+  // Direct usage in className (e.g., className={{ foo: true }}) won't work in React
+  if (isObjectExpression(expression)) {
+    // Extract class names from object keys
+    for (const prop of expression.properties) {
+      // Skip spread elements (e.g., ...otherClasses)
+      if (prop.type === 'SpreadElement') continue
+
+      // Skip computed properties (e.g., [dynamicKey]: true)
+      if (prop.computed) continue
+
+      // Extract string from Literal keys (e.g., 'class-name': true)
+      if (prop.key.type === 'Literal' && typeof prop.key.value === 'string') {
+        results.push(prop.key.value)
+      }
+      // Extract name from Identifier keys (e.g., className: true or { foo })
+      else if (prop.key.type === 'Identifier') {
+        // Type assertion: we know prop.key is an Identifier at this point
+        const identifier = prop.key as Identifier
+        results.push(identifier.name)
+      }
     }
     return results
   }

@@ -322,11 +322,14 @@ The plugin skips validation for truly dynamic values that can't be determined at
 <div className={`dynamic-${foo}`} />
 <div className={`flex-${direction} mt-${spacing}`} />
 
-// Object syntax (not yet supported)
-<div className={clsx({ 'active': isActive })} />
+// Object syntax (within function calls like clsx/classnames)
+<div className={clsx({ 'active': isActive, 'disabled': isDisabled })} />
 
-// Array syntax (not yet supported)
+// Array syntax (within function calls like clsx/classnames)
 <div className={cns(['flex', condition && 'active'])} />
+
+// Mixed array and object syntax
+<div className={clsx(['flex', { 'active': isActive }])} />
 ```
 
 ## Dynamic Class Name Support
@@ -335,19 +338,19 @@ The plugin uses **recursive expression tree traversal** to extract and validate 
 
 ### Supported Patterns
 
-| Pattern                         | Example                   | Status               |
-| ------------------------------- | ------------------------- | -------------------- |
-| **Ternary Operators**           | `condition ? 'a' : 'b'`   | ✅ Validated         |
-| **Logical AND**                 | `condition && 'class'`    | ✅ Validated         |
-| **Logical OR**                  | `value \|\| 'class'`      | ✅ Validated         |
-| **Nullish Coalescing**          | `value ?? 'class'`        | ✅ Validated         |
-| **Function Calls**              | `cns('a', 'b')`           | ✅ Validated         |
-| **Nested Combinations**         | `cns('a', b ? 'c' : 'd')` | ✅ Validated         |
-| **Template Literals (static)**  | `` `class` ``             | ✅ Validated         |
-| **Template Literals (dynamic)** | `` `class-${var}` ``      | ⏭️ Skipped           |
-| **Variables**                   | `className={someVar}`     | ⏭️ Skipped           |
-| **Object Syntax**               | `{ 'class': condition }`  | ⏭️ Not Yet Supported |
-| **Array Syntax**                | `['class1', 'class2']`    | ⏭️ Not Yet Supported |
+| Pattern                         | Example                      | Status       |
+| ------------------------------- | ---------------------------- | ------------ |
+| **Ternary Operators**           | `condition ? 'a' : 'b'`      | ✅ Validated |
+| **Logical AND**                 | `condition && 'class'`       | ✅ Validated |
+| **Logical OR**                  | `value \|\| 'class'`         | ✅ Validated |
+| **Nullish Coalescing**          | `value ?? 'class'`           | ✅ Validated |
+| **Function Calls**              | `cns('a', 'b')`              | ✅ Validated |
+| **Nested Combinations**         | `cns('a', b ? 'c' : 'd')`    | ✅ Validated |
+| **Template Literals (static)**  | `` `class` ``                | ✅ Validated |
+| **Template Literals (dynamic)** | `` `class-${var}` ``         | ⏭️ Skipped   |
+| **Variables**                   | `className={someVar}`        | ⏭️ Skipped   |
+| **Object Syntax**               | `clsx({ 'class': true })`    | ✅ Validated |
+| **Array Syntax**                | `clsx(['class1', 'class2'])` | ✅ Validated |
 
 ### How It Works
 
@@ -425,10 +428,10 @@ The plugin uses a multi-layered architecture:
 
 ## Limitations
 
-- **Static Strings in Expressions**: The plugin validates static string literals within expressions (ternaries, logical operators, function calls), but truly dynamic values like variables, interpolated template literals, and computed expressions are skipped.
-- **Object/Array Syntax**: Object syntax (`{ 'class': condition }`) and array syntax in utility functions are not yet supported.
+- **Static Strings Only**: The plugin validates static string literals within expressions (ternaries, logical operators, function calls, arrays, and objects), but truly dynamic values like variables, interpolated template literals, and computed expressions are skipped.
 - **CSS Modules**: Not yet implemented. Use `validation.whitelist` patterns as a workaround.
 - **Blacklist**: Not yet implemented.
+- **Array/Object Direct Assignment**: Arrays and objects work only within function calls like `clsx()` or `classnames()`. Direct assignment like `className={['foo']}` or `className={{ foo: true }}` doesn't work in React (React expects a string, not an array/object).
 
 ## Development
 

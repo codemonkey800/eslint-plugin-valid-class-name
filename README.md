@@ -620,7 +620,6 @@ The plugin uses a multi-layered architecture:
 
 - **Static Strings Only**: The plugin validates static string literals within expressions (ternaries, logical operators, function calls, arrays, and objects), but truly dynamic values like variables, interpolated template literals, and computed expressions are skipped.
 - **CSS Modules**: Out of scope for this plugin. CSS/SCSS modules are best validated using dedicated type generation tools like [typed-css-modules](https://github.com/Quramy/typed-css-modules) for CSS and [typed-scss-modules](https://github.com/skovy/typed-scss-modules) for SCSS. These tools generate TypeScript declaration files that provide both type safety and IDE autocomplete.
-- **Blacklist**: Not yet implemented.
 - **Direct Assignment Limitation**: Arrays and objects are validated when used within function calls like `clsx()` or `classnames()`. Direct assignment like `className={['foo']}` or `className={{ foo: true }}` won't be validated because React doesn't support these patterns (React expects className to be a string).
 
 ## Development

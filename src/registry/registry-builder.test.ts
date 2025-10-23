@@ -336,7 +336,13 @@ describe('buildClassRegistry', () => {
     it('should add Tailwind classes when provided', () => {
       const tailwindClasses = new Set(['flex', 'bg-blue-500', 'p-4'])
 
-      const registry = buildClassRegistry([], [], tailwindClasses, undefined, process.cwd())
+      const registry = buildClassRegistry(
+        [],
+        [],
+        tailwindClasses,
+        undefined,
+        process.cwd(),
+      )
 
       expect(registry.isValid('flex')).toBe(true)
       expect(registry.isValid('bg-blue-500')).toBe(true)
@@ -347,14 +353,26 @@ describe('buildClassRegistry', () => {
     it('should handle empty Tailwind classes set', () => {
       const tailwindClasses = new Set<string>()
 
-      const registry = buildClassRegistry([], [], tailwindClasses, undefined, process.cwd())
+      const registry = buildClassRegistry(
+        [],
+        [],
+        tailwindClasses,
+        undefined,
+        process.cwd(),
+      )
 
       expect(registry.isValid('flex')).toBe(false)
       expect(registry.getAllClasses().size).toBe(0)
     })
 
     it('should handle undefined Tailwind classes', () => {
-      const registry = buildClassRegistry([], [], undefined, undefined, process.cwd())
+      const registry = buildClassRegistry(
+        [],
+        [],
+        undefined,
+        undefined,
+        process.cwd(),
+      )
 
       expect(registry.isValid('flex')).toBe(false)
       expect(registry.getAllClasses().size).toBe(0)
@@ -363,7 +381,13 @@ describe('buildClassRegistry', () => {
     it('should include Tailwind classes in getAllClasses', () => {
       const tailwindClasses = new Set(['flex', 'bg-blue-500'])
 
-      const registry = buildClassRegistry([], [], tailwindClasses, undefined, process.cwd())
+      const registry = buildClassRegistry(
+        [],
+        [],
+        tailwindClasses,
+        undefined,
+        process.cwd(),
+      )
 
       const allClasses = registry.getAllClasses()
 
@@ -523,7 +547,13 @@ describe('buildClassRegistry', () => {
     it('should return true for Tailwind classes', () => {
       const tailwindClasses = new Set(['flex', 'p-4'])
 
-      const registry = buildClassRegistry([], [], tailwindClasses, undefined, process.cwd())
+      const registry = buildClassRegistry(
+        [],
+        [],
+        tailwindClasses,
+        undefined,
+        process.cwd(),
+      )
 
       expect(registry.isTailwindClass('flex')).toBe(true)
       expect(registry.isTailwindClass('p-4')).toBe(true)
@@ -627,7 +657,13 @@ describe('buildClassRegistry', () => {
     })
 
     it('should return empty set when no classes present', () => {
-      const registry = buildClassRegistry([], [], undefined, undefined, process.cwd())
+      const registry = buildClassRegistry(
+        [],
+        [],
+        undefined,
+        undefined,
+        process.cwd(),
+      )
 
       const allClasses = registry.getAllClasses()
 
@@ -639,7 +675,13 @@ describe('buildClassRegistry', () => {
     it('should return provided variants set', () => {
       const variants = new Set(['hover', 'focus', 'active'])
 
-      const registry = buildClassRegistry([], [], undefined, variants, process.cwd())
+      const registry = buildClassRegistry(
+        [],
+        [],
+        undefined,
+        variants,
+        process.cwd(),
+      )
 
       const validVariants = registry.getValidVariants()
 
@@ -650,7 +692,13 @@ describe('buildClassRegistry', () => {
     })
 
     it('should return empty set when no variants provided', () => {
-      const registry = buildClassRegistry([], [], undefined, undefined, process.cwd())
+      const registry = buildClassRegistry(
+        [],
+        [],
+        undefined,
+        undefined,
+        process.cwd(),
+      )
 
       const validVariants = registry.getValidVariants()
 
@@ -658,7 +706,13 @@ describe('buildClassRegistry', () => {
     })
 
     it('should return empty set when variants is undefined', () => {
-      const registry = buildClassRegistry([], [], undefined, undefined, process.cwd())
+      const registry = buildClassRegistry(
+        [],
+        [],
+        undefined,
+        undefined,
+        process.cwd(),
+      )
 
       const validVariants = registry.getValidVariants()
 
@@ -669,7 +723,13 @@ describe('buildClassRegistry', () => {
 
   describe('edge cases', () => {
     it('should handle empty inputs', () => {
-      const registry = buildClassRegistry([], [], undefined, undefined, process.cwd())
+      const registry = buildClassRegistry(
+        [],
+        [],
+        undefined,
+        undefined,
+        process.cwd(),
+      )
 
       expect(registry.isValid('anything')).toBe(false)
       expect(registry.isTailwindClass('anything')).toBe(false)
@@ -697,7 +757,13 @@ describe('buildClassRegistry', () => {
     })
 
     it('should handle empty whitelist array', () => {
-      const registry = buildClassRegistry([], [], undefined, undefined, process.cwd())
+      const registry = buildClassRegistry(
+        [],
+        [],
+        undefined,
+        undefined,
+        process.cwd(),
+      )
 
       expect(registry.isValid('anything')).toBe(false)
     })

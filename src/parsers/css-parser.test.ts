@@ -393,6 +393,28 @@ describe('extractClassNamesFromCss', () => {
       expect(classes.size).toBe(3)
     })
   })
+
+  describe('input validation', () => {
+    it('should return empty set for null input', () => {
+      const classes = extractClassNamesFromCss(null as any)
+      expect(classes.size).toBe(0)
+    })
+
+    it('should return empty set for undefined input', () => {
+      const classes = extractClassNamesFromCss(undefined as any)
+      expect(classes.size).toBe(0)
+    })
+
+    it('should return empty set for non-string input', () => {
+      const classes = extractClassNamesFromCss(123 as any)
+      expect(classes.size).toBe(0)
+    })
+
+    it('should return empty set for whitespace-only input', () => {
+      const classes = extractClassNamesFromCss('   \n\t   ')
+      expect(classes.size).toBe(0)
+    })
+  })
 })
 
 describe('extractClassNamesFromScss', () => {
@@ -593,5 +615,51 @@ describe('extractClassNamesFromScss', () => {
     const scss = '// This is a comment\n/* This is another comment */'
     const classes = extractClassNamesFromScss(scss, mockFilePath)
     expect(classes.size).toBe(0)
+  })
+
+  describe('input validation', () => {
+    it('should return empty set for null scssContent', () => {
+      const classes = extractClassNamesFromScss(null as any, mockFilePath)
+      expect(classes.size).toBe(0)
+    })
+
+    it('should return empty set for undefined scssContent', () => {
+      const classes = extractClassNamesFromScss(undefined as any, mockFilePath)
+      expect(classes.size).toBe(0)
+    })
+
+    it('should return empty set for non-string scssContent', () => {
+      const classes = extractClassNamesFromScss(123 as any, mockFilePath)
+      expect(classes.size).toBe(0)
+    })
+
+    it('should return empty set for whitespace-only SCSS', () => {
+      const classes = extractClassNamesFromScss('   \n\t   ', mockFilePath)
+      expect(classes.size).toBe(0)
+    })
+
+    it('should return empty set for missing filePath', () => {
+      const classes = extractClassNamesFromScss(
+        '.btn { color: red; }',
+        '' as any,
+      )
+      expect(classes.size).toBe(0)
+    })
+  })
+
+  describe('cwd parameter', () => {
+    it('should work with optional cwd parameter', () => {
+      const scss = '.btn { color: red; }'
+      const classes = extractClassNamesFromScss(scss, mockFilePath, process.cwd())
+      expect(classes.has('btn')).toBe(true)
+      expect(classes.size).toBe(1)
+    })
+
+    it('should work without cwd parameter (backward compatibility)', () => {
+      const scss = '.card { padding: 10px; }'
+      const classes = extractClassNamesFromScss(scss, mockFilePath)
+      expect(classes.has('card')).toBe(true)
+      expect(classes.size).toBe(1)
+    })
   })
 })

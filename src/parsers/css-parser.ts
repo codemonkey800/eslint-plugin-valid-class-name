@@ -5,11 +5,30 @@ import * as sass from 'sass'
 import { logger } from 'src/utils/logger'
 
 /**
+ * Set of CSS class names extracted from CSS/SCSS content
+ */
+export type CssClassSet = Set<string>
+
+/**
  * Extracts CSS class names from CSS content using PostCSS
+ *
  * @param cssContent - The CSS content to parse
  * @returns Set of class names found in the CSS
+ *
+ * @remarks
+ * **Error Handling:** If parsing fails, returns partial results (classes
+ * extracted before the error occurred). This allows extraction of valid
+ * classes even when the CSS file has syntax errors in some rules.
  */
-export function extractClassNamesFromCss(cssContent: string): Set<string> {
+export function extractClassNamesFromCss(cssContent: string): CssClassSet {
+  // Input validation
+  if (!cssContent || typeof cssContent !== 'string') {
+    return new Set<string>()
+  }
+  if (!cssContent.trim()) {
+    return new Set<string>()
+  }
+
   const classNames = new Set<string>()
 
   try {
@@ -45,19 +64,46 @@ export function extractClassNamesFromCss(cssContent: string): Set<string> {
 
 /**
  * Extracts CSS class names from SCSS content by compiling to CSS first
+ *
  * @param scssContent - The SCSS content to compile and parse
  * @param filePath - The file path for resolving @import/@use statements
+ * @param cwd - Optional current working directory for resolving imports from project root and node_modules
  * @returns Set of class names found in the SCSS
+ *
+ * @remarks
+ * **Error Handling:** If SCSS compilation fails, returns an empty Set.
+ * This differs from `extractClassNamesFromCss` which returns partial results,
+ * because SCSS must be successfully compiled before class extraction can occur.
+ *
+ * **Import Resolution:** When `cwd` is provided, imports are resolved from:
+ * - The SCSS file's directory (always)
+ * - The project root (`cwd`)
+ * - The node_modules directory (`cwd/node_modules`)
  */
 export function extractClassNamesFromScss(
   scssContent: string,
   filePath: string,
-): Set<string> {
+  cwd?: string,
+): CssClassSet {
+  // Input validation
+  if (!scssContent || typeof scssContent !== 'string' || !filePath) {
+    return new Set<string>()
+  }
+  if (!scssContent.trim()) {
+    return new Set<string>()
+  }
+
   try {
+    // Build loadPaths with optional cwd for better import resolution
+    const loadPaths = [path.dirname(filePath)]
+    if (cwd) {
+      loadPaths.push(cwd)
+      loadPaths.push(path.join(cwd, 'node_modules'))
+    }
+
     // Compile SCSS to CSS
     const result = sass.compileString(scssContent, {
-      loadPaths: [path.dirname(filePath)],
-      // Use legacy API for better compatibility
+      loadPaths,
       syntax: 'scss',
     })
 

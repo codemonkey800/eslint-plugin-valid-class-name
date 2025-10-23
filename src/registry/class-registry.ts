@@ -74,6 +74,7 @@ export function getClassRegistry(
     whitelist,
     tailwindData?.classes,
     tailwindData?.variants,
+    cwd,
   )
   cacheKey = currentCacheKey
 

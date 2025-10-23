@@ -51,6 +51,7 @@ export interface ClassRegistry {
  * @param whitelist - Array of class name patterns (supports wildcards)
  * @param tailwindClasses - Pre-loaded Tailwind classes (optional)
  * @param validVariants - Pre-loaded valid Tailwind variants (optional)
+ * @param cwd - Current working directory for resolving SCSS imports
  * @returns ClassRegistry instance
  */
 export function buildClassRegistry(
@@ -58,6 +59,7 @@ export function buildClassRegistry(
   whitelist: string[],
   tailwindClasses: Set<string> | undefined,
   validVariants: Set<string> | undefined,
+  cwd: string,
 ): ClassRegistry {
   // Separate CSS classes from Tailwind classes
   const cssClasses = new Set<string>()
@@ -73,7 +75,7 @@ export function buildClassRegistry(
       // Handle SCSS files differently from CSS files
       let classes: Set<string>
       if (ext === '.scss') {
-        classes = extractClassNamesFromScss(content, file.path)
+        classes = extractClassNamesFromScss(content, file.path, cwd)
       } else {
         classes = extractClassNamesFromCss(content)
       }

@@ -35,6 +35,7 @@ describe('buildClassRegistry', () => {
         [],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isValid('btn')).toBe(true)
@@ -59,6 +60,7 @@ describe('buildClassRegistry', () => {
         [],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isValid('btn')).toBe(true)
@@ -85,6 +87,7 @@ describe('buildClassRegistry', () => {
         [],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isValid('nav')).toBe(true)
@@ -109,6 +112,7 @@ describe('buildClassRegistry', () => {
         [],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry).toBeDefined()
@@ -127,6 +131,7 @@ describe('buildClassRegistry', () => {
         [],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry).toBeDefined()
@@ -159,6 +164,7 @@ describe('buildClassRegistry', () => {
         [],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isValid('parent')).toBe(true)
@@ -193,6 +199,7 @@ describe('buildClassRegistry', () => {
         [],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isValid('btn')).toBe(true)
@@ -221,6 +228,7 @@ describe('buildClassRegistry', () => {
         [],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry).toBeDefined()
@@ -254,6 +262,7 @@ describe('buildClassRegistry', () => {
         [],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isValid('css-class')).toBe(true)
@@ -269,6 +278,7 @@ describe('buildClassRegistry', () => {
         ['custom-class', 'another-class'],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isValid('custom-class')).toBe(true)
@@ -282,6 +292,7 @@ describe('buildClassRegistry', () => {
         ['custom-*', '*-suffix'],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isValid('custom-button')).toBe(true)
@@ -296,6 +307,7 @@ describe('buildClassRegistry', () => {
         ['literal-class', 'custom-*', 'another-literal'],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isValid('literal-class')).toBe(true)
@@ -310,6 +322,7 @@ describe('buildClassRegistry', () => {
         ['literal-class', 'custom-*'],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       const allClasses = registry.getAllClasses()
@@ -323,7 +336,7 @@ describe('buildClassRegistry', () => {
     it('should add Tailwind classes when provided', () => {
       const tailwindClasses = new Set(['flex', 'bg-blue-500', 'p-4'])
 
-      const registry = buildClassRegistry([], [], tailwindClasses, undefined)
+      const registry = buildClassRegistry([], [], tailwindClasses, undefined, process.cwd())
 
       expect(registry.isValid('flex')).toBe(true)
       expect(registry.isValid('bg-blue-500')).toBe(true)
@@ -334,14 +347,14 @@ describe('buildClassRegistry', () => {
     it('should handle empty Tailwind classes set', () => {
       const tailwindClasses = new Set<string>()
 
-      const registry = buildClassRegistry([], [], tailwindClasses, undefined)
+      const registry = buildClassRegistry([], [], tailwindClasses, undefined, process.cwd())
 
       expect(registry.isValid('flex')).toBe(false)
       expect(registry.getAllClasses().size).toBe(0)
     })
 
     it('should handle undefined Tailwind classes', () => {
-      const registry = buildClassRegistry([], [], undefined, undefined)
+      const registry = buildClassRegistry([], [], undefined, undefined, process.cwd())
 
       expect(registry.isValid('flex')).toBe(false)
       expect(registry.getAllClasses().size).toBe(0)
@@ -350,7 +363,7 @@ describe('buildClassRegistry', () => {
     it('should include Tailwind classes in getAllClasses', () => {
       const tailwindClasses = new Set(['flex', 'bg-blue-500'])
 
-      const registry = buildClassRegistry([], [], tailwindClasses, undefined)
+      const registry = buildClassRegistry([], [], tailwindClasses, undefined, process.cwd())
 
       const allClasses = registry.getAllClasses()
 
@@ -373,6 +386,7 @@ describe('buildClassRegistry', () => {
         ['custom-*'],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isValid('btn')).toBe(true)
@@ -394,6 +408,7 @@ describe('buildClassRegistry', () => {
         [],
         tailwindClasses,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isValid('btn')).toBe(true)
@@ -427,6 +442,7 @@ describe('buildClassRegistry', () => {
         ['whitelist-*'],
         tailwindClasses,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isValid('css-class')).toBe(true)
@@ -451,6 +467,7 @@ describe('buildClassRegistry', () => {
         ['btn'], // Same as CSS and Tailwind
         tailwindClasses,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isValid('btn')).toBe(true)
@@ -475,6 +492,7 @@ describe('buildClassRegistry', () => {
         ['wl-btn'],
         tailwindClasses,
         undefined,
+        process.cwd(),
       )
 
       // Each source should be checked
@@ -489,6 +507,7 @@ describe('buildClassRegistry', () => {
         ['literal', 'custom-*'],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       // Literal should match
@@ -504,7 +523,7 @@ describe('buildClassRegistry', () => {
     it('should return true for Tailwind classes', () => {
       const tailwindClasses = new Set(['flex', 'p-4'])
 
-      const registry = buildClassRegistry([], [], tailwindClasses, undefined)
+      const registry = buildClassRegistry([], [], tailwindClasses, undefined, process.cwd())
 
       expect(registry.isTailwindClass('flex')).toBe(true)
       expect(registry.isTailwindClass('p-4')).toBe(true)
@@ -516,6 +535,7 @@ describe('buildClassRegistry', () => {
         ['custom-*'],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isTailwindClass('custom-button')).toBe(true)
@@ -534,6 +554,7 @@ describe('buildClassRegistry', () => {
         [],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isTailwindClass('btn')).toBe(false)
@@ -553,6 +574,7 @@ describe('buildClassRegistry', () => {
         ['wl-*'],
         tailwindClasses,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isTailwindClass('css-btn')).toBe(false)
@@ -576,6 +598,7 @@ describe('buildClassRegistry', () => {
         ['literal-class', 'wildcard-*'],
         tailwindClasses,
         undefined,
+        process.cwd(),
       )
 
       const allClasses = registry.getAllClasses()
@@ -592,6 +615,7 @@ describe('buildClassRegistry', () => {
         ['custom-*', '*-suffix', 'literal'],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       const allClasses = registry.getAllClasses()
@@ -603,7 +627,7 @@ describe('buildClassRegistry', () => {
     })
 
     it('should return empty set when no classes present', () => {
-      const registry = buildClassRegistry([], [], undefined, undefined)
+      const registry = buildClassRegistry([], [], undefined, undefined, process.cwd())
 
       const allClasses = registry.getAllClasses()
 
@@ -615,7 +639,7 @@ describe('buildClassRegistry', () => {
     it('should return provided variants set', () => {
       const variants = new Set(['hover', 'focus', 'active'])
 
-      const registry = buildClassRegistry([], [], undefined, variants)
+      const registry = buildClassRegistry([], [], undefined, variants, process.cwd())
 
       const validVariants = registry.getValidVariants()
 
@@ -626,7 +650,7 @@ describe('buildClassRegistry', () => {
     })
 
     it('should return empty set when no variants provided', () => {
-      const registry = buildClassRegistry([], [], undefined, undefined)
+      const registry = buildClassRegistry([], [], undefined, undefined, process.cwd())
 
       const validVariants = registry.getValidVariants()
 
@@ -634,7 +658,7 @@ describe('buildClassRegistry', () => {
     })
 
     it('should return empty set when variants is undefined', () => {
-      const registry = buildClassRegistry([], [], undefined, undefined)
+      const registry = buildClassRegistry([], [], undefined, undefined, process.cwd())
 
       const validVariants = registry.getValidVariants()
 
@@ -645,7 +669,7 @@ describe('buildClassRegistry', () => {
 
   describe('edge cases', () => {
     it('should handle empty inputs', () => {
-      const registry = buildClassRegistry([], [], undefined, undefined)
+      const registry = buildClassRegistry([], [], undefined, undefined, process.cwd())
 
       expect(registry.isValid('anything')).toBe(false)
       expect(registry.isTailwindClass('anything')).toBe(false)
@@ -666,13 +690,14 @@ describe('buildClassRegistry', () => {
         [],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.getAllClasses().size).toBe(0)
     })
 
     it('should handle empty whitelist array', () => {
-      const registry = buildClassRegistry([], [], undefined, undefined)
+      const registry = buildClassRegistry([], [], undefined, undefined, process.cwd())
 
       expect(registry.isValid('anything')).toBe(false)
     })
@@ -697,6 +722,7 @@ describe('buildClassRegistry', () => {
         [],
         undefined,
         undefined,
+        process.cwd(),
       )
 
       expect(registry.isValid('btn-primary')).toBe(true)
@@ -724,6 +750,7 @@ describe('buildClassRegistry', () => {
         [],
         undefined,
         undefined,
+        process.cwd(),
       )
       const buildTime = Date.now() - startTime
 
@@ -753,6 +780,7 @@ describe('buildClassRegistry', () => {
         ['shared'],
         tailwindClasses,
         undefined,
+        process.cwd(),
       )
 
       // Should be valid (from any source)

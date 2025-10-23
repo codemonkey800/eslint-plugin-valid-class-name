@@ -1,5 +1,6 @@
 import type { ESLint } from 'eslint'
-import { rules } from 'src/rules'
+
+import { rules } from './rules'
 
 const plugin: ESLint.Plugin = {
   meta: {

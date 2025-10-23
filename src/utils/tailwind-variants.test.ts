@@ -1,12 +1,12 @@
 import {
+  ARBITRARY_VALUE_PREFIXES,
   DEFAULT_TAILWIND_VARIANTS,
+  isArbitraryValue,
+  isValidArbitraryValue,
   isValidVariant,
+  parseArbitraryValue,
   parseClassName,
   validateVariants,
-  isArbitraryValue,
-  parseArbitraryValue,
-  isValidArbitraryValue,
-  ARBITRARY_VALUE_PREFIXES,
 } from './tailwind-variants'
 
 describe('DEFAULT_TAILWIND_VARIANTS', () => {

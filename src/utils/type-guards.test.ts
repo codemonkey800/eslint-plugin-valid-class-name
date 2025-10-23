@@ -1,4 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
+
 import { isObject, isString, isThemeScale, isThemeValue } from './type-guards'
 
 describe('isString', () => {

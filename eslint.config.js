@@ -7,6 +7,32 @@ import nodePlugin from 'eslint-plugin-n'
 import eslintPluginPlugin from 'eslint-plugin-eslint-plugin'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
 
+// Shared configuration across all file types
+const sharedPlugins = {
+  'import': importPlugin,
+  'simple-import-sort': simpleImportSort,
+  'n': nodePlugin,
+}
+
+const sharedSettings = {
+  'import/resolver': {
+    typescript: {
+      alwaysTryTypes: true,
+      project: './tsconfig.json',
+    },
+  },
+}
+
+const sharedRules = {
+  'import/no-unresolved': 'error',
+  'import/named': 'error',
+  'import/no-duplicates': 'error',
+  'simple-import-sort/imports': 'error',
+  'simple-import-sort/exports': 'error',
+  ...nodePlugin.configs.recommended.rules,
+  'n/no-missing-import': 'off',
+}
+
 export default [
   {
     ignores: ['lib/**', 'node_modules/**', '*.js', '*.mjs', 'test-project/**'],
@@ -23,30 +49,14 @@ export default [
       },
     },
     plugins: {
-      'import': importPlugin,
-      'n': nodePlugin,
+      ...sharedPlugins,
       'eslint-plugin': eslintPluginPlugin,
-      'simple-import-sort': simpleImportSort,
     },
-    settings: {
-      'import/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-          project: './tsconfig.json',
-        },
-      },
-    },
+    settings: sharedSettings,
     rules: {
+      ...sharedRules,
       '@typescript-eslint/no-require-imports': 'off',
-      'import/no-unresolved': 'error',
-      'import/named': 'error',
-      'import/no-duplicates': 'error',
-      'simple-import-sort/imports': 'error',
-      'simple-import-sort/exports': 'error',
-      ...nodePlugin.configs.recommended.rules,
       ...eslintPluginPlugin.configs.recommended.rules,
-      // Disable n/no-missing-import as it doesn't understand TypeScript baseUrl
-      'n/no-missing-import': 'off',
       // Don't enforce relative imports rules since we're using absolute imports
       'import/no-relative-packages': 'off',
       'import/no-relative-parent-imports': 'off',
@@ -56,21 +66,29 @@ export default [
     files: ['**/*.test.ts'],
     ...tseslint.configs.disableTypeChecked,
     plugins: {
+      ...sharedPlugins,
       jest: jestPlugin,
     },
     languageOptions: {
       globals: jestPlugin.environments.globals.globals,
     },
+    settings: sharedSettings,
     rules: {
+      ...sharedRules,
       ...jestPlugin.configs.recommended.rules,
       '@typescript-eslint/no-explicit-any': 'off',
+      'n/no-unpublished-import': 'off',
     },
   },
   {
     files: ['**/*.config.ts'],
     ...tseslint.configs.disableTypeChecked,
+    plugins: sharedPlugins,
+    settings: sharedSettings,
     rules: {
+      ...sharedRules,
       '@typescript-eslint/no-explicit-any': 'off',
+      'n/no-unpublished-import': 'off',
     },
   },
   prettierConfig,

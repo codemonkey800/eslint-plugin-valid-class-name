@@ -6,6 +6,7 @@ import {
   it,
   jest,
 } from '@jest/globals'
+
 import { logger } from './logger'
 
 describe('logger', () => {

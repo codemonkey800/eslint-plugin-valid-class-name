@@ -1,10 +1,11 @@
 import { describe, expect, it } from '@jest/globals'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import {
   extractClassNamesFromCss,
   extractClassNamesFromScss,
 } from './css-parser'
-import path from 'path'
-import { fileURLToPath } from 'url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

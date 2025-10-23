@@ -1,9 +1,9 @@
 import { RuleTester } from 'eslint'
-import rule from 'src/rules/valid-class-name'
 import fs from 'fs'
-import path from 'path'
 import os from 'os'
+import path from 'path'
 import { clearCache } from 'src/cache/class-registry'
+import rule from 'src/rules/valid-class-name'
 
 const ruleTester = new RuleTester({
   languageOptions: {

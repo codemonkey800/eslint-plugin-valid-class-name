@@ -60,6 +60,8 @@ export default [
       // Don't enforce relative imports rules since we're using absolute imports
       'import/no-relative-packages': 'off',
       'import/no-relative-parent-imports': 'off',
+      // Enforce named exports only
+      'import/no-default-export': 'error',
     },
   },
   {

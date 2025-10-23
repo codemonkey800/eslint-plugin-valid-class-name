@@ -357,7 +357,7 @@ function extractClassStringsFromObjectValues(
   return results
 }
 
-const rule: Rule.RuleModule = {
+export const validClassNameRule: Rule.RuleModule = {
   meta: {
     type: 'problem',
     docs: {
@@ -596,5 +596,3 @@ const rule: Rule.RuleModule = {
     }
   },
 }
-
-export default rule

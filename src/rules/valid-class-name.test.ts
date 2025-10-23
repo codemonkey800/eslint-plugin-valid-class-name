@@ -715,7 +715,10 @@ describe('Tailwind variant validation', () => {
     {
       sources: {
         tailwind: {
-          config: path.join(process.cwd(), 'test-project/tailwind.config.cjs'),
+          config: path.join(
+            process.cwd(),
+            'examples/react/tailwind.config.cjs',
+          ),
         },
       },
       validation: {
@@ -930,7 +933,7 @@ describe('Tailwind variant validation', () => {
                   tailwind: {
                     config: path.join(
                       process.cwd(),
-                      'test-project/tailwind.config.cjs',
+                      'examples/react/tailwind.config.cjs',
                     ),
                   },
                 },
@@ -948,7 +951,7 @@ describe('Tailwind variant validation', () => {
                   tailwind: {
                     config: path.join(
                       process.cwd(),
-                      'test-project/tailwind.config.cjs',
+                      'examples/react/tailwind.config.cjs',
                     ),
                   },
                 },
@@ -965,7 +968,7 @@ describe('Tailwind variant validation', () => {
                   tailwind: {
                     config: path.join(
                       process.cwd(),
-                      'test-project/tailwind.config.cjs',
+                      'examples/react/tailwind.config.cjs',
                     ),
                   },
                 },
@@ -988,7 +991,7 @@ describe('Tailwind variant validation', () => {
                   tailwind: {
                     config: path.join(
                       process.cwd(),
-                      'test-project/tailwind.config.cjs',
+                      'examples/react/tailwind.config.cjs',
                     ),
                     includePluginClasses: false, // Disable to test CSS-only validation
                   },
@@ -1014,7 +1017,7 @@ describe('Tailwind variant validation', () => {
                   tailwind: {
                     config: path.join(
                       process.cwd(),
-                      'test-project/tailwind.config.cjs',
+                      'examples/react/tailwind.config.cjs',
                     ),
                   },
                 },
@@ -1046,7 +1049,7 @@ describe('Tailwind variant validation', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
               },
             },
@@ -1629,7 +1632,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
               },
             },
@@ -1645,7 +1648,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
               },
             },
@@ -1662,7 +1665,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
               },
             },
@@ -1678,7 +1681,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
               },
             },
@@ -1695,7 +1698,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
               },
             },
@@ -1711,7 +1714,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
               },
             },
@@ -1728,7 +1731,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
               },
             },
@@ -1745,7 +1748,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
               },
             },
@@ -1761,7 +1764,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
               },
             },
@@ -1777,7 +1780,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
               },
             },
@@ -1794,7 +1797,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
               },
             },
@@ -1811,7 +1814,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
               },
             },
@@ -1830,7 +1833,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
               },
             },
@@ -1855,7 +1858,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
                 includePluginClasses: false, // Disable to avoid interference
               },
@@ -1881,7 +1884,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'test-project/tailwind.config.cjs',
+                  'examples/react/tailwind.config.cjs',
                 ),
               },
             },

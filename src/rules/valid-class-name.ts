@@ -466,7 +466,8 @@ const rule: Rule.RuleModule = {
     const tailwindConfig = options.sources?.tailwind
     const whitelist = options.validation?.whitelist || []
     const ignorePatterns = options.validation?.ignorePatterns || []
-    const objectStyleAttributes = options.validation?.objectStyleAttributes || []
+    const objectStyleAttributes =
+      options.validation?.objectStyleAttributes || []
     const cwd = context.getCwd ? context.getCwd() : process.cwd()
 
     // Get the class registry (with CSS, SCSS, Tailwind parsing and caching)

@@ -3,7 +3,8 @@ import fs from 'fs'
 import os from 'os'
 import path from 'path'
 import { clearCache } from 'src/registry/class-registry'
-import rule from 'src/rules/valid-class-name'
+
+import rule from './valid-class-name'
 
 const ruleTester = new RuleTester({
   languageOptions: {

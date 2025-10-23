@@ -16,7 +16,7 @@ import type { ResolvedFile } from './file-resolver'
  */
 export function createCacheKey(
   resolvedFiles: ResolvedFile[],
-  whitelist: string[],
+  allowlist: string[],
   tailwindConfig: boolean | TailwindConfig | undefined,
   cwd: string,
 ): string {
@@ -29,8 +29,8 @@ export function createCacheKey(
     hash.update(String(file.mtime))
   }
 
-  // Hash whitelist patterns directly
-  for (const pattern of whitelist) {
+  // Hash allowlist patterns directly
+  for (const pattern of allowlist) {
     hash.update(pattern)
   }
 

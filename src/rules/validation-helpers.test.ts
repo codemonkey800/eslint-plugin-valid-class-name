@@ -40,7 +40,9 @@ describe('validation-helpers', () => {
 
     it('should handle patterns with multiple wildcards', () => {
       const ignorePatterns = ['*-dynamic-*']
-      expect(isClassNameIgnored('prefix-dynamic-suffix', ignorePatterns)).toBe(true)
+      expect(isClassNameIgnored('prefix-dynamic-suffix', ignorePatterns)).toBe(
+        true,
+      )
       expect(isClassNameIgnored('a-dynamic-b', ignorePatterns)).toBe(true)
       expect(isClassNameIgnored('-dynamic-', ignorePatterns)).toBe(true)
     })
@@ -83,7 +85,9 @@ describe('validation-helpers', () => {
 
     it('should handle patterns with hyphens and underscores', () => {
       const ignorePatterns = ['my-component_*']
-      expect(isClassNameIgnored('my-component_variant', ignorePatterns)).toBe(true)
+      expect(isClassNameIgnored('my-component_variant', ignorePatterns)).toBe(
+        true,
+      )
       expect(isClassNameIgnored('my-component_', ignorePatterns)).toBe(true)
       expect(isClassNameIgnored('my-component', ignorePatterns)).toBe(false)
     })

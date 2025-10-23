@@ -116,8 +116,8 @@ describe('ClassRegistry', () => {
     })
   })
 
-  describe('with whitelist patterns', () => {
-    it('should validate literal whitelist entries', () => {
+  describe('with allowlist patterns', () => {
+    it('should validate literal allowlist entries', () => {
       const registry = getClassRegistry(
         [],
         ['custom-class', 'another-class'],
@@ -185,7 +185,7 @@ describe('ClassRegistry', () => {
       expect(registry.isValid('nonexistent')).toBe(false)
     })
 
-    it('should handle overlapping CSS and whitelist entries', () => {
+    it('should handle overlapping CSS and allowlist entries', () => {
       const cssFile = path.join(tempDir, 'styles.css')
       fs.writeFileSync(cssFile, '.btn { color: red; }')
 
@@ -334,7 +334,7 @@ describe('ClassRegistry', () => {
       expect(allClasses.size).toBe(2)
     })
 
-    it('should include literal whitelist entries', () => {
+    it('should include literal allowlist entries', () => {
       const registry = getClassRegistry(
         [],
         ['literal-class'],
@@ -699,7 +699,7 @@ describe('ClassRegistry', () => {
       expect(registry.isValid('nonexistent')).toBe(false)
     })
 
-    it('should merge Tailwind classes with whitelist patterns', () => {
+    it('should merge Tailwind classes with allowlist patterns', () => {
       // Create Tailwind config
       const configFile = path.join(tempDir, 'tailwind.config.js')
       fs.writeFileSync(

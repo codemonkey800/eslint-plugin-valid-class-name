@@ -306,7 +306,11 @@ describe('ast-guards', () => {
     it('should return true for ArrayExpression with null elements (sparse arrays)', () => {
       const node: ArrayExpression = {
         type: 'ArrayExpression',
-        elements: [{ type: 'Literal', value: 'class1' }, null, { type: 'Literal', value: 'class2' }],
+        elements: [
+          { type: 'Literal', value: 'class1' },
+          null,
+          { type: 'Literal', value: 'class2' },
+        ],
       }
       expect(isArrayExpression(node)).toBe(true)
     })

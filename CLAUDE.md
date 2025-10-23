@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an ESLint plugin that validates CSS class names in JSX/TSX files against actual CSS/SCSS files, Tailwind configuration, and whitelists. The plugin reports errors when class names are used that don't exist in any of the configured sources.
+This is an ESLint plugin that validates CSS class names in JSX/TSX files against actual CSS/SCSS files, Tailwind configuration, and allowlists. The plugin reports errors when class names are used that don't exist in any of the configured sources.
 
 ## Development Commands
 
@@ -135,8 +135,8 @@ The rule accepts the following options:
     tailwind: true                   // or { config: 'path/to/tailwind.config.js' }
   },
   validation: {
-    whitelist: ['custom-*'],         // Always valid patterns (supports wildcards)
-    blacklist: [],                   // Not yet implemented
+    allowlist: ['custom-*'],         // Always valid patterns (supports wildcards)
+    blocklist: [],                   // Not yet implemented
     ignorePatterns: ['dynamic-*']    // Skip validation for these patterns
   }
 }

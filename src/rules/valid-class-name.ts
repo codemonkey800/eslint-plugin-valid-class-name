@@ -21,7 +21,7 @@ export const validClassNameRule: Rule.RuleModule = {
     type: 'problem',
     docs: {
       description:
-        'Validates CSS class names against actual CSS/SCSS files, Tailwind config, and whitelists',
+        'Validates CSS class names against actual CSS/SCSS files, Tailwind config, and allowlists',
       recommended: true,
     },
     messages: {
@@ -85,13 +85,13 @@ export const validClassNameRule: Rule.RuleModule = {
             type: 'object',
             description: 'Validation options for class names',
             properties: {
-              whitelist: {
+              allowlist: {
                 type: 'array',
                 items: { type: 'string' },
                 description:
                   'Array of class name patterns that are always considered valid',
               },
-              blacklist: {
+              blocklist: {
                 type: 'array',
                 items: { type: 'string' },
                 description: 'Array of class name patterns that are forbidden',
@@ -123,7 +123,7 @@ export const validClassNameRule: Rule.RuleModule = {
     const scssPatterns = options.sources?.scss || []
     const allCssPatterns = [...cssPatterns, ...scssPatterns]
     const tailwindConfig = options.sources?.tailwind
-    const whitelist = options.validation?.whitelist || []
+    const allowlist = options.validation?.allowlist || []
     const ignorePatterns = options.validation?.ignorePatterns || []
     const objectStyleAttributes =
       options.validation?.objectStyleAttributes || []
@@ -132,7 +132,7 @@ export const validClassNameRule: Rule.RuleModule = {
     // Get the class registry (with CSS, SCSS, Tailwind parsing and caching)
     const classRegistry = getClassRegistry(
       allCssPatterns,
-      whitelist,
+      allowlist,
       tailwindConfig,
       cwd,
     )
@@ -235,7 +235,7 @@ export const validClassNameRule: Rule.RuleModule = {
 
             // Validate base utility
             // When Tailwind variants are present, only validate against Tailwind classes
-            // Otherwise, validate against all sources (CSS, Tailwind, whitelist)
+            // Otherwise, validate against all sources (CSS, Tailwind, allowlist)
             const isValidBase = hasTailwindVariants
               ? classRegistry.isTailwindClass(base)
               : classRegistry.isValid(base)

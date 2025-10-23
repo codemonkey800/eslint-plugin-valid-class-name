@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-An ESLint plugin that validates CSS class names in HTML and JSX files by checking them against actual CSS/SCSS files, Tailwind configuration, and user-defined whitelists. The plugin prevents runtime errors from typos and non-existent class names during development. Supports both standard HTML `class` attributes and JSX `className` attributes.
+An ESLint plugin that validates CSS class names in HTML and JSX files by checking them against actual CSS/SCSS files, Tailwind configuration, and user-defined allowlists. The plugin prevents runtime errors from typos and non-existent class names during development. Supports both standard HTML `class` attributes and JSX `className` attributes.
 
 ## Core Objectives
 
@@ -250,7 +250,7 @@ Implement intelligent suggestions for typos and performance optimizations. Add d
 - [x] Build basic validation against hardcoded list
 - [x] Add ESLint error reporting
 - [x] Implement configuration loading
-- [x] Create whitelist/blacklist support
+- [x] Create allowlist/blocklist support
 
 ### CSS Processing
 

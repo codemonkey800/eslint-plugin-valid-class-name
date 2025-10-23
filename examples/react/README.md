@@ -172,7 +172,7 @@ Comprehensive invalid cases:
 - Empty arbitrary values: `w-[]`, `bg-[]`
 - Malformed: `hover::bg-blue`, `:hover:bg-blue`, `bg-blue-`
 - CSS/SCSS typos: `containr`, `buton-primary`, `crd`
-- Non-whitelisted: `random-class-123`, `not-in-css`
+- Non-allowlisted: `random-class-123`, `not-in-css`
 
 Run: `pnpm run test:comprehensive-invalid`
 
@@ -217,7 +217,7 @@ rules: {
         tailwind: true,
       },
       validation: {
-        whitelist: ['custom-*'],
+        allowlist: ['custom-*'],
         ignorePatterns: ['dynamic-*'],
       },
     },

@@ -81,14 +81,14 @@ export interface ValidationConfig {
    * Supports glob patterns and regular expressions
    * @example ["custom-*", "app-*"]
    */
-  whitelist?: string[]
+  allowlist?: string[]
 
   /**
    * Array of class name patterns that are forbidden
    * Supports glob patterns and regular expressions
    * @example ["legacy-*", "deprecated-*"]
    */
-  blacklist?: string[]
+  blocklist?: string[]
 
   /**
    * Array of patterns to skip validation for

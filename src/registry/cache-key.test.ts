@@ -50,7 +50,7 @@ describe('createCacheKey', () => {
       expect(hash1).not.toBe(hash2)
     })
 
-    it('should generate different hashes for different whitelist arrays', () => {
+    it('should generate different hashes for different allowlist arrays', () => {
       const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
 
       const hash1 = createCacheKey(files, ['custom-*'], undefined, '/cwd')
@@ -168,7 +168,7 @@ describe('createCacheKey', () => {
       expect(hash.length).toBe(64)
     })
 
-    it('should handle empty whitelist array', () => {
+    it('should handle empty allowlist array', () => {
       const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
       const hash = createCacheKey(files, [], undefined, '/cwd')
 
@@ -200,7 +200,7 @@ describe('createCacheKey', () => {
       expect(hash).toMatch(/^[a-f0-9]{64}$/)
     })
 
-    it('should handle special characters in whitelist patterns', () => {
+    it('should handle special characters in allowlist patterns', () => {
       const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
       const whitelist = ['custom-*', 'app.btn-*', '[data-*]']
 
@@ -224,9 +224,9 @@ describe('createCacheKey', () => {
       expect(endTime - startTime).toBeLessThan(50) // Should complete in < 50ms
     })
 
-    it('should handle large whitelist arrays', () => {
+    it('should handle large allowlist arrays', () => {
       const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
-      // Create 500 whitelist patterns
+      // Create 500 allowlist patterns
       const whitelist = Array.from({ length: 500 }, (_, i) => `pattern-${i}-*`)
 
       const hash = createCacheKey(files, whitelist, undefined, '/cwd')
@@ -256,8 +256,8 @@ describe('createCacheKey', () => {
     })
   })
 
-  describe('whitelist ordering', () => {
-    it('should generate different hashes for different whitelist order', () => {
+  describe('allowlist ordering', () => {
+    it('should generate different hashes for different allowlist order', () => {
       const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
 
       const hash1 = createCacheKey(
@@ -276,7 +276,7 @@ describe('createCacheKey', () => {
       expect(hash1).not.toBe(hash2)
     })
 
-    it('should generate same hash for identical whitelist order', () => {
+    it('should generate same hash for identical allowlist order', () => {
       const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
 
       const hash1 = createCacheKey(

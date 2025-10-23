@@ -23,7 +23,7 @@ export interface ClassRegistry {
    * Checks if a class name is a valid Tailwind class (excludes CSS classes)
    * Used when validating classes with Tailwind variants
    * @param className - The class name to validate
-   * @returns true if the class name is a Tailwind utility or matches whitelist pattern
+   * @returns true if the class name is a Tailwind utility or matches allowlist pattern
    */
   isTailwindClass(className: string): boolean
 
@@ -41,14 +41,14 @@ export interface ClassRegistry {
 }
 
 /**
- * Builds a class registry from CSS files, Tailwind config, and whitelist patterns
+ * Builds a class registry from CSS files, Tailwind config, and allowlist patterns
  *
  * Note: Uses synchronous file I/O (fs.readFileSync) because ESLint rules must be
  * synchronous. Performance impact is mitigated by the caching strategy - files are
  * only read when the cache is invalid (i.e., when configuration or files change).
  *
  * @param resolvedFiles - Pre-resolved CSS files with paths and mtimes
- * @param whitelist - Array of class name patterns (supports wildcards)
+ * @param allowlist - Array of class name patterns (supports wildcards)
  * @param tailwindClasses - Pre-loaded Tailwind classes (optional)
  * @param validVariants - Pre-loaded valid Tailwind variants (optional)
  * @param cwd - Current working directory for resolving SCSS imports
@@ -56,7 +56,7 @@ export interface ClassRegistry {
  */
 export function buildClassRegistry(
   resolvedFiles: ResolvedFile[],
-  whitelist: string[],
+  allowlist: string[],
   tailwindClasses: Set<string> | undefined,
   validVariants: Set<string> | undefined,
   cwd: string,
@@ -64,7 +64,7 @@ export function buildClassRegistry(
   // Separate CSS classes from Tailwind classes
   const cssClasses = new Set<string>()
   const tailwindLiteralClasses = new Set<string>()
-  const whitelistLiteralClasses = new Set<string>()
+  const allowlistLiteralClasses = new Set<string>()
 
   // Extract classes from CSS files
   for (const file of resolvedFiles) {
@@ -86,10 +86,10 @@ export function buildClassRegistry(
     }
   }
 
-  // Add literal whitelist entries (non-wildcard patterns) to whitelist set
-  whitelist.forEach(pattern => {
+  // Add literal allowlist entries (non-wildcard patterns) to allowlist set
+  allowlist.forEach(pattern => {
     if (!pattern.includes('*')) {
-      whitelistLiteralClasses.add(pattern)
+      allowlistLiteralClasses.add(pattern)
     }
   })
 
@@ -98,8 +98,8 @@ export function buildClassRegistry(
     tailwindClasses.forEach(cls => tailwindLiteralClasses.add(cls))
   }
 
-  // Extract wildcard patterns from whitelist and compile them to RegExp
-  const wildcardPatterns = whitelist.filter(pattern => pattern.includes('*'))
+  // Extract wildcard patterns from allowlist and compile them to RegExp
+  const wildcardPatterns = allowlist.filter(pattern => pattern.includes('*'))
   const compiledWildcardPatterns = wildcardPatterns
     .map(compilePattern)
     .filter((regex): regex is RegExp => regex !== null)
@@ -112,11 +112,11 @@ export function buildClassRegistry(
   return {
     isValid(className: string): boolean {
       // Check source Sets in order of likelihood for early returns:
-      // 1. Whitelist (often matches dynamic patterns)
+      // 1. Allowlist (often matches dynamic patterns)
       // 2. Tailwind (most common in modern projects)
       // 3. CSS (project-specific classes)
       if (
-        whitelistLiteralClasses.has(className) ||
+        allowlistLiteralClasses.has(className) ||
         tailwindLiteralClasses.has(className) ||
         cssClasses.has(className)
       ) {
@@ -128,9 +128,9 @@ export function buildClassRegistry(
     },
 
     isTailwindClass(className: string): boolean {
-      // Check only Tailwind and whitelist sources (excludes CSS)
+      // Check only Tailwind and allowlist sources (excludes CSS)
       if (
-        whitelistLiteralClasses.has(className) ||
+        allowlistLiteralClasses.has(className) ||
         tailwindLiteralClasses.has(className)
       ) {
         return true
@@ -145,7 +145,7 @@ export function buildClassRegistry(
       const allClasses = new Set<string>()
       cssClasses.forEach(cls => allClasses.add(cls))
       tailwindLiteralClasses.forEach(cls => allClasses.add(cls))
-      whitelistLiteralClasses.forEach(cls => allClasses.add(cls))
+      allowlistLiteralClasses.forEach(cls => allClasses.add(cls))
       return allClasses
     },
 

@@ -271,8 +271,8 @@ describe('buildClassRegistry', () => {
     })
   })
 
-  describe('whitelist handling', () => {
-    it('should add literal whitelist entries', () => {
+  describe('allowlist handling', () => {
+    it('should add literal allowlist entries', () => {
       const registry = buildClassRegistry(
         [],
         ['custom-class', 'another-class'],
@@ -286,7 +286,7 @@ describe('buildClassRegistry', () => {
       expect(registry.isValid('nonexistent')).toBe(false)
     })
 
-    it('should handle wildcard patterns in whitelist', () => {
+    it('should handle wildcard patterns in allowlist', () => {
       const registry = buildClassRegistry(
         [],
         ['custom-*', '*-suffix'],
@@ -301,7 +301,7 @@ describe('buildClassRegistry', () => {
       expect(registry.isValid('other-class')).toBe(false)
     })
 
-    it('should handle mixed literal and wildcard whitelist patterns', () => {
+    it('should handle mixed literal and wildcard allowlist patterns', () => {
       const registry = buildClassRegistry(
         [],
         ['literal-class', 'custom-*', 'another-literal'],
@@ -316,7 +316,7 @@ describe('buildClassRegistry', () => {
       expect(registry.isValid('nonexistent')).toBe(false)
     })
 
-    it('should include literal whitelist in getAllClasses', () => {
+    it('should include literal allowlist in getAllClasses', () => {
       const registry = buildClassRegistry(
         [],
         ['literal-class', 'custom-*'],
@@ -397,7 +397,7 @@ describe('buildClassRegistry', () => {
   })
 
   describe('combined sources', () => {
-    it('should combine CSS classes and whitelist', () => {
+    it('should combine CSS classes and allowlist', () => {
       const cssFile = path.join(tempDir, 'styles.css')
       fs.writeFileSync(cssFile, '.btn { color: red; }')
 
@@ -559,7 +559,7 @@ describe('buildClassRegistry', () => {
       expect(registry.isTailwindClass('p-4')).toBe(true)
     })
 
-    it('should return true for whitelist patterns', () => {
+    it('should return true for allowlist patterns', () => {
       const registry = buildClassRegistry(
         [],
         ['custom-*'],
@@ -590,7 +590,7 @@ describe('buildClassRegistry', () => {
       expect(registry.isTailwindClass('btn')).toBe(false)
     })
 
-    it('should exclude CSS but include Tailwind and whitelist', () => {
+    it('should exclude CSS but include Tailwind and allowlist', () => {
       const cssFile = path.join(tempDir, 'styles.css')
       fs.writeFileSync(cssFile, '.css-btn { color: red; }')
 
@@ -756,7 +756,7 @@ describe('buildClassRegistry', () => {
       expect(registry.getAllClasses().size).toBe(0)
     })
 
-    it('should handle empty whitelist array', () => {
+    it('should handle empty allowlist array', () => {
       const registry = buildClassRegistry(
         [],
         [],

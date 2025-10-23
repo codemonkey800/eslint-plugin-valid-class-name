@@ -35,38 +35,38 @@ ruleTester.run('valid-class-name', rule, {
       code: '<div />',
       filename: 'test.jsx',
     },
-    // With whitelist - exact matches
+    // With allowlist - exact matches
     {
       code: '<div className="custom-class" />',
       filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ['custom-class'],
+            allowlist: ['custom-class'],
           },
         },
       ],
     },
-    // With whitelist - multiple classes, all valid
+    // With allowlist - multiple classes, all valid
     {
       code: '<div className="foo bar baz" />',
       filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ['foo', 'bar', 'baz'],
+            allowlist: ['foo', 'bar', 'baz'],
           },
         },
       ],
     },
-    // With whitelist - glob pattern matching
+    // With allowlist - glob pattern matching
     {
       code: '<div className="btn-primary" />',
       filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ['btn-*'],
+            allowlist: ['btn-*'],
           },
         },
       ],
@@ -77,7 +77,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['text-*'],
+            allowlist: ['text-*'],
           },
         },
       ],
@@ -89,7 +89,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['static-class'],
+            allowlist: ['static-class'],
             ignorePatterns: ['dynamic-*'],
           },
         },
@@ -102,7 +102,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['foo', 'bar'],
+            allowlist: ['foo', 'bar'],
           },
         },
       ],
@@ -119,7 +119,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['foo', 'bar', 'baz'],
+            allowlist: ['foo', 'bar', 'baz'],
           },
         },
       ],
@@ -131,7 +131,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['foo', 'bar'],
+            allowlist: ['foo', 'bar'],
           },
         },
       ],
@@ -143,7 +143,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['*-middle-*'],
+            allowlist: ['*-middle-*'],
           },
         },
       ],
@@ -155,7 +155,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['foo', 'bar'],
+            allowlist: ['foo', 'bar'],
           },
         },
       ],
@@ -166,7 +166,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['btn-*'],
+            allowlist: ['btn-*'],
           },
         },
       ],
@@ -178,7 +178,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['foo', 'bar'],
+            allowlist: ['foo', 'bar'],
           },
         },
       ],
@@ -189,7 +189,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['btn-*', 'text-*'],
+            allowlist: ['btn-*', 'text-*'],
           },
         },
       ],
@@ -201,7 +201,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['foo', 'bar', 'baz'],
+            allowlist: ['foo', 'bar', 'baz'],
           },
         },
       ],
@@ -212,7 +212,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['base', 'container', 'active'],
+            allowlist: ['base', 'container', 'active'],
           },
         },
       ],
@@ -224,7 +224,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['foo', 'bar', 'baz'],
+            allowlist: ['foo', 'bar', 'baz'],
           },
         },
       ],
@@ -236,7 +236,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['foo', 'bar'],
+            allowlist: ['foo', 'bar'],
           },
         },
       ],
@@ -247,7 +247,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['foo', 'bar', 'baz'],
+            allowlist: ['foo', 'bar', 'baz'],
           },
         },
       ],
@@ -259,7 +259,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['flex', 'items-center', 'bg-*'],
+            allowlist: ['flex', 'items-center', 'bg-*'],
           },
         },
       ],
@@ -280,7 +280,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['foo', 'bar'],
+            allowlist: ['foo', 'bar'],
           },
         },
       ],
@@ -292,14 +292,14 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['foo', 'bar'],
+            allowlist: ['foo', 'bar'],
           },
         },
       ],
     },
   ],
   invalid: [
-    // No whitelist - all class names are invalid
+    // No allowlist - all class names are invalid
     {
       code: '<div className="any-class" />',
       filename: 'test.jsx',
@@ -342,14 +342,14 @@ ruleTester.run('valid-class-name', rule, {
         },
       ],
     },
-    // With whitelist - class not in list
+    // With allowlist - class not in list
     {
       code: '<div className="invalid-class" />',
       filename: 'test.jsx',
       options: [
         {
           validation: {
-            whitelist: ['valid-class'],
+            allowlist: ['valid-class'],
           },
         },
       ],
@@ -369,7 +369,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['foo', 'baz'],
+            allowlist: ['foo', 'baz'],
           },
         },
       ],
@@ -389,7 +389,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['valid-*'],
+            allowlist: ['valid-*'],
           },
         },
       ],
@@ -415,7 +415,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['btn-*'],
+            allowlist: ['btn-*'],
           },
         },
       ],
@@ -435,7 +435,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['valid-class'],
+            allowlist: ['valid-class'],
           },
         },
       ],
@@ -455,7 +455,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['valid-class'],
+            allowlist: ['valid-class'],
             ignorePatterns: ['dynamic-*'],
           },
         },
@@ -476,7 +476,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['valid-class'],
+            allowlist: ['valid-class'],
           },
         },
       ],
@@ -496,7 +496,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['valid-class'],
+            allowlist: ['valid-class'],
           },
         },
       ],
@@ -516,7 +516,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['valid-class'],
+            allowlist: ['valid-class'],
           },
         },
       ],
@@ -536,7 +536,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['valid-class'],
+            allowlist: ['valid-class'],
           },
         },
       ],
@@ -556,7 +556,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            whitelist: ['valid-class'],
+            allowlist: ['valid-class'],
           },
         },
       ],
@@ -642,7 +642,7 @@ ruleTester.run('valid-class-name', rule, {
               css: [path.join(tempDir, 'styles2.css')],
             },
             validation: {
-              whitelist: ['custom-*'],
+              allowlist: ['custom-*'],
             },
           },
         ],
@@ -686,7 +686,7 @@ ruleTester.run('valid-class-name', rule, {
               css: [path.join(tempDir, 'styles2.css')],
             },
             validation: {
-              whitelist: ['custom-*'],
+              allowlist: ['custom-*'],
             },
           },
         ],
@@ -723,7 +723,7 @@ describe('Tailwind variant validation', () => {
         },
       },
       validation: {
-        whitelist: ['mt-2', 'bg-blue-500', 'text-lg', 'opacity-100', 'ring-2'],
+        allowlist: ['mt-2', 'bg-blue-500', 'text-lg', 'opacity-100', 'ring-2'],
       },
     },
   ]
@@ -959,7 +959,7 @@ describe('Tailwind variant validation', () => {
               },
             ],
           },
-          // Whitelist pattern with variants should be valid
+          // Allowlist pattern with variants should be valid
           {
             code: '<div className="hover:custom-button" />',
             filename: 'test.jsx',
@@ -974,7 +974,7 @@ describe('Tailwind variant validation', () => {
                   },
                 },
                 validation: {
-                  whitelist: ['custom-*'],
+                  allowlist: ['custom-*'],
                 },
               },
             ],
@@ -1073,7 +1073,7 @@ describe('Dynamic class names - ConditionalExpression', () => {
   const options = [
     {
       validation: {
-        whitelist: ['opacity-0', 'opacity-1', 'bg-blue-500', 'bg-gray-500'],
+        allowlist: ['opacity-0', 'opacity-1', 'bg-blue-500', 'bg-gray-500'],
       },
     },
   ]
@@ -1169,7 +1169,7 @@ describe('Dynamic class names - LogicalExpression', () => {
   const options = [
     {
       validation: {
-        whitelist: ['opacity-0', 'opacity-50', 'flex', 'mt-2'],
+        allowlist: ['opacity-0', 'opacity-50', 'flex', 'mt-2'],
       },
     },
   ]
@@ -1255,7 +1255,7 @@ describe('Dynamic class names - CallExpression', () => {
   const options = [
     {
       validation: {
-        whitelist: ['mt-2', 'opacity-0', 'bg-blue-500', 'flex', 'items-center'],
+        allowlist: ['mt-2', 'opacity-0', 'bg-blue-500', 'flex', 'items-center'],
       },
     },
   ]
@@ -1370,7 +1370,7 @@ describe('Dynamic class names - TemplateLiteral and edge cases', () => {
   const options = [
     {
       validation: {
-        whitelist: ['flex', 'opacity-0', 'mt-2'],
+        allowlist: ['flex', 'opacity-0', 'mt-2'],
       },
     },
   ]
@@ -1465,7 +1465,7 @@ describe('Dynamic class names - Advanced cases', () => {
   const options = [
     {
       validation: {
-        whitelist: [
+        allowlist: [
           'flex',
           'opacity-0',
           'mt-2',
@@ -1929,7 +1929,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2', 'p-4'],
+                  allowlist: ['mt-2', 'p-4'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -1942,7 +1942,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2', 'mt-4'],
+                  allowlist: ['mt-2', 'mt-4'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -1955,7 +1955,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2'],
+                  allowlist: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -1968,7 +1968,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2', 'p-4'],
+                  allowlist: ['mt-2', 'p-4'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -1981,7 +1981,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2'],
+                  allowlist: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -1994,7 +1994,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2'],
+                  allowlist: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2007,7 +2007,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['foo', 'bar'],
+                  allowlist: ['foo', 'bar'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2020,7 +2020,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2'],
+                  allowlist: ['mt-2'],
                   objectStyleAttributes: ['classNames'],
                 },
               },
@@ -2033,7 +2033,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2'],
+                  allowlist: ['mt-2'],
                   objectStyleAttributes: ['sx'],
                 },
               },
@@ -2046,7 +2046,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2', 'p-4'],
+                  allowlist: ['mt-2', 'p-4'],
                   objectStyleAttributes: ['classes', 'classNames'],
                 },
               },
@@ -2059,7 +2059,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2'],
+                  allowlist: ['mt-2'],
                   // objectStyleAttributes not configured
                 },
               },
@@ -2072,7 +2072,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2', 'flex', 'items-center', 'p-4', 'rounded'],
+                  allowlist: ['mt-2', 'flex', 'items-center', 'p-4', 'rounded'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2085,7 +2085,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2'],
+                  allowlist: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2100,7 +2100,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2'],
+                  allowlist: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2119,7 +2119,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2'],
+                  allowlist: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2142,7 +2142,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2'],
+                  allowlist: ['mt-2'],
                   objectStyleAttributes: ['classNames'],
                 },
               },
@@ -2161,7 +2161,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2'],
+                  allowlist: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2180,7 +2180,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2'],
+                  allowlist: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2199,7 +2199,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  whitelist: ['mt-2'],
+                  allowlist: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },

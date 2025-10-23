@@ -622,6 +622,186 @@ The plugin uses a multi-layered architecture:
 - **CSS Modules**: Out of scope for this plugin. CSS/SCSS modules are best validated using dedicated type generation tools like [typed-css-modules](https://github.com/Quramy/typed-css-modules) for CSS and [typed-scss-modules](https://github.com/skovy/typed-scss-modules) for SCSS. These tools generate TypeScript declaration files that provide both type safety and IDE autocomplete.
 - **Direct Assignment Limitation**: Arrays and objects are validated when used within function calls like `clsx()` or `classnames()`. Direct assignment like `className={['foo']}` or `className={{ foo: true }}` won't be validated because React doesn't support these patterns (React expects className to be a string).
 
+## Roadmap
+
+We're actively developing this plugin and listening to community feedback. Here's what's coming and what's being considered.
+
+### Planned Features
+
+Features we're actively planning to implement:
+
+#### 🏷️ Tagged Template Support
+
+**Status:** Planned for v1.x
+
+Support for validating class names in tagged template literals used by CSS-in-JS libraries:
+
+```tsx
+// twin.macro
+const Button = tw`bg-blue-500 hover:bg-blue-600 p-4`
+
+// styled-components with Tailwind
+const Card = styled.div`flex items-center mt-4`
+
+// emotion
+const styles = css`rounded-lg shadow-md`
+
+// With expressions
+const Button = tw`mt-2 ${isActive && 'bg-green-500'}`
+```
+
+**Configuration:**
+
+```javascript
+{
+  sources: { tailwind: true },
+  tags: ['tw', 'css', 'styled']  // Enable validation for these tags
+}
+```
+
+**Use case:** Popular in projects using twin.macro, tailwind-styled-components, or emotion with Tailwind CSS.
+
+See [TAGGED_TEMPLATE_IMPL.md](TAGGED_TEMPLATE_IMPL.md) for implementation details.
+
+#### 📞 Standalone Callee Validation
+
+**Status:** Planned for v1.x
+
+Validate `clsx()`, `classnames()`, and other utility function calls outside JSX attributes.
+
+**Current behavior:** Only validates callees inside JSX expressions:
+
+```tsx
+// ✅ Currently validated
+<div className={clsx('flex', 'items-center')} />
+```
+
+**New behavior:** Will also validate standalone calls:
+
+```tsx
+// ✅ Will be validated
+const buttonClasses = clsx('btn', isActive && 'btn-active')
+const cardStyles = classnames({ 'card': true, 'card-elevated': elevated })
+```
+
+**Configuration:**
+
+```javascript
+{
+  callees: ['clsx', 'classnames', 'cn', 'cva']  // Specify which functions to validate
+}
+```
+
+#### 🔤 Advanced Pattern Matching
+
+**Status:** Planned for v1.x
+
+Full regular expression support in `allowlist` and `blocklist` patterns.
+
+**Current:** Only supports glob-style wildcards (`*`)
+
+```javascript
+{
+  allowlist: ['custom-*', 'app-*']  // ✅ Currently supported
+}
+```
+
+**New:** Full regex patterns with advanced features:
+
+```javascript
+{
+  allowlist: [
+    'custom-*',                  // Wildcards still supported
+    'skin\\-(summer|xmas)',      // Regex alternation
+    '(?!(bg|text)\\-).*'         // Negative lookahead - "everything except bg-* and text-*"
+  ],
+  blocklist: [
+    'legacy-v[12]-.*',           // Block legacy-v1-* and legacy-v2-*
+    '^old-(btn|card|modal)$'     // Exact matches only
+  ]
+}
+```
+
+**Use cases:**
+- Complex naming patterns from design systems
+- Fine-grained control over allowed/blocked classes
+- Migration scenarios with specific class patterns
+
+### Framework Support
+
+Currently, the plugin focuses on React/JSX. Based on community demand, we're considering support for additional frameworks:
+
+#### Vue.js
+
+**Status:** Under consideration
+
+Validate class names in Vue templates and components.
+
+**Patterns that would be supported:**
+
+```vue
+<!-- Static classes -->
+<div class="flex items-center"></div>
+
+<!-- v-bind shorthand -->
+<div :class="dynamicClass"></div>
+
+<!-- v-bind long form -->
+<div v-bind:class="computedClass"></div>
+
+<!-- Array syntax -->
+<div :class="['flex', isActive && 'bg-blue-500']"></div>
+
+<!-- Object syntax -->
+<div :class="{ 'active': isActive, 'disabled': isDisabled }"></div>
+```
+
+#### Angular
+
+**Status:** Under consideration
+
+Validate class names in Angular templates.
+
+**Patterns that would be supported:**
+
+```html
+<!-- Static classes -->
+<div class="flex items-center"></div>
+
+<!-- Property binding -->
+<div [class]="dynamicClass"></div>
+
+<!-- ngClass directive -->
+<div [ngClass]="{'active': isActive, 'disabled': isDisabled}"></div>
+```
+
+#### Svelte
+
+**Status:** Under consideration
+
+Validate class names in Svelte components.
+
+**Patterns that would be supported:**
+
+```svelte
+<!-- Static classes -->
+<div class="flex items-center"></div>
+
+<!-- Dynamic classes -->
+<div class={dynamicClass}></div>
+
+<!-- Conditional classes -->
+<div class:active={isActive} class:disabled={isDisabled}></div>
+```
+
+**Note:** Framework support depends on community demand and maintainer bandwidth. If you'd like to see support for a specific framework, please [open an issue](https://github.com/your-username/eslint-plugin-valid-class-name/issues) with your use case and examples.
+
+### Other Features Under Consideration
+
+- **Custom Group/Peer Names** - Support Tailwind's custom group names like `group/edit:opacity-50`, `peer/draft:text-gray-400`
+- **Tailwind v4 Support** - When Tailwind v4 becomes stable, add async validation support via worker threads
+- **Configuration Profiles** - Preset configurations for common setups (e.g., Material-UI, Chakra UI, DaisyUI)
+
 ## Development
 
 For development instructions, architecture details, and contributing guidelines, see [CLAUDE.md](CLAUDE.md).

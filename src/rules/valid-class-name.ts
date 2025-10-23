@@ -74,10 +74,6 @@ export const validClassNameRule: Rule.RuleModule = {
                 description:
                   'Enable Tailwind CSS validation or provide configuration',
               },
-              cssModules: {
-                type: 'boolean',
-                description: 'Enable CSS Modules support',
-              },
             },
             additionalProperties: false,
           },

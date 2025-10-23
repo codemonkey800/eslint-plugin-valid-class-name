@@ -39,12 +39,6 @@ export interface SourcesConfig {
    * - Provide an object to specify custom configuration
    */
   tailwind?: boolean | TailwindConfig
-
-  /**
-   * Enable CSS Modules support
-   * When enabled, validates class names against CSS Module files
-   */
-  cssModules?: boolean
 }
 
 /**

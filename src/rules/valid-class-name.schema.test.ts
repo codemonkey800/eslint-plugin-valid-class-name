@@ -83,28 +83,6 @@ ruleTester.run(
         ],
       },
       {
-        code: '<div />',
-        filename: 'test.jsx',
-        options: [
-          {
-            sources: {
-              cssModules: true,
-            },
-          },
-        ],
-      },
-      {
-        code: '<div />',
-        filename: 'test.jsx',
-        options: [
-          {
-            sources: {
-              cssModules: false,
-            },
-          },
-        ],
-      },
-      {
         code: '<div className="custom-btn" />',
         filename: 'test.jsx',
         options: [
@@ -148,7 +126,6 @@ ruleTester.run(
               tailwind: {
                 config: './tailwind.config.js',
               },
-              cssModules: true,
             },
             validation: {
               allowlist: ['custom-*'],

@@ -13,6 +13,9 @@ import { logger } from 'src/utils/logger'
 import { DEFAULT_TAILWIND_VARIANTS } from 'src/utils/tailwind-variants'
 import { isResolvedTailwindConfig } from 'src/utils/type-guards'
 
+// Create a require function for loading CommonJS modules from ES modules
+const require = createRequire(import.meta.url)
+
 /**
  * Result of loading Tailwind configuration
  */
@@ -32,9 +35,6 @@ export function loadTailwindClassesSync(
   tailwindConfig: boolean | TailwindConfig,
   cwd: string,
 ): TailwindLoadResult {
-  // Create a require function for loading CommonJS modules from ES modules
-  const require = createRequire(import.meta.url)
-
   const configPath =
     typeof tailwindConfig === 'object' ? tailwindConfig.config : undefined
 

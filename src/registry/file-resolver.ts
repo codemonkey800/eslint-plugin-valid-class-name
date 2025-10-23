@@ -39,14 +39,13 @@ let globCacheEntry: GlobCacheEntry | null = null
  * @returns true if arrays have the same elements in the same order
  */
 function arraysEqual(arr1: string[], arr2: string[]): boolean {
-  if (arr1.length !== arr2.length) return false
-  return arr1.every((val, idx) => val === arr2[idx])
+  return arr1.length === arr2.length && arr1.every((val, idx) => val === arr2[idx])
 }
 
 /**
- * Gets cached glob resolution results or resolves files fresh with mtime validation
+ * Gets cached glob resolution results or resolves files fresh
  * This function caches glob results to avoid expensive file system operations on every call.
- * Cache is valid for GLOB_CACHE_TTL_MS and requires all cached files to have unchanged mtimes.
+ * Cache is valid for GLOB_CACHE_TTL_MS (1 second) without revalidation.
  *
  * @param patterns - Glob patterns for CSS files
  * @param cwd - Current working directory for resolving relative paths
@@ -70,20 +69,7 @@ export function getCachedOrResolveFiles(
     globCacheEntry.cwd === cwd &&
     now - globCacheEntry.timestamp < GLOB_CACHE_TTL_MS
   ) {
-    // Validate that cached files haven't changed
-    const allValid = globCacheEntry.resolvedFiles.every(file => {
-      try {
-        const stats = fs.statSync(file.path)
-        return stats.mtimeMs === file.mtime
-      } catch {
-        // File was deleted or can't be read
-        return false
-      }
-    })
-
-    if (allValid) {
-      return globCacheEntry.resolvedFiles // Cache hit!
-    }
+    return globCacheEntry.resolvedFiles // Cache hit!
   }
 
   // Cache miss, expired, or invalidated - do full resolution

@@ -251,7 +251,7 @@ describe('file-resolver', () => {
         expect(files1).not.toBe(files2)
       })
 
-      it('should invalidate cache when file mtime changes', () => {
+      it('should use cached data within TTL even when file changes', () => {
         const cssFile = path.join(tempDir, 'styles.css')
         fs.writeFileSync(cssFile, '.btn {}')
 
@@ -261,13 +261,14 @@ describe('file-resolver', () => {
         const newTime = Date.now() + 100
         fs.utimesSync(cssFile, new Date(newTime), new Date(newTime))
 
+        // Within TTL, should return cached results (same reference)
         const files2 = getCachedOrResolveFiles([`${tempDir}/*.css`], tempDir)
 
-        expect(files1).not.toBe(files2)
-        expect(files1[0].mtime).not.toBe(files2[0].mtime)
+        expect(files1).toBe(files2)
+        expect(files1[0].mtime).toBe(files2[0].mtime)
       })
 
-      it('should invalidate cache when file is deleted', () => {
+      it('should use cached data within TTL even when file is deleted', () => {
         const cssFile = path.join(tempDir, 'styles.css')
         fs.writeFileSync(cssFile, '.btn {}')
 
@@ -277,10 +278,11 @@ describe('file-resolver', () => {
         // Delete file
         fs.unlinkSync(cssFile)
 
+        // Within TTL, should return cached results (same reference)
         const files2 = getCachedOrResolveFiles([`${tempDir}/*.css`], tempDir)
 
-        expect(files1).not.toBe(files2)
-        expect(files2).toHaveLength(0)
+        expect(files1).toBe(files2)
+        expect(files2).toHaveLength(1)
       })
 
       it('should detect new files after TTL expiry', () => {
@@ -339,53 +341,6 @@ describe('file-resolver', () => {
         // Use approximate equality since file system times can have precision variations
         expect(Math.abs((file1?.mtime ?? 0) - time1)).toBeLessThan(2)
         expect(Math.abs((file2?.mtime ?? 0) - time2)).toBeLessThan(2)
-      })
-
-      it('should validate all files have unchanged mtimes for cache hit', () => {
-        const css1 = path.join(tempDir, 'file1.css')
-        const css2 = path.join(tempDir, 'file2.css')
-
-        fs.writeFileSync(css1, '.btn {}')
-        fs.writeFileSync(css2, '.card {}')
-
-        const files1 = getCachedOrResolveFiles([`${tempDir}/*.css`], tempDir)
-
-        // Modify one file's mtime
-        const newTime = Date.now() + 100
-        fs.utimesSync(css1, new Date(newTime), new Date(newTime))
-
-        const files2 = getCachedOrResolveFiles([`${tempDir}/*.css`], tempDir)
-
-        // Cache should be invalidated because one file changed
-        expect(files1).not.toBe(files2)
-      })
-
-      it('should handle file stat errors gracefully', () => {
-        const cssFile = path.join(tempDir, 'styles.css')
-        fs.writeFileSync(cssFile, '.btn {}')
-
-        const files1 = getCachedOrResolveFiles([`${tempDir}/*.css`], tempDir)
-        expect(files1).toHaveLength(1)
-
-        // Make file unreadable (simulate permission error)
-        // Note: This is platform-dependent; on some systems this might not work
-        try {
-          fs.chmodSync(cssFile, 0o000)
-
-          const files2 = getCachedOrResolveFiles([`${tempDir}/*.css`], tempDir)
-
-          // Should handle error and re-resolve
-          expect(files2).toBeDefined()
-        } catch {
-          // Skip test if chmod not supported (e.g., on Windows)
-        } finally {
-          // Always restore permissions
-          try {
-            fs.chmodSync(cssFile, 0o644)
-          } catch {
-            // Ignore if already restored or not possible
-          }
-        }
       })
     })
 

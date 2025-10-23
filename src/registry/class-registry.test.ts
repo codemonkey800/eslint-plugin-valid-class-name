@@ -487,7 +487,7 @@ describe('ClassRegistry', () => {
       const newTime = Date.now() + 100
       fs.utimesSync(cssFile, new Date(newTime), new Date(newTime))
 
-      // Second call - should detect mtime change and invalidate cache
+      // Second call within TTL - should use cached registry
       const registry2 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
@@ -495,8 +495,8 @@ describe('ClassRegistry', () => {
         tempDir,
       )
 
-      // Should rebuild registry due to changed mtime
-      expect(registry1).not.toBe(registry2)
+      // Should use cached registry (same reference) within TTL
+      expect(registry1).toBe(registry2)
     })
 
     it('should invalidate glob cache when file is deleted', () => {
@@ -516,7 +516,7 @@ describe('ClassRegistry', () => {
       // Delete file
       fs.unlinkSync(cssFile)
 
-      // Second call - should detect file deletion and invalidate cache
+      // Second call within TTL - should use cached registry
       const registry2 = getClassRegistry(
         [path.join(tempDir, '*.css')],
         [],
@@ -524,8 +524,10 @@ describe('ClassRegistry', () => {
         tempDir,
       )
 
-      expect(registry1).not.toBe(registry2)
-      expect(registry2.isValid('btn')).toBe(false)
+      // Should use cached registry (same reference) within TTL
+      expect(registry1).toBe(registry2)
+      // Class is still valid because we're using the cached registry
+      expect(registry2.isValid('btn')).toBe(true)
     })
 
     it('should invalidate glob cache after TTL expires', () => {

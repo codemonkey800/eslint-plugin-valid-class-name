@@ -26,10 +26,52 @@ interface JSXExpressionContainer {
   expression: Literal | Expression
 }
 
-interface Expression {
+interface ConditionalExpression {
+  type: 'ConditionalExpression'
+  test: Expression
+  consequent: Expression
+  alternate: Expression
+}
+
+interface LogicalExpression {
+  type: 'LogicalExpression'
+  operator: '&&' | '||' | '??'
+  left: Expression
+  right: Expression
+}
+
+interface CallExpression {
+  type: 'CallExpression'
+  callee: Expression
+  arguments: Expression[]
+}
+
+interface TemplateLiteral {
+  type: 'TemplateLiteral'
+  quasis: Array<{
+    type: 'TemplateElement'
+    value: {
+      cooked: string | null
+      raw: string
+    }
+  }>
+  expressions: Expression[]
+}
+
+// Catch-all for expression types we don't explicitly handle
+// These will be skipped during validation (e.g., variables, complex expressions)
+interface UnknownExpression {
   type: string
   [key: string]: unknown
 }
+
+type Expression =
+  | Literal
+  | ConditionalExpression
+  | LogicalExpression
+  | CallExpression
+  | TemplateLiteral
+  | UnknownExpression
 
 interface JSXAttribute {
   type: 'JSXAttribute'
@@ -89,6 +131,114 @@ function isClassNameIgnored(
   return ignorePatterns.some(pattern => matchesPattern(className, pattern))
 }
 
+/**
+ * Type guard to check if an expression is a Literal
+ */
+function isLiteral(expression: Expression): expression is Literal {
+  return expression.type === 'Literal'
+}
+
+/**
+ * Type guard to check if an expression is a TemplateLiteral
+ */
+function isTemplateLiteral(
+  expression: Expression,
+): expression is TemplateLiteral {
+  return expression.type === 'TemplateLiteral'
+}
+
+/**
+ * Type guard to check if an expression is a ConditionalExpression
+ */
+function isConditionalExpression(
+  expression: Expression,
+): expression is ConditionalExpression {
+  return expression.type === 'ConditionalExpression'
+}
+
+/**
+ * Type guard to check if an expression is a LogicalExpression
+ */
+function isLogicalExpression(
+  expression: Expression,
+): expression is LogicalExpression {
+  return expression.type === 'LogicalExpression'
+}
+
+/**
+ * Type guard to check if an expression is a CallExpression
+ */
+function isCallExpression(
+  expression: Expression,
+): expression is CallExpression {
+  return expression.type === 'CallExpression'
+}
+
+/**
+ * Recursively extracts all static string literals from an expression tree
+ * This enables validation of class names in dynamic expressions like:
+ * - Ternary: condition ? 'class1' : 'class2'
+ * - Logical: condition && 'class1'
+ * - Function calls: cns('class1', condition && 'class2')
+ *
+ * @param expression - The expression to extract strings from
+ * @returns Array of class strings found in the expression
+ */
+function extractClassStringsFromExpression(expression: Expression): string[] {
+  const results: string[] = []
+
+  // Handle string literals
+  if (isLiteral(expression)) {
+    if (typeof expression.value === 'string') {
+      results.push(expression.value)
+    }
+    return results
+  }
+
+  // Handle template literals (only if no interpolation)
+  if (isTemplateLiteral(expression)) {
+    // Only handle template literals with no interpolation (static strings)
+    if (expression.expressions.length === 0) {
+      const cooked = expression.quasis[0]?.value?.cooked
+      if (typeof cooked === 'string') {
+        results.push(cooked)
+      }
+    }
+    return results
+  }
+
+  // Handle conditional expressions (ternary operator)
+  // Example: condition ? 'class1' : 'class2'
+  if (isConditionalExpression(expression)) {
+    results.push(...extractClassStringsFromExpression(expression.consequent))
+    results.push(...extractClassStringsFromExpression(expression.alternate))
+    return results
+  }
+
+  // Handle logical expressions (&&, ||, and ?? operators)
+  // Example: condition && 'class1' or 'class1' || 'class2'
+  if (isLogicalExpression(expression)) {
+    // Extract from both sides since either could contain class strings
+    results.push(...extractClassStringsFromExpression(expression.left))
+    results.push(...extractClassStringsFromExpression(expression.right))
+    return results
+  }
+
+  // Handle function calls (e.g., cns(), clsx(), classnames())
+  // Example: cns('class1', condition && 'class2')
+  if (isCallExpression(expression)) {
+    // Recursively extract from all arguments
+    for (const arg of expression.arguments) {
+      results.push(...extractClassStringsFromExpression(arg))
+    }
+    return results
+  }
+
+  // For all other expression types (variables, complex expressions, etc.),
+  // we can't statically extract class names, so skip validation
+  return results
+}
+
 const rule: Rule.RuleModule = {
   meta: {
     type: 'problem',
@@ -134,6 +284,11 @@ const rule: Rule.RuleModule = {
                       config: {
                         type: 'string',
                         description: 'Path to Tailwind configuration file',
+                      },
+                      includePluginClasses: {
+                        type: 'boolean',
+                        description:
+                          'Whether to include plugin-generated classes via Tailwind build process',
                       },
                     },
                     additionalProperties: false,
@@ -204,92 +359,92 @@ const rule: Rule.RuleModule = {
           return
         }
 
-        // Extract the class string from the attribute value
-        let classString: string | null = null
+        // Extract class strings from the attribute value
+        let classStrings: string[] = []
 
         if (node.value?.type === 'Literal') {
           // Handle direct string literal: <div className="foo bar" />
           const value = node.value.value
           if (typeof value === 'string') {
-            classString = value
+            classStrings.push(value)
           }
         } else if (node.value?.type === 'JSXExpressionContainer') {
-          // Handle JSXExpressionContainer: <div className={"foo bar"} />
+          // Handle JSXExpressionContainer with dynamic expressions:
+          // - String literals: <div className={"foo bar"} />
+          // - Ternary: <div className={condition ? "foo" : "bar"} />
+          // - Logical: <div className={condition && "foo"} />
+          // - Function calls: <div className={cns("foo", condition && "bar")} />
           const expression = node.value.expression
-          if (expression.type === 'Literal') {
-            const value = (expression as Literal).value
-            if (typeof value === 'string') {
-              classString = value
-            }
-          }
-          // For other expression types (variables, template literals, etc.),
-          // skip validation for now - will be handled in Phase 5: Dynamic Classes
+          classStrings = extractClassStringsFromExpression(expression)
         }
 
-        // If we couldn't extract a class string, skip validation
-        if (classString === null) {
+        // If we couldn't extract any class strings, skip validation
+        if (classStrings.length === 0) {
           return
         }
 
-        // Extract individual class names from the string
-        const classNames = extractClassNamesFromString(classString)
+        // Process each class string
+        for (const classString of classStrings) {
+          // Extract individual class names from the string
+          const classNames = extractClassNamesFromString(classString)
 
-        // Validate each class name
-        for (const className of classNames) {
-          // Parse className to extract variants and base utility
-          const { variants, base } = parseClassName(className)
+          // Validate each class name
+          for (const className of classNames) {
+            // Parse className to extract variants and base utility
+            const { variants, base } = parseClassName(className)
 
-          // Skip if the BASE matches an ignore pattern (not full className)
-          if (isClassNameIgnored(base, ignorePatterns)) {
-            continue
-          }
-
-          // Validate variants if present
-          const validVariants = classRegistry.getValidVariants()
-          const hasTailwindVariants =
-            variants.length > 0 && validVariants.size > 0
-
-          if (hasTailwindVariants) {
-            const { valid, invalidVariant } = validateVariants(
-              variants,
-              validVariants,
-            )
-
-            if (!valid && invalidVariant) {
-              context.report({
-                node,
-                messageId: 'invalidVariant',
-                data: {
-                  variant: invalidVariant,
-                  className,
-                },
-              })
+            // Skip if the BASE matches an ignore pattern (not full className)
+            if (isClassNameIgnored(base, ignorePatterns)) {
               continue
             }
-          }
 
-          // Check if the base utility uses arbitrary value syntax
-          // Arbitrary values (e.g., w-[100px], bg-[#1da1f2]) bypass registry validation
-          if (isValidArbitraryValue(base)) {
-            // Valid arbitrary value, skip further validation
-            continue
-          }
+            // Validate variants if present
+            const validVariants = classRegistry.getValidVariants()
+            const hasTailwindVariants =
+              variants.length > 0 && validVariants.size > 0
 
-          // Validate base utility
-          // When Tailwind variants are present, only validate against Tailwind classes
-          // Otherwise, validate against all sources (CSS, Tailwind, whitelist)
-          const isValidBase = hasTailwindVariants
-            ? classRegistry.isTailwindClass(base)
-            : classRegistry.isValid(base)
+            if (hasTailwindVariants) {
+              const { valid, invalidVariant } = validateVariants(
+                variants,
+                validVariants,
+              )
 
-          if (!isValidBase) {
-            context.report({
-              node,
-              messageId: 'invalidClassName',
-              data: {
-                className: base,
-              },
-            })
+              if (!valid && invalidVariant) {
+                context.report({
+                  node,
+                  messageId: 'invalidVariant',
+                  data: {
+                    variant: invalidVariant,
+                    className,
+                  },
+                })
+                continue
+              }
+            }
+
+            // Check if the base utility uses arbitrary value syntax
+            // Arbitrary values (e.g., w-[100px], bg-[#1da1f2]) bypass registry validation
+            if (isValidArbitraryValue(base)) {
+              // Valid arbitrary value, skip further validation
+              continue
+            }
+
+            // Validate base utility
+            // When Tailwind variants are present, only validate against Tailwind classes
+            // Otherwise, validate against all sources (CSS, Tailwind, whitelist)
+            const isValidBase = hasTailwindVariants
+              ? classRegistry.isTailwindClass(base)
+              : classRegistry.isValid(base)
+
+            if (!isValidBase) {
+              context.report({
+                node,
+                messageId: 'invalidClassName',
+                data: {
+                  className: base,
+                },
+              })
+            }
           }
         }
       },

@@ -89,9 +89,26 @@ Integrate Sass compiler for SCSS files. Handle SCSS-specific features like nesti
 
 Connect to Tailwind configuration and generate utility classes. Support variants, arbitrary values, and custom utilities. Handle both JIT and AOT modes.
 
-### Phase 5: Dynamic Classes
+### Phase 5: Dynamic Classes (Partially Complete)
 
 Add support for template literals, conditional expressions, and utility functions like clsx. Implement configurable handling strategies for dynamic content.
+
+**✅ Completed:**
+
+- Ternary operators (ConditionalExpression): `condition ? 'class1' : 'class2'`
+- Logical expressions (LogicalExpression): `condition && 'class'`, `value || 'class'`, `value ?? 'class'`
+- Function calls (CallExpression): `cns()`, `clsx()`, `classnames()` with nested expressions
+- Template literals without interpolation: `` `class` ``
+- Recursive expression tree traversal to extract static strings
+- Deeply nested combinations of above patterns
+
+**⏸ Not Yet Implemented:**
+
+- Template literals with interpolation (currently skipped)
+- Object syntax: `{ 'class': condition }`
+- Array syntax: `['class1', condition && 'class2']`
+- Variables and identifiers (currently skipped)
+- Spread operators in class expressions
 
 ### Phase 6: Framework Support
 
@@ -495,13 +512,24 @@ Implement intelligent suggestions for typos, CSS Modules support, and performanc
 - Unused class detection
 - Class name refactoring tools
 
-### Dynamic Class Handling (Nice to Have)
+### Dynamic Class Handling
 
-- Parse template literals with static/dynamic parts
-- Handle conditional expressions
-- Support clsx/classnames utility patterns
-- Process computed property names
-- Implement configurable dynamic handling
+**✅ Implemented:**
+
+- [x] Parse template literals without interpolation (static only)
+- [x] Handle conditional expressions (ternary operators: `a ? 'b' : 'c'`)
+- [x] Support clsx/classnames/cns utility function patterns with nested expressions
+- [x] Handle logical expressions (&&, ||, ??)
+- [x] Recursive extraction of static strings from expression trees
+- [x] Support deeply nested combinations of all above patterns
+
+**⏸ Not Yet Implemented:**
+
+- [ ] Parse template literals with dynamic/interpolated parts (e.g., `` `flex-${direction}` ``)
+- [ ] Process computed property names
+- [ ] Support object syntax in utility functions (e.g., `clsx({ 'class': condition })`)
+- [ ] Support array syntax in utility functions (e.g., `clsx(['class1', condition && 'class2'])`)
+- [ ] Implement configurable dynamic handling strategies (strict vs permissive modes)
 
 ### Ecosystem Integration
 

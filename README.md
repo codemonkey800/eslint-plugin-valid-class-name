@@ -8,6 +8,7 @@ Catch typos and invalid class names at lint time, before they reach production. 
 
 - 📝 **CSS/SCSS Validation** - Parses your CSS and SCSS files to extract valid class names
 - 🎨 **Tailwind CSS Support** - Validates Tailwind utilities, variants, arbitrary values, and plugin-generated classes
+- 🔀 **Dynamic Expression Support** - Validates class names in ternaries, logical operators, and utility functions (cns/clsx/classnames)
 - ⭐ **Whitelist Patterns** - Define custom patterns that are always valid (supports glob-style wildcards)
 - 🚫 **Ignore Patterns** - Skip validation for dynamic or generated class names
 - ⚡ **High Performance** - Intelligent caching ensures fast linting even in large codebases
@@ -226,10 +227,40 @@ export default [
 // Ignored patterns (validation skipped)
 <div className="dynamic-class-123" />
 // (with ignorePatterns: ['dynamic-*'])
+```
 
-// Dynamic expressions (automatically skipped)
-<div className={dynamicClass} />
-<div className={`flex ${someVar}`} />
+### 🔀 Dynamic Expressions
+
+The plugin validates static class strings within dynamic expressions:
+
+```jsx
+// Ternary operators (validates both branches)
+<div className={isActive ? "bg-blue-500" : "bg-gray-300"} />
+<div className={size === 'large' ? "p-4 text-lg" : "p-2 text-sm"} />
+
+// Logical operators
+<div className={isDisabled && "opacity-50"} />
+<div className={customClass || "flex"} />
+<div className={value ?? "items-center"} />
+
+// Utility functions (cns, clsx, classnames)
+<div className={cns("flex", isActive && "bg-blue-500")} />
+<div className={clsx("p-4", condition ? "rounded" : "square")} />
+<div className={classnames("mt-2", isDisabled && "opacity-50")} />
+
+// Template literals without interpolation
+<div className={`flex items-center`} />
+
+// Nested combinations
+<div className={cns(
+  "container",
+  isActive ? (isLarge ? "p-4" : "p-2") : "p-1",
+  showBorder && "border"
+)} />
+
+// Note: Variables and template interpolations are skipped
+<div className={dynamicClass} />  {/* Skipped - can't validate variables */}
+<div className={`flex-${direction}`} />  {/* Skipped - has interpolation */}
 ```
 
 ### ❌ Invalid Code
@@ -257,21 +288,92 @@ export default [
 
 ### Edge Cases
 
-Dynamic class names and template literals are automatically skipped:
+**✅ What IS validated:**
+
+The plugin extracts and validates static string literals from dynamic expressions:
 
 ```jsx
-// These are NOT validated (no errors)
-<div className={dynamicClass} />
-<div className={`dynamic-${foo}`} />
+// Ternary expressions - BOTH branches are validated
 <div className={condition ? 'class-a' : 'class-b'} />
-```
 
-String literals in JSX expressions are validated:
+// Logical expressions - string literals are validated
+<div className={isDisabled && 'opacity-50'} />
 
-```jsx
-// This IS validated
+// Function calls - all static strings are validated
+<div className={cns('flex', condition && 'bg-blue-500')} />
+
+// Template literals without interpolation
+<div className={`flex items-center`} />
+
+// String literals in JSX expressions
 <div className={'static-class'} />
 ```
+
+**⏭️ What is NOT validated (skipped):**
+
+The plugin skips validation for truly dynamic values that can't be determined at lint time:
+
+```jsx
+// Variables and identifiers
+<div className={dynamicClass} />
+<div className={condition ? someVar : 'flex'} />
+
+// Template literals with interpolation
+<div className={`dynamic-${foo}`} />
+<div className={`flex-${direction} mt-${spacing}`} />
+
+// Object syntax (not yet supported)
+<div className={clsx({ 'active': isActive })} />
+
+// Array syntax (not yet supported)
+<div className={cns(['flex', condition && 'active'])} />
+```
+
+## Dynamic Class Name Support
+
+The plugin uses **recursive expression tree traversal** to extract and validate static string literals from dynamic expressions. This means you can use common JavaScript patterns while still getting validation for the class names you use.
+
+### Supported Patterns
+
+| Pattern                         | Example                   | Status               |
+| ------------------------------- | ------------------------- | -------------------- |
+| **Ternary Operators**           | `condition ? 'a' : 'b'`   | ✅ Validated         |
+| **Logical AND**                 | `condition && 'class'`    | ✅ Validated         |
+| **Logical OR**                  | `value \|\| 'class'`      | ✅ Validated         |
+| **Nullish Coalescing**          | `value ?? 'class'`        | ✅ Validated         |
+| **Function Calls**              | `cns('a', 'b')`           | ✅ Validated         |
+| **Nested Combinations**         | `cns('a', b ? 'c' : 'd')` | ✅ Validated         |
+| **Template Literals (static)**  | `` `class` ``             | ✅ Validated         |
+| **Template Literals (dynamic)** | `` `class-${var}` ``      | ⏭️ Skipped           |
+| **Variables**                   | `className={someVar}`     | ⏭️ Skipped           |
+| **Object Syntax**               | `{ 'class': condition }`  | ⏭️ Not Yet Supported |
+| **Array Syntax**                | `['class1', 'class2']`    | ⏭️ Not Yet Supported |
+
+### How It Works
+
+The plugin walks through your expression tree and extracts **all static string literals** it encounters:
+
+```jsx
+// Plugin extracts: ["container", "p-4", "p-2", "bg-blue-500"]
+<div
+  className={cns(
+    'container',
+    isLarge ? 'p-4' : 'p-2',
+    isActive && 'bg-blue-500',
+  )}
+/>
+```
+
+Each extracted string is then validated against your CSS files, Tailwind configuration, and whitelist patterns.
+
+### Recognized Utility Functions
+
+The plugin recognizes these common utility function names:
+
+- `cns()`, `clsx()`, `classnames()`, `cn()`, `cx()`
+- Any function name ending in `classnames` or `classNames`
+
+All arguments to these functions are recursively scanned for static strings.
 
 ## Tailwind CSS Support
 
@@ -309,10 +411,11 @@ When a class contains Tailwind variants (e.g., `hover:bg-blue-500`):
 
 The plugin uses a multi-layered architecture:
 
-1. **Class Registry** - Central caching layer that aggregates class names from all sources
-2. **CSS/SCSS Parser** - Uses PostCSS to extract class names from stylesheets
-3. **Tailwind Parser** - Generates utilities from Tailwind configuration
-4. **Variant Validator** - Handles Tailwind variants and arbitrary values
+1. **Expression Parser** - Recursively extracts static string literals from dynamic expressions (ternaries, logical operators, function calls)
+2. **Class Registry** - Central caching layer that aggregates class names from all sources
+3. **CSS/SCSS Parser** - Uses PostCSS to extract class names from stylesheets
+4. **Tailwind Parser** - Generates utilities from Tailwind configuration
+5. **Variant Validator** - Handles Tailwind variants and arbitrary values
 
 ### Performance
 
@@ -322,7 +425,8 @@ The plugin uses a multi-layered architecture:
 
 ## Limitations
 
-- **Static Classes Only**: The plugin only validates static string literals in `className` attributes. Dynamic expressions, template literals, and variables are automatically skipped.
+- **Static Strings in Expressions**: The plugin validates static string literals within expressions (ternaries, logical operators, function calls), but truly dynamic values like variables, interpolated template literals, and computed expressions are skipped.
+- **Object/Array Syntax**: Object syntax (`{ 'class': condition }`) and array syntax in utility functions are not yet supported.
 - **CSS Modules**: Not yet implemented. Use `validation.whitelist` patterns as a workaround.
 - **Blacklist**: Not yet implemented.
 

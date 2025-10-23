@@ -1,8 +1,9 @@
-import { describe, expect, it, beforeEach, jest } from '@jest/globals'
-import { getClassRegistry, clearCache } from 'src/cache/class-registry'
+import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import fs from 'fs'
-import path from 'path'
 import os from 'os'
+import path from 'path'
+
+import { clearCache, getClassRegistry } from './class-registry'
 
 describe('ClassRegistry', () => {
   let tempDir: string

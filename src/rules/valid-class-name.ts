@@ -326,6 +326,37 @@ function extractClassStringsFromExpression(expression: Expression): string[] {
   return results
 }
 
+/**
+ * Extracts class strings from object property VALUES (not keys)
+ * This is used for object-style class name props like:
+ * - classes={{ root: 'mt-2', container: 'p-4' }}
+ * - classNames={{ header: 'flex items-center', body: 'p-4' }}
+ *
+ * Reuses extractClassStringsFromExpression to handle complex value expressions:
+ * - String literals: { root: 'mt-2' }
+ * - Conditionals: { root: condition ? 'mt-2' : 'mt-4' }
+ * - Function calls: { root: clsx('mt-2', condition && 'mt-4') }
+ * - Dynamic values: { root: someVar } → skipped automatically
+ *
+ * @param expression - The ObjectExpression to extract class strings from
+ * @returns Array of class strings found in object property values
+ */
+function extractClassStringsFromObjectValues(
+  expression: ObjectExpression,
+): string[] {
+  const results: string[] = []
+
+  for (const prop of expression.properties) {
+    // Skip spread elements (e.g., { ...otherClasses })
+    if (prop.type === 'SpreadElement') continue
+
+    // Extract class strings from the property VALUE
+    results.push(...extractClassStringsFromExpression(prop.value))
+  }
+
+  return results
+}
+
 const rule: Rule.RuleModule = {
   meta: {
     type: 'problem',
@@ -411,6 +442,12 @@ const rule: Rule.RuleModule = {
                 items: { type: 'string' },
                 description: 'Array of patterns to skip validation for',
               },
+              objectStyleAttributes: {
+                type: 'array',
+                items: { type: 'string' },
+                description:
+                  'Array of attribute names that use object-style class name syntax (e.g., classes, classNames, sx)',
+              },
             },
             additionalProperties: false,
           },
@@ -429,6 +466,7 @@ const rule: Rule.RuleModule = {
     const tailwindConfig = options.sources?.tailwind
     const whitelist = options.validation?.whitelist || []
     const ignorePatterns = options.validation?.ignorePatterns || []
+    const objectStyleAttributes = options.validation?.objectStyleAttributes || []
     const cwd = context.getCwd ? context.getCwd() : process.cwd()
 
     // Get the class registry (with CSS, SCSS, Tailwind parsing and caching)
@@ -441,28 +479,47 @@ const rule: Rule.RuleModule = {
 
     return {
       JSXAttribute(node: JSXAttribute) {
-        // Only process className attributes
-        if (node.name.name !== 'className') {
+        const attributeName = node.name.name
+
+        // Check if this is an attribute we should validate
+        const isClassNameAttribute = attributeName === 'className'
+        const isObjectStyleAttribute =
+          objectStyleAttributes.includes(attributeName)
+
+        if (!isClassNameAttribute && !isObjectStyleAttribute) {
           return
         }
 
         // Extract class strings from the attribute value
         let classStrings: string[] = []
 
-        if (node.value?.type === 'Literal') {
-          // Handle direct string literal: <div className="foo bar" />
-          const value = node.value.value
-          if (typeof value === 'string') {
-            classStrings.push(value)
+        if (isClassNameAttribute) {
+          // Handle className attribute (existing behavior)
+          if (node.value?.type === 'Literal') {
+            // Handle direct string literal: <div className="foo bar" />
+            const value = node.value.value
+            if (typeof value === 'string') {
+              classStrings.push(value)
+            }
+          } else if (node.value?.type === 'JSXExpressionContainer') {
+            // Handle JSXExpressionContainer with dynamic expressions:
+            // - String literals: <div className={"foo bar"} />
+            // - Ternary: <div className={condition ? "foo" : "bar"} />
+            // - Logical: <div className={condition && "foo"} />
+            // - Function calls: <div className={cns("foo", condition && "bar")} />
+            const expression = node.value.expression
+            classStrings = extractClassStringsFromExpression(expression)
           }
-        } else if (node.value?.type === 'JSXExpressionContainer') {
-          // Handle JSXExpressionContainer with dynamic expressions:
-          // - String literals: <div className={"foo bar"} />
-          // - Ternary: <div className={condition ? "foo" : "bar"} />
-          // - Logical: <div className={condition && "foo"} />
-          // - Function calls: <div className={cns("foo", condition && "bar")} />
-          const expression = node.value.expression
-          classStrings = extractClassStringsFromExpression(expression)
+        } else if (isObjectStyleAttribute) {
+          // Handle object-style attributes (new behavior)
+          // Extract class strings from object property VALUES
+          // Example: <Component classes={{ root: 'mt-2', container: 'p-4' }} />
+          if (node.value?.type === 'JSXExpressionContainer') {
+            const expression = node.value.expression
+            if (isObjectExpression(expression)) {
+              classStrings = extractClassStringsFromObjectValues(expression)
+            }
+          }
         }
 
         // If we couldn't extract any class strings, skip validation

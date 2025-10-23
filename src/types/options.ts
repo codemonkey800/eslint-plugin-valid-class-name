@@ -96,4 +96,13 @@ export interface ValidationConfig {
    * @example ["dynamic-*", "state-*"]
    */
   ignorePatterns?: string[]
+
+  /**
+   * Array of attribute names that use object-style class name syntax
+   * For these attributes, class names are extracted from object property VALUES
+   * Example: classes={{ root: 'mt-2', container: 'p-4' }}
+   * Common in component libraries like Material-UI, Chakra UI, etc.
+   * @example ["classes", "classNames", "sx"]
+   */
+  objectStyleAttributes?: string[]
 }

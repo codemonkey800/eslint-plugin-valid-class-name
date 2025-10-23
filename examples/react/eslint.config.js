@@ -25,6 +25,7 @@ export default tseslint.config(
           validation: {
             whitelist: ['custom-*'],
             ignorePatterns: ['dynamic-*'],
+            objectStyleAttributes: ['classes', 'classNames'],
           },
         },
       ],

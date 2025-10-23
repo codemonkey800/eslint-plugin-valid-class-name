@@ -9,6 +9,7 @@ Catch typos and invalid class names at lint time, before they reach production. 
 - 📝 **CSS/SCSS Validation** - Parses your CSS and SCSS files to extract valid class names
 - 🎨 **Tailwind CSS Support** - Validates Tailwind utilities, variants, arbitrary values, and plugin-generated classes
 - 🔀 **Dynamic Expression Support** - Validates class names in ternaries, logical operators, and utility functions (cns/clsx/classnames)
+- 🎯 **Object-Style Attributes** - Validates component library patterns like `classes={{ root: 'mt-2' }}` (Material-UI, Chakra UI, etc.)
 - ⭐ **Whitelist Patterns** - Define custom patterns that are always valid (supports glob-style wildcards)
 - 🚫 **Ignore Patterns** - Skip validation for dynamic or generated class names
 - ⚡ **High Performance** - Intelligent caching ensures fast linting even in large codebases
@@ -166,6 +167,36 @@ Array of patterns to skip validation for. Useful for dynamic or generated class 
 }
 ```
 
+##### `validation.objectStyleAttributes`
+
+Array of attribute names that use object-style class name syntax. Common in component libraries like Material-UI, Chakra UI, Mantine, etc.
+
+For these attributes, the plugin extracts and validates class names from object property **values** (not keys).
+
+```javascript
+{
+  validation: {
+    // Enable validation for object-style attributes
+    objectStyleAttributes: ['classes', 'classNames', 'sx']
+  }
+}
+```
+
+**How it works:**
+
+```jsx
+// With objectStyleAttributes: ['classes']
+<Component classes={{ root: 'mt-2', header: 'flex' }} />
+//                    ^^^^^^^^^^^^  ^^^^^^^^^^^^^^
+//                    Key (ignored) Value (validated)
+```
+
+**Common attribute names:**
+
+- `classes` - Material-UI, Chakra UI, Mantine
+- `classNames` - Some custom component libraries
+- `sx` - Material-UI's sx prop (when using string values)
+
 ### Complete Configuration Example
 
 ```javascript
@@ -192,6 +223,7 @@ export default [
           validation: {
             whitelist: ['custom-*', 'app-*'],
             ignorePatterns: ['dynamic-*', 'js-*'],
+            objectStyleAttributes: ['classes', 'classNames', 'sx'],
           },
         },
       ],
@@ -227,6 +259,57 @@ export default [
 // Ignored patterns (validation skipped)
 <div className="dynamic-class-123" />
 // (with ignorePatterns: ['dynamic-*'])
+```
+
+### 🎯 Object-Style Attributes
+
+Component libraries like Material-UI and Chakra UI use object-style props for nested component styling:
+
+```jsx
+// Material-UI style - classes prop
+<Card
+  classes={{
+    root: 'card rounded',
+    header: 'flex items-center',
+    body: 'p-4 bg-blue-500',
+  }}
+/>
+
+// Alternative naming - classNames prop
+<Component
+  classNames={{
+    container: 'flex',
+    title: 'text-lg font-bold',
+  }}
+/>
+
+// Mix of className and object-style
+<Card
+  className="main-content"
+  classes={{
+    root: 'card',
+    header: 'flex',
+  }}
+/>
+
+// Object values support all dynamic expressions
+<Card
+  classes={{
+    root: isActive ? 'bg-blue-500' : 'bg-gray-500',
+    header: condition && 'flex items-center',
+    body: clsx('p-4', isLarge && 'text-lg'),
+  }}
+/>
+```
+
+**Configuration required:**
+
+```javascript
+{
+  validation: {
+    objectStyleAttributes: ['classes', 'classNames', 'sx']
+  }
+}
 ```
 
 ### 🔀 Dynamic Expressions
@@ -351,6 +434,7 @@ The plugin uses **recursive expression tree traversal** to extract and validate 
 | **Variables**                   | `className={someVar}`        | ⏭️ Skipped   |
 | **Object Syntax**               | `clsx({ 'class': true })`    | ✅ Validated |
 | **Array Syntax**                | `clsx(['class1', 'class2'])` | ✅ Validated |
+| **Object-Style Attributes**     | `classes={{ root: 'mt-2' }}` | ✅ Validated |
 
 ### How It Works
 

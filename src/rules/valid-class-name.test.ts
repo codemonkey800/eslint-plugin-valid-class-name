@@ -1898,4 +1898,317 @@ describe('Tailwind arbitrary value support', () => {
       },
     ],
   })
+
+  // Test object-style class name attributes
+  describe('object-style attributes', () => {
+    const ruleTesterForObjects = new RuleTester({
+      languageOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+        parserOptions: {
+          ecmaFeatures: {
+            jsx: true,
+          },
+        },
+      },
+    })
+
+    ruleTesterForObjects.run(
+      'valid-class-name with object-style attributes',
+      rule,
+      {
+        valid: [
+          // Basic object literal with valid classes
+          {
+            code: '<Component classes={{ root: "mt-2", container: "p-4" }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2', 'p-4'],
+                  objectStyleAttributes: ['classes'],
+                },
+              },
+            ],
+          },
+          // Object with conditional expressions
+          {
+            code: '<Component classes={{ root: condition ? "mt-2" : "mt-4" }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2', 'mt-4'],
+                  objectStyleAttributes: ['classes'],
+                },
+              },
+            ],
+          },
+          // Object with logical expressions
+          {
+            code: '<Component classes={{ root: condition && "mt-2" }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2'],
+                  objectStyleAttributes: ['classes'],
+                },
+              },
+            ],
+          },
+          // Object with function calls (clsx)
+          {
+            code: '<Component classes={{ root: clsx("mt-2", "p-4") }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2', 'p-4'],
+                  objectStyleAttributes: ['classes'],
+                },
+              },
+            ],
+          },
+          // Dynamic variable (should skip validation)
+          {
+            code: '<Component classes={{ root: someVariable }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2'],
+                  objectStyleAttributes: ['classes'],
+                },
+              },
+            ],
+          },
+          // Spread operator (should skip)
+          {
+            code: '<Component classes={{ ...others, root: "mt-2" }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2'],
+                  objectStyleAttributes: ['classes'],
+                },
+              },
+            ],
+          },
+          // Multiple attributes on same element
+          {
+            code: '<Component className="foo" classes={{ root: "bar" }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['foo', 'bar'],
+                  objectStyleAttributes: ['classes'],
+                },
+              },
+            ],
+          },
+          // Custom attribute name: classNames
+          {
+            code: '<Component classNames={{ root: "mt-2" }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2'],
+                  objectStyleAttributes: ['classNames'],
+                },
+              },
+            ],
+          },
+          // Custom attribute name: sx
+          {
+            code: '<Component sx={{ root: "mt-2" }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2'],
+                  objectStyleAttributes: ['sx'],
+                },
+              },
+            ],
+          },
+          // Multiple custom attribute names
+          {
+            code: '<Component classes={{ root: "mt-2" }} classNames={{ body: "p-4" }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2', 'p-4'],
+                  objectStyleAttributes: ['classes', 'classNames'],
+                },
+              },
+            ],
+          },
+          // Empty configuration (backward compatibility - should not validate)
+          {
+            code: '<Component classes={{ root: "invalid-class" }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2'],
+                  // objectStyleAttributes not configured
+                },
+              },
+            ],
+          },
+          // Object with multiple properties
+          {
+            code: '<Component classes={{ root: "mt-2", header: "flex items-center", body: "p-4 rounded" }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2', 'flex', 'items-center', 'p-4', 'rounded'],
+                  objectStyleAttributes: ['classes'],
+                },
+              },
+            ],
+          },
+          // Non-object value (should skip validation)
+          {
+            code: '<Component classes="string-value" />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2'],
+                  objectStyleAttributes: ['classes'],
+                },
+              },
+            ],
+          },
+        ],
+        invalid: [
+          // Invalid class in object value
+          {
+            code: '<Component classes={{ root: "invalid-class" }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2'],
+                  objectStyleAttributes: ['classes'],
+                },
+              },
+            ],
+            errors: [
+              {
+                messageId: 'invalidClassName',
+                data: { className: 'invalid-class' },
+              },
+            ],
+          },
+          // Multiple invalid classes in single property
+          {
+            code: '<Component classes={{ root: "invalid-1 invalid-2" }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2'],
+                  objectStyleAttributes: ['classes'],
+                },
+              },
+            ],
+            errors: [
+              {
+                messageId: 'invalidClassName',
+                data: { className: 'invalid-1' },
+              },
+              {
+                messageId: 'invalidClassName',
+                data: { className: 'invalid-2' },
+              },
+            ],
+          },
+          // Invalid class with custom attribute name
+          {
+            code: '<Component classNames={{ root: "invalid-class" }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2'],
+                  objectStyleAttributes: ['classNames'],
+                },
+              },
+            ],
+            errors: [
+              {
+                messageId: 'invalidClassName',
+                data: { className: 'invalid-class' },
+              },
+            ],
+          },
+          // Mixed valid and invalid classes in object
+          {
+            code: '<Component classes={{ root: "mt-2", container: "invalid-class" }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2'],
+                  objectStyleAttributes: ['classes'],
+                },
+              },
+            ],
+            errors: [
+              {
+                messageId: 'invalidClassName',
+                data: { className: 'invalid-class' },
+              },
+            ],
+          },
+          // Invalid class in conditional
+          {
+            code: '<Component classes={{ root: condition ? "mt-2" : "invalid-class" }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2'],
+                  objectStyleAttributes: ['classes'],
+                },
+              },
+            ],
+            errors: [
+              {
+                messageId: 'invalidClassName',
+                data: { className: 'invalid-class' },
+              },
+            ],
+          },
+          // Invalid class in function call
+          {
+            code: '<Component classes={{ root: clsx("mt-2", "invalid-class") }} />',
+            filename: 'test.jsx',
+            options: [
+              {
+                validation: {
+                  whitelist: ['mt-2'],
+                  objectStyleAttributes: ['classes'],
+                },
+              },
+            ],
+            errors: [
+              {
+                messageId: 'invalidClassName',
+                data: { className: 'invalid-class' },
+              },
+            ],
+          },
+        ],
+      },
+    )
+  })
 })

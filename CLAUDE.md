@@ -49,9 +49,15 @@ When modifying files, run linters only for changed files to save time.
 **1. Rule Implementation** ([src/rules/valid-class-name.ts](src/rules/valid-class-name.ts))
 
 - Main ESLint rule that validates className attributes in JSX
-- Extracts class names from JSX attributes (both string literals and JSXExpressionContainers)
 - Integrates with the class registry for validation
 - Supports ignore patterns and whitelist patterns with glob-style wildcards
+- Delegates to specialized helper modules for AST parsing and class extraction
+
+**Rule Helper Modules**:
+- **AST Types** ([src/rules/ast-types.ts](src/rules/ast-types.ts)) - Type definitions for JSX AST nodes
+- **AST Guards** ([src/rules/ast-guards.ts](src/rules/ast-guards.ts)) - Type guard functions for runtime type checking
+- **Class Extractors** ([src/rules/class-extractors.ts](src/rules/class-extractors.ts)) - Functions to extract class names from various expression types (literals, ternaries, function calls, arrays, objects)
+- **Validation Helpers** ([src/rules/validation-helpers.ts](src/rules/validation-helpers.ts)) - Utility functions for pattern matching and validation
 
 **2. Class Registry** ([src/registry/class-registry.ts](src/registry/class-registry.ts))
 
@@ -161,6 +167,10 @@ src/
 │   ├── css-parser.ts              # CSS/SCSS parsing
 │   └── tailwind-parser.ts         # Tailwind config parsing and utility generation
 ├── rules/
+│   ├── ast-types.ts               # JSX AST type definitions
+│   ├── ast-guards.ts              # Type guard functions
+│   ├── class-extractors.ts        # Class name extraction logic
+│   ├── validation-helpers.ts      # Validation utility functions
 │   ├── index.ts                   # Rule exports
 │   └── valid-class-name.ts        # Main rule implementation
 ├── types/

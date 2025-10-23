@@ -1,6 +1,6 @@
 import { RuleTester } from 'eslint'
 
-import rule from './valid-class-name'
+import { validClassNameRule } from './valid-class-name'
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -15,7 +15,7 @@ const ruleTester = new RuleTester({
 })
 
 // Test valid configurations - these should all pass
-ruleTester.run('valid-class-name schema - valid configurations', rule, {
+ruleTester.run('valid-class-name schema - valid configurations', validClassNameRule, {
   valid: [
     {
       code: '<div />',

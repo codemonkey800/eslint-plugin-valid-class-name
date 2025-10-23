@@ -136,7 +136,7 @@ The rule accepts the following options:
   },
   validation: {
     allowlist: ['custom-*'],         // Always valid patterns (supports wildcards)
-    blocklist: [],                   // Not yet implemented
+    blocklist: ['legacy-*', 'deprecated-*'],  // Forbidden patterns (supports wildcards)
     ignorePatterns: ['dynamic-*']    // Skip validation for these patterns
   }
 }

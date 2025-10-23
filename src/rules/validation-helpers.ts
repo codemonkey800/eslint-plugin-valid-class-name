@@ -16,3 +16,16 @@ export function isClassNameIgnored(
 ): boolean {
   return ignorePatterns.some(pattern => matchesPattern(className, pattern))
 }
+
+/**
+ * Checks if a class name is blocked based on blocklist patterns
+ * @param className - The class name to check
+ * @param blocklist - Array of patterns to block
+ * @returns true if the class name is blocked
+ */
+export function isClassNameBlocklisted(
+  className: string,
+  blocklist: string[],
+): boolean {
+  return blocklist.some(pattern => matchesPattern(className, pattern))
+}

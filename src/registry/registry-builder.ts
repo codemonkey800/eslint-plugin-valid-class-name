@@ -41,7 +41,7 @@ export interface ClassRegistry {
 }
 
 /**
- * Builds a class registry from CSS files, Tailwind config, and allowlist patterns
+ * Builds a class registry from CSS files, Tailwind config, allowlist patterns, and blocklist patterns
  *
  * Note: Uses synchronous file I/O (fs.readFileSync) because ESLint rules must be
  * synchronous. Performance impact is mitigated by the caching strategy - files are
@@ -49,6 +49,7 @@ export interface ClassRegistry {
  *
  * @param resolvedFiles - Pre-resolved CSS files with paths and mtimes
  * @param allowlist - Array of class name patterns (supports wildcards)
+ * @param blocklist - Array of class name patterns to forbid (supports wildcards)
  * @param tailwindClasses - Pre-loaded Tailwind classes (optional)
  * @param validVariants - Pre-loaded valid Tailwind variants (optional)
  * @param cwd - Current working directory for resolving SCSS imports
@@ -57,6 +58,7 @@ export interface ClassRegistry {
 export function buildClassRegistry(
   resolvedFiles: ResolvedFile[],
   allowlist: string[],
+  blocklist: string[],
   tailwindClasses: Set<string> | undefined,
   validVariants: Set<string> | undefined,
   cwd: string,
@@ -65,6 +67,7 @@ export function buildClassRegistry(
   const cssClasses = new Set<string>()
   const tailwindLiteralClasses = new Set<string>()
   const allowlistLiteralClasses = new Set<string>()
+  const blocklistLiteralClasses = new Set<string>()
 
   // Extract classes from CSS files
   for (const file of resolvedFiles) {
@@ -93,6 +96,13 @@ export function buildClassRegistry(
     }
   })
 
+  // Add literal blocklist entries (non-wildcard patterns) to blocklist set
+  blocklist.forEach(pattern => {
+    if (!pattern.includes('*')) {
+      blocklistLiteralClasses.add(pattern)
+    }
+  })
+
   // Add Tailwind classes if provided
   if (tailwindClasses) {
     tailwindClasses.forEach(cls => tailwindLiteralClasses.add(cls))
@@ -104,6 +114,14 @@ export function buildClassRegistry(
     .map(compilePattern)
     .filter((regex): regex is RegExp => regex !== null)
 
+  // Extract wildcard patterns from blocklist and compile them to RegExp
+  const blocklistWildcardPatterns = blocklist.filter(pattern =>
+    pattern.includes('*'),
+  )
+  const compiledBlocklistPatterns = blocklistWildcardPatterns
+    .map(compilePattern)
+    .filter((regex): regex is RegExp => regex !== null)
+
   // Performance optimization: Keep source Sets separate instead of merging them.
   // This avoids O(n) Set creation overhead during registry build.
   // Trade-off: Validation performs 2-3 sequential Set.has() checks (still O(1))
@@ -111,6 +129,17 @@ export function buildClassRegistry(
   // negligible compared to the registry build time savings.
   return {
     isValid(className: string): boolean {
+      // Check blocklist first - blocked classes are always invalid
+      // This takes precedence over all other sources
+      if (blocklistLiteralClasses.has(className)) {
+        return false
+      }
+
+      // Check blocklist wildcard patterns
+      if (compiledBlocklistPatterns.some(regex => regex.test(className))) {
+        return false
+      }
+
       // Check source Sets in order of likelihood for early returns:
       // 1. Allowlist (often matches dynamic patterns)
       // 2. Tailwind (most common in modern projects)
@@ -123,11 +152,22 @@ export function buildClassRegistry(
         return true
       }
 
-      // Check wildcard patterns using pre-compiled RegExp
+      // Check allowlist wildcard patterns using pre-compiled RegExp
       return compiledWildcardPatterns.some(regex => regex.test(className))
     },
 
     isTailwindClass(className: string): boolean {
+      // Check blocklist first - blocked classes are always invalid
+      // This takes precedence over all other sources
+      if (blocklistLiteralClasses.has(className)) {
+        return false
+      }
+
+      // Check blocklist wildcard patterns
+      if (compiledBlocklistPatterns.some(regex => regex.test(className))) {
+        return false
+      }
+
       // Check only Tailwind and allowlist sources (excludes CSS)
       if (
         allowlistLiteralClasses.has(className) ||
@@ -136,7 +176,7 @@ export function buildClassRegistry(
         return true
       }
 
-      // Check wildcard patterns using pre-compiled RegExp
+      // Check allowlist wildcard patterns using pre-compiled RegExp
       return compiledWildcardPatterns.some(regex => regex.test(className))
     },
 

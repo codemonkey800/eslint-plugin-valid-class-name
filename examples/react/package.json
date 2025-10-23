@@ -15,8 +15,10 @@
     "test:comprehensive-invalid": "eslint src/components/ComprehensiveInvalid.tsx",
     "test:edge-cases": "eslint src/components/EdgeCasesValid.tsx",
     "test:custom-classes": "eslint src/components/CustomClassesComponent.tsx",
-    "test:all-valid": "eslint src/components/ValidComponent.tsx src/components/CustomClassesComponent.tsx src/components/TailwindUtilitiesValid.tsx src/components/TailwindVariantsValid.tsx src/components/ArbitraryValuesValid.tsx src/components/ArbitraryVariantsValid.tsx src/components/EdgeCasesValid.tsx",
-    "test:all-invalid": "eslint src/components/InvalidComponent.tsx src/components/ComprehensiveInvalid.tsx"
+    "test:blocklist-valid": "eslint src/components/BlocklistValid.tsx",
+    "test:blocklist-invalid": "eslint src/components/BlocklistInvalid.tsx",
+    "test:all-valid": "eslint src/components/ValidComponent.tsx src/components/CustomClassesComponent.tsx src/components/TailwindUtilitiesValid.tsx src/components/TailwindVariantsValid.tsx src/components/ArbitraryValuesValid.tsx src/components/ArbitraryVariantsValid.tsx src/components/EdgeCasesValid.tsx src/components/BlocklistValid.tsx",
+    "test:all-invalid": "eslint src/components/InvalidComponent.tsx src/components/ComprehensiveInvalid.tsx src/components/BlocklistInvalid.tsx"
   },
   "dependencies": {
     "react": "^18.2.0",

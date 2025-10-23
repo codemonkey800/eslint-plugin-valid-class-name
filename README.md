@@ -11,7 +11,8 @@ Catch typos and invalid class names at lint time, before they reach production. 
 - 🔀 **Dynamic Expression Support** - Validates class names in ternaries, logical operators, and utility functions (cns/clsx/classnames)
 - 🎯 **Object-Style Attributes** - Validates component library patterns like `classes={{ root: 'mt-2' }}` (Material-UI, Chakra UI, etc.)
 - ⭐ **Allowlist Patterns** - Define custom patterns that are always valid (supports glob-style wildcards)
-- 🚫 **Ignore Patterns** - Skip validation for dynamic or generated class names
+- 🚫 **Blocklist Patterns** - Prevent usage of deprecated or forbidden class names (supports glob-style wildcards)
+- 🔇 **Ignore Patterns** - Skip validation for dynamic or generated class names
 - ⚡ **High Performance** - Intelligent caching ensures fast linting even in large codebases
 - 🔧 **ESLint 8 & 9** - Supports both legacy and flat config formats
 
@@ -138,23 +139,36 @@ Enable Tailwind CSS validation.
 
 Configure validation rules and patterns.
 
-##### Allowlist vs Ignore Patterns
+##### Allowlist vs Blocklist vs Ignore Patterns
 
-The plugin provides two ways to handle special class names, with different purposes:
+The plugin provides three ways to handle special class names, with different purposes:
 
-| Feature      | `allowlist`                                              | `ignorePatterns`                           |
-| ------------ | -------------------------------------------------------- | ------------------------------------------ |
-| **Purpose**  | Declares classes as always valid                         | Skips validation entirely                  |
-| **Use case** | Classes from external sources, runtime-generated classes | Dynamic classes you don't want to validate |
-| **Effect**   | Class is validated and marked as valid                   | Class validation is bypassed completely    |
-| **Example**  | Third-party library classes, dynamic imports             | Test classes, temporary classes            |
+| Feature            | `allowlist`                                              | `blocklist`                                | `ignorePatterns`                           |
+| ------------------ | -------------------------------------------------------- | ------------------------------------------ | ------------------------------------------ |
+| **Purpose**        | Declares classes as always valid                         | Declares classes as forbidden              | Skips validation entirely                  |
+| **Use case**       | Classes from external sources, runtime-generated classes | Deprecated classes, legacy patterns        | Dynamic classes you don't want to validate |
+| **Effect**         | Class is validated and marked as valid                   | Class is validated and marked as invalid   | Class validation is bypassed completely    |
+| **Example**        | Third-party library classes, dynamic imports             | `legacy-*`, `deprecated-*`, old components | Test classes, temporary classes            |
+| **Priority**       | Medium (checked after blocklist)                         | Highest (checked first)                    | Highest (skips all validation)             |
 
-**Key difference:**
+**Key differences:**
 
+- **`blocklist`** = "This class is forbidden" (prevents usage of specific patterns)
 - **`allowlist`** = "I know this class exists, trust me" (validates and approves)
 - **`ignorePatterns`** = "Don't even check this class" (skips validation)
 
+**Validation order:**
+1. **ignorePatterns** - If matched, skip validation entirely (no error)
+2. **blocklist** - If matched, report as blocked (error)
+3. **allowlist/CSS/Tailwind** - Validate normally
+
 **When to use each:**
+
+Use **`blocklist`** when:
+- You want to prevent usage of deprecated class names
+- You're migrating away from old CSS patterns
+- You want to enforce naming conventions by blocking certain patterns
+- You need to prevent specific classes from being used
 
 Use **`allowlist`** when:
 
@@ -192,6 +206,39 @@ Array of class name patterns that are always considered valid. Supports glob-sty
 <div className="external-widget" />
 // ✅ Validated and marked as valid (even if not in CSS files)
 ```
+
+##### `validation.blocklist`
+
+Array of class name patterns that are forbidden. Supports glob-style wildcards (`*`). Classes matching blocklist patterns will be reported as errors even if they exist in CSS files or match allowlist patterns.
+
+```javascript
+{
+  validation: {
+    blocklist: [
+      'legacy-button', // Exact match - blocks this specific class
+      'deprecated-*', // Matches deprecated-card, deprecated-modal, etc.
+      '*-old', // Matches btn-old, component-old, etc.
+      'v1-*-component', // Matches v1-auth-component, v1-nav-component, etc.
+    ]
+  }
+}
+```
+
+**Example usage:**
+
+```jsx
+// With blocklist: ['legacy-*']
+<div className="legacy-button" />
+// ❌ Error: Class name "legacy-button" is blocked by the blocklist configuration
+```
+
+**Use cases:**
+- Preventing usage of deprecated class names during refactoring
+- Enforcing migration away from old CSS patterns
+- Blocking legacy component classes while maintaining them in CSS for backwards compatibility
+- Enforcing naming conventions by blocking disallowed patterns
+
+**Note:** Blocklist takes precedence over allowlist. If a class matches both, it will be blocked.
 
 ##### `validation.ignorePatterns`
 

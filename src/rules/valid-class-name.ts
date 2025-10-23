@@ -14,7 +14,10 @@ import {
   extractClassStringsFromExpression,
   extractClassStringsFromObjectValues,
 } from './class-extractors'
-import { isClassNameIgnored } from './validation-helpers'
+import {
+  isClassNameBlocklisted,
+  isClassNameIgnored,
+} from './validation-helpers'
 
 export const validClassNameRule: Rule.RuleModule = {
   meta: {
@@ -29,6 +32,8 @@ export const validClassNameRule: Rule.RuleModule = {
         'Class name "{{className}}" is not defined in any CSS files or configuration',
       invalidVariant:
         "Variant '{{variant}}' is not a valid Tailwind variant in class '{{className}}'",
+      blockedClassName:
+        'Class name "{{className}}" is blocked by the blocklist configuration',
     },
     schema: [
       {
@@ -120,6 +125,7 @@ export const validClassNameRule: Rule.RuleModule = {
     const allCssPatterns = [...cssPatterns, ...scssPatterns]
     const tailwindConfig = options.sources?.tailwind
     const allowlist = options.validation?.allowlist || []
+    const blocklist = options.validation?.blocklist || []
     const ignorePatterns = options.validation?.ignorePatterns || []
     const objectStyleAttributes =
       options.validation?.objectStyleAttributes || []
@@ -129,6 +135,7 @@ export const validClassNameRule: Rule.RuleModule = {
     const classRegistry = getClassRegistry(
       allCssPatterns,
       allowlist,
+      blocklist,
       tailwindConfig,
       cwd,
     )
@@ -195,6 +202,18 @@ export const validClassNameRule: Rule.RuleModule = {
 
             // Skip if the BASE matches an ignore pattern (not full className)
             if (isClassNameIgnored(base, ignorePatterns)) {
+              continue
+            }
+
+            // Check if the BASE is blocked by blocklist patterns
+            if (isClassNameBlocklisted(base, blocklist)) {
+              context.report({
+                node,
+                messageId: 'blockedClassName',
+                data: {
+                  className: base,
+                },
+              })
               continue
             }
 

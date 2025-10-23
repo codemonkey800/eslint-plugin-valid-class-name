@@ -49,6 +49,7 @@ npm run test:invalid
 ```
 
 Expected result: ❌ ESLint errors for each invalid class name:
+
 - `does-not-exist`
 - `missing-class`
 - `typo-flx`
@@ -61,12 +62,14 @@ The plugin is configured to validate class names against:
 1. **CSS files**: `src/styles/**/*.css`
 2. **SCSS files**: `src/styles/**/*.scss`
 3. **Tailwind safelist**: Classes explicitly added to the safelist in `tailwind.config.cjs`
-4. **Whitelist patterns**: `custom-*` (any class starting with "custom-")
-5. **Ignore patterns**: `dynamic-*` (skips validation for classes starting with "dynamic-")
+4. **Allowlist patterns**: `custom-*` (any class starting with "custom-" is always valid)
+5. **Blocklist patterns**: `legacy-*`, `deprecated-*`, `old-*`, `forbidden-class` (these classes are forbidden even if they exist in CSS)
+6. **Ignore patterns**: `dynamic-*` (skips validation for classes starting with "dynamic-")
 
 ### Tailwind Features
 
 The plugin fully supports:
+
 - ✅ **Automatic utility generation** from theme configuration (colors, spacing, typography, etc.)
 - ✅ **All Tailwind variants** (hover, focus, responsive, dark mode, group, peer, etc.)
 - ✅ **Arbitrary values** (`w-[100px]`, `bg-[#ff0000]`, etc.)
@@ -80,7 +83,9 @@ The plugin fully supports:
 ### Valid Test Components (Should Pass - 0 Errors)
 
 #### ValidComponent.tsx
+
 Basic valid classes from multiple sources:
+
 - CSS: `container`, `header`, `main-content`
 - SCSS: `button-primary`, `card`, `alert`
 - Tailwind utilities: `flex`, `items-center`, `justify-between`, `gap-4`, `bg-blue-500`, `text-white`, `p-4`, `rounded`, `mb-2`
@@ -91,7 +96,9 @@ Basic valid classes from multiple sources:
 Run: `pnpm run test:valid`
 
 #### CustomClassesComponent.tsx
+
 Tests custom classes from:
+
 - @layer utilities: `text-shadow-*`, `scrollbar-hide`, `pt-safe`, `pb-safe`, `aspect-golden`
 - @layer components: `card`, `card-header`, `card-footer`, `btn`, `btn-primary`, `btn-secondary`, `badge`, `badge-success`, `badge-error`
 - Tailwind plugins: `rotate-y-180`, `preserve-3d`, `backface-hidden`, `perspective-1000`
@@ -99,7 +106,9 @@ Tests custom classes from:
 Run: `pnpm run test:custom-classes`
 
 #### TailwindUtilitiesValid.tsx
+
 Comprehensive Tailwind utilities from theme:
+
 - Colors (bg, text, border, ring, fill, stroke)
 - Spacing (margin, padding, gap, space, inset)
 - Negative spacing (-m, -mt, -ml, etc.)
@@ -111,7 +120,9 @@ Comprehensive Tailwind utilities from theme:
 Run: `pnpm run test:tailwind-utilities`
 
 #### TailwindVariantsValid.tsx
+
 All Tailwind variant combinations:
+
 - Interactive: `hover:`, `focus:`, `active:`, `visited:`
 - Input states: `disabled:`, `checked:`, `invalid:`, `placeholder-shown:`
 - Child selectors: `first:`, `last:`, `odd:`, `even:`
@@ -123,7 +134,9 @@ All Tailwind variant combinations:
 Run: `pnpm run test:tailwind-variants`
 
 #### ArbitraryValuesValid.tsx
+
 Arbitrary value syntax:
+
 - Spacing: `w-[100px]`, `h-[50vh]`, `m-[2rem]`
 - Colors: `bg-[#ff0000]`, `text-[rgb(255,0,0)]`, `bg-[hsl(200,50%,50%)]`
 - URLs: `bg-[url('/img.png')]`
@@ -134,7 +147,9 @@ Arbitrary value syntax:
 Run: `pnpm run test:arbitrary-values`
 
 #### ArbitraryVariantsValid.tsx
+
 Arbitrary variant syntax:
+
 - Arbitrary selectors: `[&:nth-child(3)]:mt-2`, `[&>*]:p-4`
 - Arbitrary at-rules: `[@media(min-width:900px)]:flex`
 - Combined: `hover:[&:nth-child(3)]:bg-blue-500`
@@ -143,7 +158,9 @@ Arbitrary variant syntax:
 Run: `pnpm run test:arbitrary-variants`
 
 #### EdgeCasesValid.tsx
+
 Edge cases that should pass:
+
 - Important modifier: `!bg-blue-500`, `!text-white`
 - Zero values: `m-0`, `p-0`, `w-0`, `h-0`
 - Auto values: `m-auto`, `w-auto`
@@ -153,10 +170,24 @@ Edge cases that should pass:
 
 Run: `pnpm run test:edge-cases`
 
+#### BlocklistValid.tsx
+
+Valid classes that are NOT blocked by blocklist:
+
+- CSS classes: `container`, `card`, `button-primary`, `button-secondary`
+- SCSS classes: `alert`, `alert-info`, `alert-warning`
+- Tailwind utilities: `flex`, `grid`, `bg-blue-500`, `text-white`, `p-4`, `rounded`
+- Allowlist: `custom-component`, `custom-widget`, `custom-text`
+- Modern alternatives to legacy classes
+
+Run: `pnpm run test:blocklist-valid`
+
 ### Invalid Test Components (Should Fail with Errors)
 
 #### InvalidComponent.tsx (4 errors expected)
+
 Basic invalid classes:
+
 - `does-not-exist`
 - `missing-class`
 - `typo-flx` (typo of `flex`)
@@ -165,7 +196,9 @@ Basic invalid classes:
 Run: `pnpm run test:invalid`
 
 #### ComprehensiveInvalid.tsx (~60+ errors expected)
+
 Comprehensive invalid cases:
+
 - Nonexistent Tailwind utilities: `flx`, `bg-ultraviolet-500`, `txt-lg`
 - Invalid variants: `hoverr:`, `foucus:`, `mediumm:`
 - Typos: `bg-blu-500`, `text-gren-600`, `gird`
@@ -176,19 +209,34 @@ Comprehensive invalid cases:
 
 Run: `pnpm run test:comprehensive-invalid`
 
+#### BlocklistInvalid.tsx (~10 errors expected)
+
+Classes that are blocked by the blocklist configuration:
+
+- Exact match: `forbidden-class`
+- Pattern `legacy-*`: `legacy-button`, `legacy-card`, `legacy-layout`
+- Pattern `deprecated-*`: `deprecated-flex`, `deprecated-grid`
+- Pattern `old-*`: `old-container`, `old-wrapper`
+- Note: These classes exist in components.scss but are intentionally blocked to prevent use of deprecated patterns
+
+Run: `pnpm run test:blocklist-invalid`
+
 ### Test All Components
 
 Run all valid components (should pass):
+
 ```bash
 pnpm run test:all-valid
 ```
 
 Run all invalid components (should show errors):
+
 ```bash
 pnpm run test:all-invalid
 ```
 
 Run everything:
+
 ```bash
 pnpm lint
 ```
@@ -218,6 +266,7 @@ rules: {
       },
       validation: {
         allowlist: ['custom-*'],
+        blocklist: ['legacy-*', 'deprecated-*', 'old-*', 'forbidden-class'],
         ignorePatterns: ['dynamic-*'],
       },
     },

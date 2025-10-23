@@ -39,7 +39,9 @@ let globCacheEntry: GlobCacheEntry | null = null
  * @returns true if arrays have the same elements in the same order
  */
 function arraysEqual(arr1: string[], arr2: string[]): boolean {
-  return arr1.length === arr2.length && arr1.every((val, idx) => val === arr2[idx])
+  return (
+    arr1.length === arr2.length && arr1.every((val, idx) => val === arr2[idx])
+  )
 }
 
 /**

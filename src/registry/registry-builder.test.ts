@@ -33,6 +33,7 @@ describe('buildClassRegistry', () => {
       const registry = buildClassRegistry(
         resolvedFiles,
         [],
+        [],
         undefined,
         undefined,
         process.cwd(),
@@ -57,6 +58,7 @@ describe('buildClassRegistry', () => {
 
       const registry = buildClassRegistry(
         resolvedFiles,
+        [],
         [],
         undefined,
         undefined,
@@ -85,6 +87,7 @@ describe('buildClassRegistry', () => {
       const registry = buildClassRegistry(
         resolvedFiles,
         [],
+        [],
         undefined,
         undefined,
         process.cwd(),
@@ -110,6 +113,7 @@ describe('buildClassRegistry', () => {
       const registry = buildClassRegistry(
         resolvedFiles,
         [],
+        [],
         undefined,
         undefined,
         process.cwd(),
@@ -128,6 +132,7 @@ describe('buildClassRegistry', () => {
       // Should not throw
       const registry = buildClassRegistry(
         resolvedFiles,
+        [],
         [],
         undefined,
         undefined,
@@ -161,6 +166,7 @@ describe('buildClassRegistry', () => {
 
       const registry = buildClassRegistry(
         resolvedFiles,
+        [],
         [],
         undefined,
         undefined,
@@ -197,6 +203,7 @@ describe('buildClassRegistry', () => {
       const registry = buildClassRegistry(
         resolvedFiles,
         [],
+        [],
         undefined,
         undefined,
         process.cwd(),
@@ -225,6 +232,7 @@ describe('buildClassRegistry', () => {
       // Should not throw
       const registry = buildClassRegistry(
         resolvedFiles,
+        [],
         [],
         undefined,
         undefined,
@@ -260,6 +268,7 @@ describe('buildClassRegistry', () => {
       const registry = buildClassRegistry(
         resolvedFiles,
         [],
+        [],
         undefined,
         undefined,
         process.cwd(),
@@ -276,6 +285,7 @@ describe('buildClassRegistry', () => {
       const registry = buildClassRegistry(
         [],
         ['custom-class', 'another-class'],
+        [],
         undefined,
         undefined,
         process.cwd(),
@@ -408,6 +418,7 @@ describe('buildClassRegistry', () => {
       const registry = buildClassRegistry(
         resolvedFiles,
         ['custom-*'],
+        [],
         undefined,
         undefined,
         process.cwd(),
@@ -582,6 +593,7 @@ describe('buildClassRegistry', () => {
       const registry = buildClassRegistry(
         resolvedFiles,
         [],
+        [],
         undefined,
         undefined,
         process.cwd(),
@@ -748,6 +760,7 @@ describe('buildClassRegistry', () => {
       const registry = buildClassRegistry(
         resolvedFiles,
         [],
+        [],
         undefined,
         undefined,
         process.cwd(),
@@ -786,6 +799,7 @@ describe('buildClassRegistry', () => {
       const registry = buildClassRegistry(
         resolvedFiles,
         [],
+        [],
         undefined,
         undefined,
         process.cwd(),
@@ -813,6 +827,7 @@ describe('buildClassRegistry', () => {
       const startTime = Date.now()
       const registry = buildClassRegistry(
         resolvedFiles,
+        [],
         [],
         undefined,
         undefined,
@@ -844,6 +859,7 @@ describe('buildClassRegistry', () => {
       const registry = buildClassRegistry(
         resolvedFiles,
         ['shared'],
+        [],
         tailwindClasses,
         undefined,
         process.cwd(),

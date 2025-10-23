@@ -46,3 +46,56 @@ $secondary-color: #6366f1;
     color: #92400e;
   }
 }
+
+// ============================================================
+// Legacy/Deprecated classes (blocked via blocklist)
+// These classes exist in CSS but are blocked from use
+// ============================================================
+
+.legacy-button {
+  // Old button style - use .button-primary or Tailwind instead
+  background: #888;
+  padding: 10px;
+}
+
+.legacy-card {
+  // Old card style - use .card instead
+  border: 2px solid #ccc;
+  padding: 15px;
+}
+
+.legacy-layout {
+  // Old layout system - use Flexbox/Grid instead
+  float: left;
+  width: 100%;
+}
+
+.deprecated-flex {
+  // Deprecated flexbox utility - use Tailwind flex utilities
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.deprecated-grid {
+  // Deprecated grid utility - use Tailwind grid utilities
+  display: -ms-grid;
+  display: grid;
+}
+
+.old-container {
+  // Old container style - use .container or Tailwind instead
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.old-wrapper {
+  // Old wrapper style - use modern layout utilities
+  width: 100%;
+  overflow: hidden;
+}
+
+.forbidden-class {
+  // Explicitly forbidden class for testing
+  color: red;
+}

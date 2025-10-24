@@ -1,4 +1,4 @@
-import type { Config } from 'jest';
+import type { Config } from 'jest'
 
 const config: Config = {
   preset: 'ts-jest/presets/default-esm',
@@ -32,6 +32,7 @@ const config: Config = {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
-};
+  setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
+}
 
-export default config;
+export default config

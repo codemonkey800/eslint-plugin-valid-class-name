@@ -1,15 +1,14 @@
 import { describe, expect, it } from '@jest/globals'
 
+import { ast, getAllInvalidInputs } from '../test'
 import type {
   ArrayExpression,
   CallExpression,
   ConditionalExpression,
   Expression,
   Identifier,
-  Literal,
   LogicalExpression,
   ObjectExpression,
-  TemplateLiteral,
   UnknownExpression,
 } from './ast-types'
 import {
@@ -86,32 +85,26 @@ describe('class-extractors', () => {
     })
 
     it('should return empty array for non-string input', () => {
-      // @ts-expect-error - Testing runtime behavior with invalid input
-      expect(extractClassNamesFromString(null)).toEqual([])
-      // @ts-expect-error - Testing runtime behavior with invalid input
-      expect(extractClassNamesFromString(undefined)).toEqual([])
-      // @ts-expect-error - Testing runtime behavior with invalid input
-      expect(extractClassNamesFromString(123)).toEqual([])
-      // @ts-expect-error - Testing runtime behavior with invalid input
-      expect(extractClassNamesFromString({})).toEqual([])
+      // Test all invalid inputs using type-safe helper
+      const invalidInputs = getAllInvalidInputs()
+      for (const input of invalidInputs) {
+        expect(extractClassNamesFromString(input as never)).toEqual([])
+      }
     })
   })
 
   describe('extractClassStringsFromExpression', () => {
     describe('Literal expressions', () => {
       it('should extract string from string Literal', () => {
-        const expr: Literal = {
-          type: 'Literal',
-          value: 'btn primary',
-        }
+        const expr = ast.literal('btn primary')
         const result = extractClassStringsFromExpression(expr)
         expect(result).toEqual(['btn primary'])
       })
 
       it('should return empty array for non-string Literal', () => {
-        const numberExpr: Literal = { type: 'Literal', value: 42 }
-        const boolExpr: Literal = { type: 'Literal', value: true }
-        const nullExpr: Literal = { type: 'Literal', value: null }
+        const numberExpr = ast.literal(42)
+        const boolExpr = ast.literal(true)
+        const nullExpr = ast.literal(null)
 
         expect(extractClassStringsFromExpression(numberExpr)).toEqual([])
         expect(extractClassStringsFromExpression(boolExpr)).toEqual([])
@@ -121,50 +114,22 @@ describe('class-extractors', () => {
 
     describe('TemplateLiteral expressions', () => {
       it('should extract static template literal with no interpolation', () => {
-        const expr: TemplateLiteral = {
-          type: 'TemplateLiteral',
-          quasis: [
-            {
-              type: 'TemplateElement',
-              value: { cooked: 'btn primary', raw: 'btn primary' },
-            },
-          ],
-          expressions: [],
-        }
+        const expr = ast.templateLiteral('btn primary')
         const result = extractClassStringsFromExpression(expr)
         expect(result).toEqual(['btn primary'])
       })
 
       it('should return empty array for template literal with interpolation', () => {
-        const expr: TemplateLiteral = {
-          type: 'TemplateLiteral',
-          quasis: [
-            {
-              type: 'TemplateElement',
-              value: { cooked: 'btn-', raw: 'btn-' },
-            },
-            {
-              type: 'TemplateElement',
-              value: { cooked: '', raw: '' },
-            },
-          ],
-          expressions: [{ type: 'Identifier', name: 'variant' }],
-        }
+        const expr = ast.templateLiteralWithExpressions(
+          ['btn-', ''],
+          [ast.identifier('variant')],
+        )
         const result = extractClassStringsFromExpression(expr)
         expect(result).toEqual([])
       })
 
       it('should handle template literal with null cooked value', () => {
-        const expr: TemplateLiteral = {
-          type: 'TemplateLiteral',
-          quasis: [
-            {
-              type: 'TemplateElement',
-              value: { cooked: null, raw: 'raw-value' },
-            },
-          ],
-          expressions: [],
-        }
+        const expr = ast.templateLiteralWithNullCooked('raw-value')
         const result = extractClassStringsFromExpression(expr)
         expect(result).toEqual([])
       })
@@ -172,12 +137,11 @@ describe('class-extractors', () => {
 
     describe('ConditionalExpression (ternary)', () => {
       it('should extract strings from both branches', () => {
-        const expr: ConditionalExpression = {
-          type: 'ConditionalExpression',
-          test: { type: 'Identifier', name: 'condition' },
-          consequent: { type: 'Literal', value: 'class-a' },
-          alternate: { type: 'Literal', value: 'class-b' },
-        }
+        const expr = ast.conditional(
+          ast.identifier('condition'),
+          ast.literal('class-a'),
+          ast.literal('class-b'),
+        )
         const result = extractClassStringsFromExpression(expr)
         expect(result).toEqual(['class-a', 'class-b'])
       })
@@ -760,6 +724,186 @@ describe('class-extractors', () => {
       }
       const result = extractClassStringsFromObjectValues(expr)
       expect(result).toEqual(['a', 'b'])
+    })
+  })
+
+  describe('Performance and stress tests', () => {
+    it('should handle very long class names efficiently', () => {
+      const longClassName = 'class-'.repeat(1000) + 'end'
+      const result = extractClassNamesFromString(longClassName)
+
+      expect(result).toBeDefined()
+      expect(Array.isArray(result)).toBe(true)
+    })
+
+    it('should handle string with many classes efficiently', () => {
+      const manyClasses = Array.from(
+        { length: 1000 },
+        (_, i) => `class-${i}`,
+      ).join(' ')
+
+      const startTime = Date.now()
+      const result = extractClassNamesFromString(manyClasses)
+      const duration = Date.now() - startTime
+
+      expect(result).toBeDefined()
+      expect(result.length).toBe(1000)
+      expect(duration).toBeLessThan(50) // Should complete in < 50ms
+    })
+
+    it('should handle deeply nested expressions (20 levels)', () => {
+      // Build a deeply nested ternary expression
+      let expr: ConditionalExpression = {
+        type: 'ConditionalExpression',
+        test: { type: 'Identifier', name: 'test' },
+        consequent: { type: 'Literal', value: 'level-20' },
+        alternate: { type: 'Literal', value: 'fallback' },
+      }
+
+      for (let i = 19; i >= 1; i--) {
+        expr = {
+          type: 'ConditionalExpression',
+          test: { type: 'Identifier', name: `test${i}` },
+          consequent: { type: 'Literal', value: `level-${i}` },
+          alternate: expr,
+        }
+      }
+
+      const result = extractClassStringsFromExpression(expr)
+
+      expect(result).toBeDefined()
+      expect(result.length).toBe(21) // 20 levels + 1 fallback
+    })
+
+    it('should handle array with many elements', () => {
+      const largeArray: ArrayExpression = {
+        type: 'ArrayExpression',
+        elements: Array.from({ length: 100 }, (_, i) => ({
+          type: 'Literal',
+          value: `class-${i}`,
+        })),
+      }
+
+      const startTime = Date.now()
+      const result = extractClassStringsFromExpression(largeArray)
+      const duration = Date.now() - startTime
+
+      expect(result.length).toBe(100)
+      expect(duration).toBeLessThan(20) // Should be fast
+    })
+
+    it('should handle object with many properties', () => {
+      const largeObject: ObjectExpression = {
+        type: 'ObjectExpression',
+        properties: Array.from({ length: 100 }, (_, i) => ({
+          type: 'Property' as const,
+          key: { type: 'Literal', value: `class-${i}` },
+          value: { type: 'Literal', value: true },
+          computed: false,
+          shorthand: false,
+        })),
+      }
+
+      const startTime = Date.now()
+      const result = extractClassStringsFromExpression(largeObject)
+      const duration = Date.now() - startTime
+
+      expect(result.length).toBe(100)
+      expect(duration).toBeLessThan(20) // Should be fast
+    })
+
+    it('should handle deeply nested call expressions', () => {
+      // clsx(clsx(clsx(...))) nested 20 times
+      let expr: CallExpression = {
+        type: 'CallExpression',
+        callee: { type: 'Identifier', name: 'clsx' },
+        arguments: [{ type: 'Literal', value: 'innermost' }],
+      }
+
+      for (let i = 1; i < 20; i++) {
+        expr = {
+          type: 'CallExpression',
+          callee: { type: 'Identifier', name: 'clsx' },
+          arguments: [expr, { type: 'Literal', value: `level-${i}` }],
+        }
+      }
+
+      const result = extractClassStringsFromExpression(expr)
+
+      expect(result).toBeDefined()
+      expect(result.length).toBe(20) // innermost + 19 levels
+    })
+  })
+
+  describe('Special characters and unicode', () => {
+    it('should handle unicode characters (emoji)', () => {
+      const result = extractClassNamesFromString('😀-happy 🎉-party')
+      expect(result).toEqual(['😀-happy', '🎉-party'])
+    })
+
+    it('should handle class names with forward slashes', () => {
+      const result = extractClassNamesFromString('w-1/2 w-2/3 w-3/4')
+      expect(result).toEqual(['w-1/2', 'w-2/3', 'w-3/4'])
+    })
+
+    it('should handle class names with multiple special characters', () => {
+      const result = extractClassNamesFromString(
+        'w-[calc(100%-2rem)] bg-[#ff0000] w-1.5',
+      )
+      expect(result).toEqual(['w-[calc(100%-2rem)]', 'bg-[#ff0000]', 'w-1.5'])
+    })
+
+    it('should handle mixed unicode and ASCII', () => {
+      const result = extractClassNamesFromString('btn-primary 日本語-button')
+      expect(result).toEqual(['btn-primary', '日本語-button'])
+    })
+
+    it('should handle class names with brackets', () => {
+      const result = extractClassNamesFromString('w-[100px] bg-[#ff0000]')
+      expect(result).toEqual(['w-[100px]', 'bg-[#ff0000]'])
+    })
+
+    it('should handle class names with parentheses', () => {
+      const result = extractClassNamesFromString('calc(100%-2rem)')
+      expect(result).toEqual(['calc(100%-2rem)'])
+    })
+
+    it('should handle class names with commas', () => {
+      const result = extractClassNamesFromString('font-[Inter,sans-serif]')
+      expect(result).toEqual(['font-[Inter,sans-serif]'])
+    })
+  })
+
+  describe('Boundary conditions', () => {
+    it('should handle empty expressions list in various contexts', () => {
+      const emptyArray: ArrayExpression = {
+        type: 'ArrayExpression',
+        elements: [],
+      }
+      const emptyObject: ObjectExpression = {
+        type: 'ObjectExpression',
+        properties: [],
+      }
+      const emptyCall: CallExpression = {
+        type: 'CallExpression',
+        callee: { type: 'Identifier', name: 'clsx' },
+        arguments: [],
+      }
+
+      expect(extractClassStringsFromExpression(emptyArray)).toEqual([])
+      expect(extractClassStringsFromExpression(emptyObject)).toEqual([])
+      expect(extractClassStringsFromExpression(emptyCall)).toEqual([])
+    })
+
+    it('should handle single character class names', () => {
+      const result = extractClassNamesFromString('a b c d')
+      expect(result).toEqual(['a', 'b', 'c', 'd'])
+    })
+
+    it('should handle class string with maximum normal length', () => {
+      const normalMax = 'a'.repeat(200)
+      const result = extractClassNamesFromString(normalMax)
+      expect(result).toEqual([normalMax])
     })
   })
 })

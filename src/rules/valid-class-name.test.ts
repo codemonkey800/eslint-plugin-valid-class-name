@@ -89,8 +89,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            ignorePatterns: ['static-class'],
-            ignorePatterns: ['dynamic-*'],
+            ignorePatterns: ['static-class', 'dynamic-*'],
           },
         },
       ],
@@ -455,8 +454,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            ignorePatterns: ['valid-class'],
-            ignorePatterns: ['dynamic-*'],
+            ignorePatterns: ['valid-class', 'dynamic-*'],
           },
         },
       ],

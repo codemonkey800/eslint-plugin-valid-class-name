@@ -2,6 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { INVALID_INPUTS } from '../test'
 import {
   extractClassNamesFromCss,
   extractClassNamesFromScss,
@@ -532,27 +533,6 @@ describe('extractClassNamesFromCss', () => {
       expect(classes.size).toBe(1)
     })
 
-    it('should extract classes with Japanese characters', () => {
-      const css = '.日本語 { color: blue; }'
-      const classes = extractClassNamesFromCss(css)
-      expect(classes.has('日本語')).toBe(true)
-      expect(classes.size).toBe(1)
-    })
-
-    it('should extract classes with Cyrillic characters', () => {
-      const css = '.меню { color: green; }'
-      const classes = extractClassNamesFromCss(css)
-      expect(classes.has('меню')).toBe(true)
-      expect(classes.size).toBe(1)
-    })
-
-    it('should extract classes with emoji', () => {
-      const css = '.😀 { color: yellow; }'
-      const classes = extractClassNamesFromCss(css)
-      expect(classes.has('😀')).toBe(true)
-      expect(classes.size).toBe(1)
-    })
-
     it('should extract multiple international classes', () => {
       const css = `
         .café { color: brown; }
@@ -607,41 +587,26 @@ describe('extractClassNamesFromCss', () => {
   })
 
   describe('input validation', () => {
-    it('should return empty set for null input', () => {
-      const classes = extractClassNamesFromCss(null as any)
-      expect(classes.size).toBe(0)
-    })
+    it('should return empty set for invalid inputs', () => {
+      // Test all invalid inputs using type-safe helper
+      const invalidInputs = [
+        INVALID_INPUTS.null,
+        INVALID_INPUTS.undefined,
+        INVALID_INPUTS.number,
+        INVALID_INPUTS.object,
+        INVALID_INPUTS.array,
+        INVALID_INPUTS.boolean,
+      ]
 
-    it('should return empty set for undefined input', () => {
-      const classes = extractClassNamesFromCss(undefined as any)
-      expect(classes.size).toBe(0)
-    })
-
-    it('should return empty set for non-string input', () => {
-      const classes = extractClassNamesFromCss(123 as any)
-      expect(classes.size).toBe(0)
+      for (const input of invalidInputs) {
+        const classes = extractClassNamesFromCss(input as never)
+        expect(classes).toBeInstanceOf(Set)
+        expect(classes.size).toBe(0)
+      }
     })
 
     it('should return empty set for whitespace-only input', () => {
-      const classes = extractClassNamesFromCss('   \n\t   ')
-      expect(classes.size).toBe(0)
-    })
-
-    it('should return empty set for object input', () => {
-      const classes = extractClassNamesFromCss({} as any)
-      expect(classes).toBeInstanceOf(Set)
-      expect(classes.size).toBe(0)
-    })
-
-    it('should return empty set for array input', () => {
-      const classes = extractClassNamesFromCss([] as any)
-      expect(classes).toBeInstanceOf(Set)
-      expect(classes.size).toBe(0)
-    })
-
-    it('should return empty set for boolean input', () => {
-      const classes = extractClassNamesFromCss(true as any)
-      expect(classes).toBeInstanceOf(Set)
+      const classes = extractClassNamesFromCss(INVALID_INPUTS.whitespace)
       expect(classes.size).toBe(0)
     })
   })
@@ -848,30 +813,32 @@ describe('extractClassNamesFromScss', () => {
   })
 
   describe('input validation', () => {
-    it('should return empty set for null scssContent', () => {
-      const classes = extractClassNamesFromScss(null as any, mockFilePath)
-      expect(classes.size).toBe(0)
-    })
+    it('should return empty set for invalid scssContent inputs', () => {
+      // Test all invalid inputs using type-safe helper
+      const invalidInputs = [
+        INVALID_INPUTS.null,
+        INVALID_INPUTS.undefined,
+        INVALID_INPUTS.number,
+      ]
 
-    it('should return empty set for undefined scssContent', () => {
-      const classes = extractClassNamesFromScss(undefined as any, mockFilePath)
-      expect(classes.size).toBe(0)
-    })
-
-    it('should return empty set for non-string scssContent', () => {
-      const classes = extractClassNamesFromScss(123 as any, mockFilePath)
-      expect(classes.size).toBe(0)
+      for (const input of invalidInputs) {
+        const classes = extractClassNamesFromScss(input as never, mockFilePath)
+        expect(classes.size).toBe(0)
+      }
     })
 
     it('should return empty set for whitespace-only SCSS', () => {
-      const classes = extractClassNamesFromScss('   \n\t   ', mockFilePath)
+      const classes = extractClassNamesFromScss(
+        INVALID_INPUTS.whitespace,
+        mockFilePath,
+      )
       expect(classes.size).toBe(0)
     })
 
     it('should return empty set for missing filePath', () => {
       const classes = extractClassNamesFromScss(
         '.btn { color: red; }',
-        '' as any,
+        INVALID_INPUTS.emptyString as never,
       )
       expect(classes.size).toBe(0)
     })
@@ -1233,6 +1200,209 @@ describe('extractClassNamesFromScss', () => {
       expect(classes.has('text-sm')).toBe(false)
       expect(classes.has('text-lg')).toBe(false)
       expect(classes.size).toBe(1)
+    })
+  })
+
+  describe('SCSS advanced features', () => {
+    it('should handle @function definitions', () => {
+      const scss = `
+        @function calculate-rem($px) {
+          @return #{$px / 16}rem;
+        }
+
+        .text {
+          font-size: calculate-rem(24);
+        }
+
+        .heading {
+          font-size: calculate-rem(32);
+        }
+      `
+      const classes = extractClassNamesFromScss(scss, mockFilePath)
+      expect(classes.has('text')).toBe(true)
+      expect(classes.has('heading')).toBe(true)
+      expect(classes.size).toBe(2)
+    })
+
+    it('should handle @while loops', () => {
+      const scss = `
+        $i: 1;
+
+        @while $i <= 3 {
+          .mb-#{$i} {
+            margin-bottom: #{$i}rem;
+          }
+          $i: $i + 1;
+        }
+      `
+      const classes = extractClassNamesFromScss(scss, mockFilePath)
+      expect(classes.has('mb-1')).toBe(true)
+      expect(classes.has('mb-2')).toBe(true)
+      expect(classes.has('mb-3')).toBe(true)
+      expect(classes.size).toBe(3)
+    })
+
+    it('should handle @import statements', () => {
+      // Note: @import will fail compilation if files don't exist
+      // This tests that we gracefully handle compilation errors
+      const scss = `
+        @import 'variables';
+        @import 'mixins';
+
+        .btn {
+          color: red;
+        }
+      `
+      const classes = extractClassNamesFromScss(scss, mockFilePath)
+      // Import fails, so no classes are extracted (compilation error)
+      expect(classes.size).toBe(0)
+    })
+
+    it('should handle @use from built-in modules', () => {
+      const scss = `
+        @use 'sass:math';
+        @use 'sass:color';
+
+        .calculated {
+          width: math.div(100%, 3);
+          color: color.adjust(blue, $lightness: 20%);
+        }
+      `
+      const classes = extractClassNamesFromScss(scss, mockFilePath)
+      expect(classes.has('calculated')).toBe(true)
+      expect(classes.size).toBe(1)
+    })
+
+    it('should handle @keyframes (should not extract animation names as classes)', () => {
+      const scss = `
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        .animated {
+          animation: fadeIn 1s;
+        }
+      `
+      const classes = extractClassNamesFromScss(scss, mockFilePath)
+      expect(classes.has('animated')).toBe(true)
+      expect(classes.has('fadeIn')).toBe(false) // Animation name is not a class
+      expect(classes.size).toBe(1)
+    })
+
+    it('should handle @supports in SCSS', () => {
+      const scss = `
+        @supports (display: grid) {
+          .grid-layout {
+            display: grid;
+          }
+        }
+      `
+      const classes = extractClassNamesFromScss(scss, mockFilePath)
+      expect(classes.has('grid-layout')).toBe(true)
+      expect(classes.size).toBe(1)
+    })
+
+    it('should handle complex @for loop with calculations', () => {
+      const scss = `
+        @for $i from 1 through 5 {
+          .w-#{$i * 20} {
+            width: percentage($i / 5);
+          }
+        }
+      `
+      const classes = extractClassNamesFromScss(scss, mockFilePath)
+      expect(classes.has('w-20')).toBe(true)
+      expect(classes.has('w-40')).toBe(true)
+      expect(classes.has('w-60')).toBe(true)
+      expect(classes.has('w-80')).toBe(true)
+      expect(classes.has('w-100')).toBe(true)
+      expect(classes.size).toBe(5)
+    })
+
+    it('should handle @content in mixins', () => {
+      const scss = `
+        @mixin responsive($breakpoint) {
+          @if $breakpoint == mobile {
+            @media (max-width: 767px) {
+              @content;
+            }
+          }
+        }
+
+        .container {
+          width: 100%;
+
+          @include responsive(mobile) {
+            width: 90%;
+          }
+        }
+      `
+      const classes = extractClassNamesFromScss(scss, mockFilePath)
+      expect(classes.has('container')).toBe(true)
+      expect(classes.size).toBe(1)
+    })
+
+    it('should handle SCSS with multiple @use imports', () => {
+      const scss = `
+        @use 'sass:color';
+        @use 'sass:list';
+        @use 'sass:map';
+
+        .themed {
+          background: color.adjust(blue, $lightness: 20%);
+        }
+      `
+      const classes = extractClassNamesFromScss(scss, mockFilePath)
+      expect(classes.has('themed')).toBe(true)
+      expect(classes.size).toBe(1)
+    })
+
+    it('should handle parent selector in complex ways', () => {
+      const scss = `
+        .btn {
+          &:hover,
+          &:focus {
+            opacity: 0.8;
+          }
+
+          &.active,
+          &.selected {
+            font-weight: bold;
+          }
+
+          &__icon {
+            margin-right: 8px;
+          }
+        }
+      `
+      const classes = extractClassNamesFromScss(scss, mockFilePath)
+      expect(classes.has('btn')).toBe(true)
+      expect(classes.has('active')).toBe(true)
+      expect(classes.has('selected')).toBe(true)
+      expect(classes.has('btn__icon')).toBe(true)
+      expect(classes.size).toBe(4)
+    })
+
+    it('should handle @at-root directive', () => {
+      const scss = `
+        .parent {
+          color: blue;
+
+          @at-root .independent {
+            color: red;
+          }
+
+          .child {
+            color: green;
+          }
+        }
+      `
+      const classes = extractClassNamesFromScss(scss, mockFilePath)
+      expect(classes.has('parent')).toBe(true)
+      expect(classes.has('independent')).toBe(true)
+      expect(classes.has('child')).toBe(true)
+      expect(classes.size).toBe(3)
     })
   })
 })

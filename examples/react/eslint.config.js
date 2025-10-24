@@ -22,7 +22,7 @@ export default tseslint.config({
           tailwind: true,
         },
         validation: {
-          ignorePatterns: ['dynamic-*'],
+          ignorePatterns: ['dynamic-*', 'custom-*'],
           objectStyleAttributes: ['classes', 'classNames'],
         },
       },

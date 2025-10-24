@@ -74,7 +74,10 @@ describe('ClassRegistry', () => {
       fs.writeFileSync(css1, '.root-class { color: red; }')
       fs.writeFileSync(css2, '.nested-class { color: blue; }')
 
-      const registry = getClassRegistry([path.join(tempDir, '**/*.css')], undefined, tempDir,
+      const registry = getClassRegistry(
+        [path.join(tempDir, '**/*.css')],
+        undefined,
+        tempDir,
       )
 
       expect(registry.isValid('root-class')).toBe(true)
@@ -82,7 +85,10 @@ describe('ClassRegistry', () => {
     })
 
     it('should handle missing CSS files gracefully', () => {
-      const registry = getClassRegistry([path.join(tempDir, 'nonexistent.css')], undefined, tempDir,
+      const registry = getClassRegistry(
+        [path.join(tempDir, 'nonexistent.css')],
+        undefined,
+        tempDir,
       )
 
       expect(registry.isValid('anything')).toBe(false)
@@ -95,22 +101,30 @@ describe('ClassRegistry', () => {
       const nodeModuleCss = path.join(nodeModules, 'library.css')
       fs.writeFileSync(nodeModuleCss, '.library-class { color: red; }')
 
-      const registry = getClassRegistry([path.join(tempDir, '**/*.css')], undefined, tempDir,
+      const registry = getClassRegistry(
+        [path.join(tempDir, '**/*.css')],
+        undefined,
+        tempDir,
       )
 
       expect(registry.isValid('library-class')).toBe(false)
     })
   })
 
-
   describe('caching', () => {
     it('should cache registry with same configuration', () => {
       const cssFile = path.join(tempDir, 'styles.css')
       fs.writeFileSync(cssFile, '.btn { color: red; }')
 
-      const registry1 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry1 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
-      const registry2 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry2 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       expect(registry1).toBe(registry2)
@@ -141,9 +155,15 @@ describe('ClassRegistry', () => {
       fs.writeFileSync(css1, '.btn { color: red; }')
       fs.writeFileSync(css2, '.card { padding: 10px; }')
 
-      const registry1 = getClassRegistry([path.join(tempDir, 'buttons.css')], undefined, tempDir,
+      const registry1 = getClassRegistry(
+        [path.join(tempDir, 'buttons.css')],
+        undefined,
+        tempDir,
       )
-      const registry2 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry2 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       expect(registry1).not.toBe(registry2)
@@ -155,9 +175,15 @@ describe('ClassRegistry', () => {
       const cssFile = path.join(tempDir, 'styles.css')
       fs.writeFileSync(cssFile, '.btn { color: red; }')
 
-      const registry1 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry1 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
-      const registry2 = getClassRegistry([path.join(tempDir, '*.css')], undefined, '/different/path',
+      const registry2 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        '/different/path',
       )
 
       expect(registry1).not.toBe(registry2)
@@ -167,11 +193,20 @@ describe('ClassRegistry', () => {
       const cssFile = path.join(tempDir, 'styles.css')
       fs.writeFileSync(cssFile, '.btn { color: red; }')
 
-      const registry1 = getClassRegistry([path.join(tempDir, '*.css')], true, tempDir,
+      const registry1 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        true,
+        tempDir,
       )
-      const registry2 = getClassRegistry([path.join(tempDir, '*.css')], false, tempDir,
+      const registry2 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        false,
+        tempDir,
       )
-      const registry3 = getClassRegistry([path.join(tempDir, '*.css')], { config: 'custom.js' }, tempDir,
+      const registry3 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        { config: 'custom.js' },
+        tempDir,
       )
 
       expect(registry1).not.toBe(registry2)
@@ -185,7 +220,10 @@ describe('ClassRegistry', () => {
       const cssFile = path.join(tempDir, 'styles.css')
       fs.writeFileSync(cssFile, '.btn { color: red; } .card { padding: 10px; }')
 
-      const registry = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
       const allClasses = registry.getAllClasses()
 
@@ -193,7 +231,6 @@ describe('ClassRegistry', () => {
       expect(allClasses.has('card')).toBe(true)
       expect(allClasses.size).toBe(2)
     })
-
   })
 
   describe('edge cases', () => {
@@ -208,7 +245,10 @@ describe('ClassRegistry', () => {
       const cssFile = path.join(tempDir, 'empty.css')
       fs.writeFileSync(cssFile, 'body { margin: 0; }')
 
-      const registry = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       expect(registry.isValid('anything')).toBe(false)
@@ -219,7 +259,10 @@ describe('ClassRegistry', () => {
       const cssFile = path.join(tempDir, 'malformed.css')
       fs.writeFileSync(cssFile, '.btn { color: red')
 
-      const registry = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       expect(registry).toBeDefined()
@@ -232,11 +275,17 @@ describe('ClassRegistry', () => {
       fs.writeFileSync(cssFile, '.btn { color: red; }')
 
       // First call - should resolve files
-      const registry1 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry1 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       // Second call with same patterns - should use cached glob results
-      const registry2 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry2 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       // Both should return the same cached registry
@@ -252,11 +301,17 @@ describe('ClassRegistry', () => {
       fs.writeFileSync(css2, '.card { padding: 10px; }')
 
       // First call with specific pattern
-      const registry1 = getClassRegistry([path.join(tempDir, 'buttons.css')], undefined, tempDir,
+      const registry1 = getClassRegistry(
+        [path.join(tempDir, 'buttons.css')],
+        undefined,
+        tempDir,
       )
 
       // Second call with different pattern - should invalidate cache
-      const registry2 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry2 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       expect(registry1).not.toBe(registry2)
@@ -269,11 +324,17 @@ describe('ClassRegistry', () => {
       fs.writeFileSync(cssFile, '.btn { color: red; }')
 
       // First call with tempDir as cwd
-      const registry1 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry1 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       // Second call with different cwd - should invalidate cache
-      const registry2 = getClassRegistry([path.join(tempDir, '*.css')], undefined, '/different/path',
+      const registry2 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        '/different/path',
       )
 
       expect(registry1).not.toBe(registry2)
@@ -284,7 +345,10 @@ describe('ClassRegistry', () => {
       fs.writeFileSync(cssFile, '.btn { color: red; }')
 
       // First call - caches glob results
-      const registry1 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry1 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       // Modify file to change mtime
@@ -293,7 +357,10 @@ describe('ClassRegistry', () => {
       fs.utimesSync(cssFile, new Date(newTime), new Date(newTime))
 
       // Second call within TTL - should use cached registry
-      const registry2 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry2 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       // Should use cached registry (same reference) within TTL
@@ -305,7 +372,10 @@ describe('ClassRegistry', () => {
       fs.writeFileSync(cssFile, '.btn { color: red; }')
 
       // First call - caches glob results
-      const registry1 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry1 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       expect(registry1.isValid('btn')).toBe(true)
@@ -314,7 +384,10 @@ describe('ClassRegistry', () => {
       fs.unlinkSync(cssFile)
 
       // Second call within TTL - should use cached registry
-      const registry2 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry2 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       // Should use cached registry (same reference) within TTL
@@ -334,14 +407,20 @@ describe('ClassRegistry', () => {
       jest.setSystemTime(startTime)
 
       // First call - caches glob results
-      const registry1 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry1 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       // Advance time by less than TTL (1000ms)
       jest.setSystemTime(startTime + 500)
 
       // Second call - should still use cache
-      const registry2 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry2 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       expect(registry1).toBe(registry2)
@@ -351,7 +430,10 @@ describe('ClassRegistry', () => {
 
       // Third call - glob cache expires, but registry cache may return same object
       // if files haven't changed (which is correct behavior)
-      const registry3 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry3 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       // Registry might be the same object if files haven't changed
@@ -381,7 +463,10 @@ describe('ClassRegistry', () => {
       fs.writeFileSync(css1, '.btn { color: red; }')
 
       // First call - caches results with only file1
-      const registry1 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry1 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       expect(registry1.isValid('btn')).toBe(true)
@@ -395,7 +480,10 @@ describe('ClassRegistry', () => {
       fs.writeFileSync(css2, '.card { padding: 10px; }')
 
       // Call within TTL - won't detect new file yet
-      const registry2 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry2 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       // Should still use cached results (missing new file)
@@ -405,7 +493,10 @@ describe('ClassRegistry', () => {
       jest.setSystemTime(startTime + 1100)
 
       // Call after TTL - should detect new file
-      const registry3 = getClassRegistry([path.join(tempDir, '*.css')], undefined, tempDir,
+      const registry3 = getClassRegistry(
+        [path.join(tempDir, '*.css')],
+        undefined,
+        tempDir,
       )
 
       expect(registry3.isValid('card')).toBe(true)

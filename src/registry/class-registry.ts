@@ -40,11 +40,7 @@ export function getClassRegistry(
   // Resolve CSS files with modification times (uses cached results when possible)
   const resolvedFiles = getCachedOrResolveFiles(cssPatterns, cwd)
 
-  const currentCacheKey = createCacheKey(
-    resolvedFiles,
-    tailwindConfig,
-    cwd,
-  )
+  const currentCacheKey = createCacheKey(resolvedFiles, tailwindConfig, cwd)
 
   // Return cached registry if configuration and files haven't changed
   if (cachedRegistry && cacheKey === currentCacheKey) {
@@ -63,11 +59,7 @@ export function getClassRegistry(
   }
 
   // Build new registry with pre-resolved files
-  cachedRegistry = buildClassRegistry(
-    resolvedFiles,
-    tailwindUtils,
-    cwd,
-  )
+  cachedRegistry = buildClassRegistry(resolvedFiles, tailwindUtils, cwd)
   cacheKey = currentCacheKey
 
   return cachedRegistry

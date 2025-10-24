@@ -110,11 +110,7 @@ export const validClassNameRule: Rule.RuleModule = {
     const cwd = context.getCwd ? context.getCwd() : process.cwd()
 
     // Get the class registry (with CSS, SCSS, Tailwind parsing and caching)
-    const classRegistry = getClassRegistry(
-      allCssPatterns,
-      tailwindConfig,
-      cwd,
-    )
+    const classRegistry = getClassRegistry(allCssPatterns, tailwindConfig, cwd)
 
     return {
       JSXAttribute(node: JSXAttribute) {

@@ -13,8 +13,9 @@ if (
   typeof (globalThis as unknown as { require?: unknown }).require ===
   'undefined'
 ) {
-  ;(globalThis as unknown as { require: NodeRequire }).require =
-    createRequire(import.meta.url)
+  ;(globalThis as unknown as { require: NodeRequire }).require = createRequire(
+    import.meta.url,
+  )
 }
 
 /**

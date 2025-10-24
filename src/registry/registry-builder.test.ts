@@ -231,8 +231,6 @@ describe('buildClassRegistry', () => {
     })
   })
 
-
-
   describe('TailwindUtils integration', () => {
     it('should validate Tailwind classes via API', () => {
       const mockTailwind = new MockTailwindUtils([
@@ -326,11 +324,9 @@ describe('buildClassRegistry', () => {
       expect(registry.isValid('flex')).toBe(false)
       expect(registry.getAllClasses().size).toBe(0)
     })
-
   })
 
   describe('combined sources', () => {
-
     it('should combine CSS classes and Tailwind classes', () => {
       const cssFile = path.join(tempDir, 'styles.css')
       fs.writeFileSync(cssFile, '.btn { color: red; }')
@@ -343,7 +339,7 @@ describe('buildClassRegistry', () => {
         'p-4',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry(resolvedFiles, mockTailwind, tempDir,)
+      const registry = buildClassRegistry(resolvedFiles, mockTailwind, tempDir)
 
       expect(registry.isValid('btn')).toBe(true)
       expect(registry.isValid('flex')).toBe(true)
@@ -414,7 +410,7 @@ describe('buildClassRegistry', () => {
         'tw-btn',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry(resolvedFiles, mockTailwind, tempDir,)
+      const registry = buildClassRegistry(resolvedFiles, mockTailwind, tempDir)
 
       // Each source should be checked
       expect(registry.isValid('css-btn')).toBe(true)
@@ -460,7 +456,6 @@ describe('buildClassRegistry', () => {
 
       expect(registry.isTailwindClass('btn')).toBe(false)
     })
-
   })
 
   describe('getAllClasses method', () => {
@@ -495,7 +490,6 @@ describe('buildClassRegistry', () => {
       expect(allClasses.has('bg-blue-500')).toBe(false)
       expect(allClasses.size).toBe(0)
     })
-
 
     it('should return empty set when no classes present', () => {
       const registry = buildClassRegistry([], null, tempDir)
@@ -615,7 +609,7 @@ describe('buildClassRegistry', () => {
         'shared',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry(resolvedFiles, mockTailwind, tempDir,)
+      const registry = buildClassRegistry(resolvedFiles, mockTailwind, tempDir)
 
       // Should be valid (from any source)
       expect(registry.isValid('shared')).toBe(true)

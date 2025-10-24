@@ -716,10 +716,7 @@ describe('Tailwind variant validation', () => {
     {
       sources: {
         tailwind: {
-          config: path.join(
-            process.cwd(),
-            'examples/react/tailwind.config.js',
-          ),
+          config: path.join(process.cwd(), 'examples/react/tailwind.config.js'),
         },
       },
     },
@@ -1070,7 +1067,12 @@ describe('Dynamic class names - ConditionalExpression', () => {
   const options = [
     {
       validation: {
-        ignorePatterns: ['opacity-0', 'opacity-1', 'bg-blue-500', 'bg-gray-500'],
+        ignorePatterns: [
+          'opacity-0',
+          'opacity-1',
+          'bg-blue-500',
+          'bg-gray-500',
+        ],
       },
     },
   ]
@@ -1252,7 +1254,13 @@ describe('Dynamic class names - CallExpression', () => {
   const options = [
     {
       validation: {
-        ignorePatterns: ['mt-2', 'opacity-0', 'bg-blue-500', 'flex', 'items-center'],
+        ignorePatterns: [
+          'mt-2',
+          'opacity-0',
+          'bg-blue-500',
+          'flex',
+          'items-center',
+        ],
       },
     },
   ]
@@ -2069,7 +2077,13 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  ignorePatterns: ['mt-2', 'flex', 'items-center', 'p-4', 'rounded'],
+                  ignorePatterns: [
+                    'mt-2',
+                    'flex',
+                    'items-center',
+                    'p-4',
+                    'rounded',
+                  ],
                   objectStyleAttributes: ['classes'],
                 },
               },

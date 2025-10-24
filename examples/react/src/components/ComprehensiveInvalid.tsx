@@ -10,7 +10,7 @@ import React from 'react'
  * - Empty arbitrary values
  * - Malformed class names
  * - CSS/SCSS class typos
- * - Non-allowlisted custom classes
+ * - Undefined custom classes
  * - Invalid variant + utility combinations
  *
  * Expected: ~20+ ESLint errors
@@ -88,14 +88,14 @@ export const ComprehensiveInvalid: React.FC = () => {
         <div className="footer-large">Nonexistent variant</div>
       </section>
 
-      {/* Non-allowlisted Custom Classes */}
+      {/* Undefined Custom Classes */}
       <section className="mb-4">
-        <h2>Non-allowlisted Custom Classes</h2>
+        <h2>Undefined Custom Classes</h2>
         <div className="random-class-123">Not in any source</div>
         <div className="not-in-css">Not defined anywhere</div>
         <div className="made-up-class">Invented class name</div>
         <div className="does-not-exist-anywhere">Long nonexistent class</div>
-        <div className="mystery-widget">Not in whitelist</div>
+        <div className="mystery-widget">Not defined anywhere</div>
       </section>
 
       {/* Invalid Layout Utilities */}

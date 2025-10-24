@@ -553,8 +553,6 @@ const Button = tw`mt-2 ${isActive && 'bg-green-500'}`
 
 **Use case:** Popular in projects using twin.macro, tailwind-styled-components, or emotion with Tailwind CSS.
 
-See [TAGGED_TEMPLATE_IMPL.md](TAGGED_TEMPLATE_IMPL.md) for implementation details.
-
 #### 📞 Standalone Callee Validation
 
 **Status:** Planned for v1.x
@@ -573,14 +571,14 @@ Validate `clsx()`, `classnames()`, and other utility function calls outside JSX 
 ```tsx
 // ✅ Will be validated
 const buttonClasses = clsx('btn', isActive && 'btn-active')
-const cardStyles = classnames({ 'card': true, 'card-elevated': elevated })
+const cardStyles = classnames({ card: true, 'card-elevated': elevated })
 ```
 
 **Configuration:**
 
 ```javascript
 {
-  callees: ['clsx', 'classnames', 'cn', 'cva']  // Specify which functions to validate
+  callees: ['clsx', 'classnames', 'cn', 'cva'] // Specify which functions to validate
 }
 ```
 
@@ -594,7 +592,7 @@ Full regular expression support in `allowlist` and `blocklist` patterns.
 
 ```javascript
 {
-  allowlist: ['custom-*', 'app-*']  // ✅ Currently supported
+  allowlist: ['custom-*', 'app-*'] // ✅ Currently supported
 }
 ```
 
@@ -615,6 +613,7 @@ Full regular expression support in `allowlist` and `blocklist` patterns.
 ```
 
 **Use cases:**
+
 - Complex naming patterns from design systems
 - Fine-grained control over allowed/blocked classes
 - Migration scenarios with specific class patterns
@@ -645,7 +644,7 @@ Validate class names in Vue templates and components.
 <div :class="['flex', isActive && 'bg-blue-500']"></div>
 
 <!-- Object syntax -->
-<div :class="{ 'active': isActive, 'disabled': isDisabled }"></div>
+<div :class="{ active: isActive, disabled: isDisabled }"></div>
 ```
 
 #### Angular

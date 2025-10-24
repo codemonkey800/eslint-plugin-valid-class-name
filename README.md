@@ -499,7 +499,7 @@ The plugin uses a multi-layered architecture:
 1. **Expression Parser** - Recursively extracts static string literals from dynamic expressions (ternaries, logical operators, function calls)
 2. **Class Registry** - Central caching layer that aggregates class names from all sources
 3. **CSS/SCSS Parser** - Uses PostCSS to extract class names from stylesheets
-4. **Tailwind Parser** - Generates utilities from Tailwind configuration
+4. **Tailwind Validator** - Validates classes on-demand using Tailwind's official API
 5. **Variant Validator** - Handles Tailwind variants and arbitrary values
 
 ### Performance

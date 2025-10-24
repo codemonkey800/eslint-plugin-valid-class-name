@@ -73,13 +73,13 @@ When modifying files, run linters only for changed files to save time.
 - SCSS files are compiled to CSS using Sass before extraction
 - Handles syntax errors gracefully with warnings
 
-**4. Tailwind Parser** ([src/parsers/tailwind-parser.ts](src/parsers/tailwind-parser.ts))
+**4. Tailwind Integration** ([src/parsers/tailwind-parser.ts](src/parsers/tailwind-parser.ts) + [src/registry/tailwind-loader.ts](src/registry/tailwind-loader.ts))
 
-- Finds and loads Tailwind configuration files
-- Generates utility classes from theme configuration (colors, spacing, typography, etc.)
-- Supports safelist extraction
-- Uses synchronous loading (required by ESLint's synchronous rule execution)
-- **Note**: Does NOT generate arbitrary value utilities (e.g., `w-[100px]`, `bg-[#ff0000]`)
+- **tailwind-parser.ts**: Finds Tailwind configuration file path
+- **tailwind-loader.ts**: Creates TailwindUtils instance from tailwind-api-utils library
+- Validates classes on-demand via `isValidClassName()` API (no upfront generation)
+- Supports all Tailwind features automatically: variants, arbitrary values, plugins
+- Tailwind CSS v3 only (v4 requires async initialization)
 
 **5. Tailwind Variants** ([src/utils/tailwind-variants.ts](src/utils/tailwind-variants.ts))
 
@@ -93,7 +93,7 @@ When modifying files, run linters only for changed files to save time.
 **Caching Strategy**:
 
 - Single registry cache at the rule level
-- Cache key is a JSON-stringified combination of: CSS patterns, Tailwind config, and cwd
+- Cache key is a hash-based combination of: CSS patterns, Tailwind config, and cwd
 - Cache invalidates automatically when configuration changes
 - The registry is shared across all lint runs with the same configuration
 
@@ -105,10 +105,10 @@ When modifying files, run linters only for changed files to save time.
 
 **Tailwind Integration**:
 
-- Generates static utilities based on theme configuration
-- Flattens nested theme objects (e.g., `colors.blue.500` → `blue-500`)
-- Handles negative values for spacing utilities (margin, inset, etc.)
-- Detects and warns about theme collisions (e.g., fontWeight and fontFamily with same keys)
+- Uses tailwind-api-utils for on-demand validation (no upfront generation)
+- TailwindUtils API handles all Tailwind features automatically
+- Lazy validation approach: classes validated only when encountered
+- Supports variants, arbitrary values, and plugin-generated classes out-of-the-box
 
 **Variant Validation**:
 
@@ -161,10 +161,10 @@ src/
 │   ├── class-registry.ts          # Central registry and caching
 │   ├── file-resolver.ts           # File path resolution
 │   ├── registry-builder.ts        # Registry building logic
-│   └── tailwind-loader.ts         # Tailwind class loading
+│   └── tailwind-loader.ts         # Creates TailwindUtils validator
 ├── parsers/
 │   ├── css-parser.ts              # CSS/SCSS parsing
-│   └── tailwind-parser.ts         # Tailwind config parsing and utility generation
+│   └── tailwind-parser.ts         # Finds Tailwind config file path
 ├── rules/
 │   ├── ast-types.ts               # JSX AST type definitions
 │   ├── ast-guards.ts              # Type guard functions
@@ -182,6 +182,6 @@ src/
 ## Important Notes
 
 - The plugin uses ES modules (`type: "module"` in package.json)
-- Tailwind class loading is synchronous and blocks during initial load (by design, due to ESLint constraints)
+- TailwindUtils initialization is synchronous (required by ESLint constraints)
 - The rule currently only validates static string literals in className attributes
 - Dynamic class names (template literals, variables, etc.) are skipped

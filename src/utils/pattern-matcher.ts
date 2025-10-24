@@ -6,6 +6,16 @@
 import { MAX_PATTERN_LENGTH } from './constants'
 
 /**
+ * Patterns that could cause catastrophic backtracking (ReDoS)
+ * Checked against user-provided patterns to prevent DoS attacks
+ */
+const DANGEROUS_PATTERNS = [
+  /\*{3,}/, // Multiple consecutive wildcards (**, ***, etc.)
+  /\+{2,}/, // Multiple consecutive plus signs
+  /(\(.*\+.*\))\+/, // Nested quantifiers like (a+)+
+] as const
+
+/**
  * Validates that a pattern is safe to use in regex
  * Prevents ReDoS (Regular Expression Denial of Service) attacks
  * @param pattern - The pattern to validate
@@ -18,14 +28,7 @@ export function validatePattern(pattern: string): boolean {
   }
 
   // Check for patterns that could cause catastrophic backtracking
-  // Patterns like a******* or (a+)+ are dangerous
-  const dangerousPatterns = [
-    /\*{3,}/, // Multiple consecutive wildcards (**, ***, etc.)
-    /\+{2,}/, // Multiple consecutive plus signs
-    /(\(.*\+.*\))\+/, // Nested quantifiers like (a+)+
-  ]
-
-  for (const dangerous of dangerousPatterns) {
+  for (const dangerous of DANGEROUS_PATTERNS) {
     if (dangerous.test(pattern)) {
       return false
     }

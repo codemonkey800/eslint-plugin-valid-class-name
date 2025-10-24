@@ -6,9 +6,20 @@ import type { TailwindConfig } from 'src/types/options'
 import { logger } from 'src/utils/logger'
 import { TailwindUtils } from 'tailwind-api-utils'
 
-// Make require available globally for tailwind-api-utils
-// This is needed because tailwind-api-utils uses require() internally
-// but is distributed as an ES module
+/**
+ * IMPORTANT: globalThis Mutation Side Effect
+ *
+ * This module mutates `globalThis.require` to provide CommonJS require() functionality
+ * in ESM context. This is required because tailwind-api-utils internally uses require()
+ * but is distributed as an ES module.
+ *
+ * Side effects:
+ * - Sets `globalThis.require` if it doesn't exist
+ * - Affects the entire Node.js process (not scoped to this module)
+ * - Could potentially conflict with other code that expects `globalThis.require` to be undefined
+ *
+ * This is a known limitation when bridging ESM and CJS dependencies.
+ */
 if (
   typeof (globalThis as unknown as { require?: unknown }).require ===
   'undefined'
@@ -60,20 +71,11 @@ export function createTailwindValidator(
       return null
     }
 
-    // Extract options
-    const options = {
-      pwd: path.dirname(resolvedConfigPath),
-      separator: undefined as string | undefined,
-      prefix: undefined as string | undefined,
-    }
-
-    if (typeof tailwindConfig === 'object') {
-      // User can override separator and prefix if needed (future enhancement)
-      // For now, let TailwindUtils read it from the config
-    }
-
     // Load config synchronously for v3
-    utils.loadConfigV3(resolvedConfigPath, options)
+    // TailwindUtils will read separator and prefix directly from the config file
+    utils.loadConfigV3(resolvedConfigPath, {
+      pwd: path.dirname(resolvedConfigPath),
+    })
 
     return utils
   } catch (error) {

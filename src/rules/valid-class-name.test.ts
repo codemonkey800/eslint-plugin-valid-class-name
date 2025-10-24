@@ -1827,6 +1827,27 @@ describe('Tailwind arbitrary value support', () => {
           },
         ],
       },
+      // Empty arbitrary values can be ignored with ignorePatterns (fix for issue 1.1)
+      {
+        code: '<div className="w-[]" />',
+        filename: 'test.jsx',
+        options: [
+          {
+            sources: {
+              tailwind: {
+                config: path.join(
+                  process.cwd(),
+                  'examples/react/tailwind.config.js',
+                ),
+                includePluginClasses: false,
+              },
+            },
+            validation: {
+              ignorePatterns: ['w-[]'],
+            },
+          },
+        ],
+      },
     ],
     invalid: [
       // Invalid prefix

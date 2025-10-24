@@ -24,6 +24,7 @@ const config: Config = {
     ],
   },
   testMatch: ['**/*.test.ts', '**/*.spec.ts'],
+  testPathIgnorePatterns: ['/node_modules/', '/tailwind-api-utils/'],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.test.ts',

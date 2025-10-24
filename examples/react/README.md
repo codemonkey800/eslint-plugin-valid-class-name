@@ -62,9 +62,7 @@ The plugin is configured to validate class names against:
 1. **CSS files**: `src/styles/**/*.css`
 2. **SCSS files**: `src/styles/**/*.scss`
 3. **Tailwind safelist**: Classes explicitly added to the safelist in `tailwind.config.cjs`
-4. **Allowlist patterns**: `custom-*` (any class starting with "custom-" is always valid)
-5. **Blocklist patterns**: `legacy-*`, `deprecated-*`, `old-*`, `forbidden-class` (these classes are forbidden even if they exist in CSS)
-6. **Ignore patterns**: `dynamic-*` (skips validation for classes starting with "dynamic-")
+4. **Ignore patterns**: `dynamic-*` (skips validation for classes starting with "dynamic-")
 
 ### Tailwind Features
 
@@ -90,7 +88,6 @@ Basic valid classes from multiple sources:
 - SCSS: `button-primary`, `card`, `alert`
 - Tailwind utilities: `flex`, `items-center`, `justify-between`, `gap-4`, `bg-blue-500`, `text-white`, `p-4`, `rounded`, `mb-2`
 - Custom theme: `text-brand-500`
-- Whitelist: `custom-widget` (matches `custom-*`)
 - Ignored: `dynamic-loader` (matches `dynamic-*`, skips validation)
 
 Run: `pnpm run test:valid`
@@ -170,18 +167,6 @@ Edge cases that should pass:
 
 Run: `pnpm run test:edge-cases`
 
-#### BlocklistValid.tsx
-
-Valid classes that are NOT blocked by blocklist:
-
-- CSS classes: `container`, `card`, `button-primary`, `button-secondary`
-- SCSS classes: `alert`, `alert-info`, `alert-warning`
-- Tailwind utilities: `flex`, `grid`, `bg-blue-500`, `text-white`, `p-4`, `rounded`
-- Allowlist: `custom-component`, `custom-widget`, `custom-text`
-- Modern alternatives to legacy classes
-
-Run: `pnpm run test:blocklist-valid`
-
 ### Invalid Test Components (Should Fail with Errors)
 
 #### InvalidComponent.tsx (4 errors expected)
@@ -205,21 +190,9 @@ Comprehensive invalid cases:
 - Empty arbitrary values: `w-[]`, `bg-[]`
 - Malformed: `hover::bg-blue`, `:hover:bg-blue`, `bg-blue-`
 - CSS/SCSS typos: `containr`, `buton-primary`, `crd`
-- Non-allowlisted: `random-class-123`, `not-in-css`
+- Non-existent classes: `random-class-123`, `not-in-css`
 
 Run: `pnpm run test:comprehensive-invalid`
-
-#### BlocklistInvalid.tsx (~10 errors expected)
-
-Classes that are blocked by the blocklist configuration:
-
-- Exact match: `forbidden-class`
-- Pattern `legacy-*`: `legacy-button`, `legacy-card`, `legacy-layout`
-- Pattern `deprecated-*`: `deprecated-flex`, `deprecated-grid`
-- Pattern `old-*`: `old-container`, `old-wrapper`
-- Note: These classes exist in components.scss but are intentionally blocked to prevent use of deprecated patterns
-
-Run: `pnpm run test:blocklist-invalid`
 
 ### Test All Components
 
@@ -265,8 +238,6 @@ rules: {
         tailwind: true,
       },
       validation: {
-        allowlist: ['custom-*'],
-        blocklist: ['legacy-*', 'deprecated-*', 'old-*', 'forbidden-class'],
         ignorePatterns: ['dynamic-*'],
       },
     },

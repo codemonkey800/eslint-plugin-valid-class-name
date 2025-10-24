@@ -22,8 +22,6 @@ export default tseslint.config({
           tailwind: true,
         },
         validation: {
-          allowlist: ['custom-*'],
-          blocklist: ['legacy-*', 'deprecated-*', 'old-*', 'forbidden-class'],
           ignorePatterns: ['dynamic-*'],
           objectStyleAttributes: ['classes', 'classNames'],
         },

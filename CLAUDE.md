@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an ESLint plugin that validates CSS class names in JSX/TSX files against actual CSS/SCSS files, Tailwind configuration, and allowlists. The plugin reports errors when class names are used that don't exist in any of the configured sources.
+This is an ESLint plugin that validates CSS class names in JSX/TSX files against actual CSS/SCSS files and Tailwind configuration. The plugin reports errors when class names are used that don't exist in any of the configured sources.
 
 ## Development Commands
 
@@ -50,7 +50,7 @@ When modifying files, run linters only for changed files to save time.
 
 - Main ESLint rule that validates className attributes in JSX
 - Integrates with the class registry for validation
-- Supports ignore patterns and whitelist patterns with glob-style wildcards
+- Supports ignore patterns with glob-style wildcards
 - Delegates to specialized helper modules for AST parsing and class extraction
 
 **Rule Helper Modules**:
@@ -62,7 +62,7 @@ When modifying files, run linters only for changed files to save time.
 **2. Class Registry** ([src/registry/class-registry.ts](src/registry/class-registry.ts))
 
 - Central registry that aggregates class names from all sources
-- Combines CSS/SCSS parsed classes, Tailwind utilities, and whitelist patterns
+- Combines CSS/SCSS parsed classes and Tailwind utilities
 - Uses a single cache that invalidates when configuration changes
 - Returns a `ClassRegistry` interface with `isValid()` and `getAllClasses()` methods
 - Supports both literal class lookups (O(1)) and wildcard pattern matching
@@ -93,13 +93,13 @@ When modifying files, run linters only for changed files to save time.
 **Caching Strategy**:
 
 - Single registry cache at the rule level
-- Cache key is a JSON-stringified combination of: CSS patterns, whitelist, Tailwind config, and cwd
+- Cache key is a JSON-stringified combination of: CSS patterns, Tailwind config, and cwd
 - Cache invalidates automatically when configuration changes
 - The registry is shared across all lint runs with the same configuration
 
 **Pattern Matching**:
 
-- Supports glob-style wildcards in whitelist and ignore patterns
+- Supports glob-style wildcards in ignore patterns
 - Literal classes use Set for O(1) lookup
 - Wildcard patterns are checked sequentially only after literal lookup fails
 
@@ -135,8 +135,6 @@ The rule accepts the following options:
     tailwind: true                   // or { config: 'path/to/tailwind.config.js' }
   },
   validation: {
-    allowlist: ['custom-*'],         // Always valid patterns (supports wildcards)
-    blocklist: ['legacy-*', 'deprecated-*'],  // Forbidden patterns (supports wildcards)
     ignorePatterns: ['dynamic-*']    // Skip validation for these patterns
   }
 }

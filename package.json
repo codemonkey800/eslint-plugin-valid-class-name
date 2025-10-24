@@ -1,7 +1,7 @@
 {
   "name": "eslint-plugin-valid-class-name",
   "version": "1.0.0",
-  "description": "ESLint plugin that validates CSS class names against actual CSS/SCSS files, Tailwind config, and allowlists",
+  "description": "ESLint plugin that validates CSS class names against actual CSS/SCSS files and Tailwind config",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

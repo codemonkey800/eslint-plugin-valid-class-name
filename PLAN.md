@@ -158,8 +158,6 @@ Implement intelligent suggestions for typos and performance optimizations. Add d
   - **tailwind**: Boolean or config object
 
 - **validation**: Control validation behavior
-  - **whitelist**: Array of always-valid class patterns
-  - **blacklist**: Array of forbidden class patterns
   - **ignorePatterns**: Skip validation for matching classes
   - **allowDynamic**: How to handle dynamic classes
 
@@ -281,7 +279,6 @@ Implement intelligent suggestions for typos and performance optimizations. Add d
 - [x] Build basic validation against hardcoded list
 - [x] Add ESLint error reporting
 - [x] Implement configuration loading
-- [x] Create allowlist/blocklist support
 
 ### CSS Processing
 

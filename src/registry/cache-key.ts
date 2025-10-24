@@ -16,8 +16,6 @@ import type { ResolvedFile } from './file-resolver'
  */
 export function createCacheKey(
   resolvedFiles: ResolvedFile[],
-  allowlist: string[],
-  blocklist: string[],
   tailwindConfig: boolean | TailwindConfig | undefined,
   cwd: string,
 ): string {
@@ -28,16 +26,6 @@ export function createCacheKey(
   for (const file of resolvedFiles) {
     hash.update(file.path)
     hash.update(String(file.mtime))
-  }
-
-  // Hash allowlist patterns directly
-  for (const pattern of allowlist) {
-    hash.update(pattern)
-  }
-
-  // Hash blocklist patterns directly
-  for (const pattern of blocklist) {
-    hash.update(pattern)
   }
 
   // Hash Tailwind config (only place where JSON.stringify is needed)

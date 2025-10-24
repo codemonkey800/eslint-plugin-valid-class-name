@@ -6,7 +6,6 @@ import {
 } from 'src/parsers/css-parser'
 import type { ResolvedFile } from 'src/registry/file-resolver'
 import { logger } from 'src/utils/logger'
-import { compilePattern } from 'src/utils/pattern-matcher'
 import type { TailwindUtils } from 'tailwind-api-utils'
 
 /**
@@ -61,30 +60,24 @@ export interface ClassRegistry {
 }
 
 /**
- * Builds a class registry from CSS files, Tailwind config, allowlist patterns, and blocklist patterns
+ * Builds a class registry from CSS files and Tailwind config
  *
  * Note: Uses synchronous file I/O (fs.readFileSync) because ESLint rules must be
  * synchronous. Performance impact is mitigated by the caching strategy - files are
  * only read when the cache is invalid (i.e., when configuration or files change).
  *
  * @param resolvedFiles - Pre-resolved CSS files with paths and mtimes
- * @param allowlist - Array of class name patterns (supports wildcards)
- * @param blocklist - Array of class name patterns to forbid (supports wildcards)
  * @param tailwindUtils - TailwindUtils instance for validating Tailwind classes (optional)
  * @param cwd - Current working directory for resolving SCSS imports
  * @returns ClassRegistry instance
  */
 export function buildClassRegistry(
   resolvedFiles: ResolvedFile[],
-  allowlist: string[],
-  blocklist: string[],
   tailwindUtils: TailwindUtils | null | undefined,
   cwd: string,
 ): ClassRegistry {
-  // Separate CSS classes from allowlist/blocklist
+  // Extract CSS classes
   const cssClasses = new Set<string>()
-  const allowlistLiteralClasses = new Set<string>()
-  const blocklistLiteralClasses = new Set<string>()
 
   // Extract classes from CSS files
   for (const file of resolvedFiles) {
@@ -106,54 +99,13 @@ export function buildClassRegistry(
     }
   }
 
-  // Add literal allowlist entries (non-wildcard patterns) to allowlist set
-  allowlist.forEach(pattern => {
-    if (!pattern.includes('*')) {
-      allowlistLiteralClasses.add(pattern)
-    }
-  })
-
-  // Add literal blocklist entries (non-wildcard patterns) to blocklist set
-  blocklist.forEach(pattern => {
-    if (!pattern.includes('*')) {
-      blocklistLiteralClasses.add(pattern)
-    }
-  })
-
-  // Extract wildcard patterns from allowlist and compile them to RegExp
-  const wildcardPatterns = allowlist.filter(pattern => pattern.includes('*'))
-  const compiledWildcardPatterns = wildcardPatterns
-    .map(compilePattern)
-    .filter((regex): regex is RegExp => regex !== null)
-
-  // Extract wildcard patterns from blocklist and compile them to RegExp
-  const blocklistWildcardPatterns = blocklist.filter(pattern =>
-    pattern.includes('*'),
-  )
-  const compiledBlocklistPatterns = blocklistWildcardPatterns
-    .map(compilePattern)
-    .filter((regex): regex is RegExp => regex !== null)
-
   // Performance optimization: Keep source Sets separate instead of merging them.
   // This avoids O(n) Set creation overhead during registry build.
   // Validation checks happen in order of likelihood for early returns.
   return {
     isValid(className: string): boolean {
-      // Check blocklist first - blocked classes are always invalid
-      // This takes precedence over all other sources
-      if (blocklistLiteralClasses.has(className)) {
-        return false
-      }
-
-      // Check blocklist wildcard patterns
-      if (compiledBlocklistPatterns.some(regex => regex.test(className))) {
-        return false
-      }
-
-      // Check source Sets in order of likelihood for early returns:
-      // 1. Literal allowlist (often matches dynamic patterns)
-      // 2. CSS classes (project-specific classes)
-      if (allowlistLiteralClasses.has(className) || cssClasses.has(className)) {
+      // Check CSS classes first (project-specific classes)
+      if (cssClasses.has(className)) {
         return true
       }
 
@@ -162,63 +114,32 @@ export function buildClassRegistry(
         return true
       }
 
-      // Check allowlist wildcard patterns using pre-compiled RegExp
-      return compiledWildcardPatterns.some(regex => regex.test(className))
+      return false
     },
 
     isTailwindClass(className: string): boolean {
-      // Check blocklist first - blocked classes are always invalid
-      // This takes precedence over all other sources
-      if (blocklistLiteralClasses.has(className)) {
-        return false
-      }
-
-      // Check blocklist wildcard patterns
-      if (compiledBlocklistPatterns.some(regex => regex.test(className))) {
-        return false
-      }
-
-      // Check literal allowlist first
-      if (allowlistLiteralClasses.has(className)) {
-        return true
-      }
-
       // Check Tailwind classes via API (if enabled)
       if (tailwindUtils?.isValidClassName(className)) {
         return true
       }
 
-      // Check allowlist wildcard patterns using pre-compiled RegExp
-      return compiledWildcardPatterns.some(regex => regex.test(className))
+      return false
     },
 
     isTailwindOnly(className: string): boolean {
-      // Check blocklist first
-      if (blocklistLiteralClasses.has(className)) {
-        return false
-      }
-
-      if (compiledBlocklistPatterns.some(regex => regex.test(className))) {
-        return false
-      }
-
-      // Don't check allowlist - we only want pure Tailwind classes
       // Check Tailwind classes via API (if enabled)
       return tailwindUtils?.isValidClassName(className) ?? false
     },
 
     isCssClass(className: string): boolean {
-      // Check if the class is from a CSS file (not allowlist)
+      // Check if the class is from a CSS file
       return cssClasses.has(className)
     },
 
     getAllClasses(): Set<string> {
-      // Create merged Set on-demand (only used in tests, not hot path)
+      // Return CSS classes (only used in tests, not hot path)
       // Note: Does not include Tailwind classes when using API mode
-      const allClasses = new Set<string>()
-      cssClasses.forEach(cls => allClasses.add(cls))
-      allowlistLiteralClasses.forEach(cls => allClasses.add(cls))
-      return allClasses
+      return new Set(cssClasses)
     },
 
     getValidVariants(): Set<string> {

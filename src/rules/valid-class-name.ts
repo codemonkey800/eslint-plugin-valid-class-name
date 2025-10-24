@@ -10,24 +10,19 @@ import {
   extractClassStringsFromExpression,
   extractClassStringsFromObjectValues,
 } from './class-extractors'
-import {
-  isClassNameBlocklisted,
-  isClassNameIgnored,
-} from './validation-helpers'
+import { isClassNameIgnored } from './validation-helpers'
 
 export const validClassNameRule: Rule.RuleModule = {
   meta: {
     type: 'problem',
     docs: {
       description:
-        'Validates CSS class names against actual CSS/SCSS files, Tailwind config, and allowlists',
+        'Validates CSS class names against actual CSS/SCSS files and Tailwind config',
       recommended: true,
     },
     messages: {
       invalidClassName:
         'Class name "{{className}}" is not defined in any CSS files or configuration',
-      blockedClassName:
-        'Class name "{{className}}" is blocked by the blocklist configuration',
       invalidVariant:
         'Variant "{{variant}}" in class "{{className}}" is not a valid Tailwind variant',
     },
@@ -82,17 +77,6 @@ export const validClassNameRule: Rule.RuleModule = {
             type: 'object',
             description: 'Validation options for class names',
             properties: {
-              allowlist: {
-                type: 'array',
-                items: { type: 'string' },
-                description:
-                  'Array of class name patterns that are always considered valid',
-              },
-              blocklist: {
-                type: 'array',
-                items: { type: 'string' },
-                description: 'Array of class name patterns that are forbidden',
-              },
               ignorePatterns: {
                 type: 'array',
                 items: { type: 'string' },
@@ -120,8 +104,6 @@ export const validClassNameRule: Rule.RuleModule = {
     const scssPatterns = options.sources?.scss || []
     const allCssPatterns = [...cssPatterns, ...scssPatterns]
     const tailwindConfig = options.sources?.tailwind
-    const allowlist = options.validation?.allowlist || []
-    const blocklist = options.validation?.blocklist || []
     const ignorePatterns = options.validation?.ignorePatterns || []
     const objectStyleAttributes =
       options.validation?.objectStyleAttributes || []
@@ -130,8 +112,6 @@ export const validClassNameRule: Rule.RuleModule = {
     // Get the class registry (with CSS, SCSS, Tailwind parsing and caching)
     const classRegistry = getClassRegistry(
       allCssPatterns,
-      allowlist,
-      blocklist,
       tailwindConfig,
       cwd,
     )
@@ -214,21 +194,9 @@ export const validClassNameRule: Rule.RuleModule = {
               continue
             }
 
-            // Check if the BASE is blocked by blocklist patterns
-            if (isClassNameBlocklisted(base, blocklist)) {
-              context.report({
-                node,
-                messageId: 'blockedClassName',
-                data: {
-                  className: base,
-                },
-              })
-              continue
-            }
-
             // If className has variants, validate the full className with variants
             if (variants.length > 0) {
-              // First check if base is valid (Tailwind, CSS, or allowlist)
+              // First check if base is valid (Tailwind or CSS)
               const isBaseValid = classRegistry.isValid(base)
 
               if (!isBaseValid) {
@@ -243,7 +211,7 @@ export const validClassNameRule: Rule.RuleModule = {
                 continue
               }
 
-              // Base is valid - determine if it's CSS, allowlist, or Tailwind
+              // Base is valid - determine if it's CSS or Tailwind
               const isCssClass = classRegistry.isCssClass(base)
 
               if (isCssClass) {
@@ -256,7 +224,7 @@ export const validClassNameRule: Rule.RuleModule = {
                   },
                 })
               } else {
-                // Base is Tailwind or allowlist
+                // Base is Tailwind
                 const isTailwindOnly = classRegistry.isTailwindOnly(base)
 
                 if (isTailwindOnly) {
@@ -278,7 +246,6 @@ export const validClassNameRule: Rule.RuleModule = {
                     }
                   }
                 }
-                // If it's allowlist, allow it with variants (no validation needed)
               }
             } else {
               // No variants - validate base utility against all sources

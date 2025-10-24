@@ -44,7 +44,7 @@ describe('buildClassRegistry', () => {
         { path: cssFile, mtime: Date.now() },
       ]
 
-      const registry = buildClassRegistry(resolvedFiles, [], [], null, tempDir)
+      const registry = buildClassRegistry(resolvedFiles, null, tempDir)
 
       expect(registry.isValid('btn')).toBe(true)
       expect(registry.isValid('card')).toBe(true)
@@ -63,7 +63,7 @@ describe('buildClassRegistry', () => {
         { path: css2, mtime: Date.now() },
       ]
 
-      const registry = buildClassRegistry(resolvedFiles, [], [], null, tempDir)
+      const registry = buildClassRegistry(resolvedFiles, null, tempDir)
 
       expect(registry.isValid('btn')).toBe(true)
       expect(registry.isValid('card')).toBe(true)
@@ -84,7 +84,7 @@ describe('buildClassRegistry', () => {
         { path: cssFile, mtime: Date.now() },
       ]
 
-      const registry = buildClassRegistry(resolvedFiles, [], [], null, tempDir)
+      const registry = buildClassRegistry(resolvedFiles, null, tempDir)
 
       expect(registry.isValid('nav')).toBe(true)
       expect(registry.isValid('menu-item')).toBe(true)
@@ -103,7 +103,7 @@ describe('buildClassRegistry', () => {
       ]
 
       // Should not throw
-      const registry = buildClassRegistry(resolvedFiles, [], [], null, tempDir)
+      const registry = buildClassRegistry(resolvedFiles, null, tempDir)
 
       expect(registry).toBeDefined()
     })
@@ -116,7 +116,7 @@ describe('buildClassRegistry', () => {
       ]
 
       // Should not throw
-      const registry = buildClassRegistry(resolvedFiles, [], [], null, tempDir)
+      const registry = buildClassRegistry(resolvedFiles, null, tempDir)
 
       expect(registry).toBeDefined()
       expect(registry.getAllClasses().size).toBe(0)
@@ -143,7 +143,7 @@ describe('buildClassRegistry', () => {
         { path: scssFile, mtime: Date.now() },
       ]
 
-      const registry = buildClassRegistry(resolvedFiles, [], [], null, tempDir)
+      const registry = buildClassRegistry(resolvedFiles, null, tempDir)
 
       expect(registry.isValid('parent')).toBe(true)
       expect(registry.isValid('child')).toBe(true)
@@ -172,7 +172,7 @@ describe('buildClassRegistry', () => {
         { path: scssFile, mtime: Date.now() },
       ]
 
-      const registry = buildClassRegistry(resolvedFiles, [], [], null, tempDir)
+      const registry = buildClassRegistry(resolvedFiles, null, tempDir)
 
       expect(registry.isValid('btn')).toBe(true)
       expect(registry.isValid('btn-primary')).toBe(true)
@@ -195,7 +195,7 @@ describe('buildClassRegistry', () => {
       ]
 
       // Should not throw
-      const registry = buildClassRegistry(resolvedFiles, [], [], null, tempDir)
+      const registry = buildClassRegistry(resolvedFiles, null, tempDir)
 
       expect(registry).toBeDefined()
     })
@@ -223,7 +223,7 @@ describe('buildClassRegistry', () => {
         { path: scssFile, mtime: Date.now() },
       ]
 
-      const registry = buildClassRegistry(resolvedFiles, [], [], null, tempDir)
+      const registry = buildClassRegistry(resolvedFiles, null, tempDir)
 
       expect(registry.isValid('css-class')).toBe(true)
       expect(registry.isValid('scss-class')).toBe(true)
@@ -231,151 +231,7 @@ describe('buildClassRegistry', () => {
     })
   })
 
-  describe('allowlist handling', () => {
-    it('should add literal allowlist entries', () => {
-      const registry = buildClassRegistry(
-        [],
-        ['custom-class', 'another-class'],
-        [],
-        null,
-        tempDir,
-      )
 
-      expect(registry.isValid('custom-class')).toBe(true)
-      expect(registry.isValid('another-class')).toBe(true)
-      expect(registry.isValid('nonexistent')).toBe(false)
-    })
-
-    it('should handle wildcard patterns in allowlist', () => {
-      const registry = buildClassRegistry(
-        [],
-        ['custom-*', '*-suffix'],
-        [],
-        null,
-        tempDir,
-      )
-
-      expect(registry.isValid('custom-button')).toBe(true)
-      expect(registry.isValid('custom-card')).toBe(true)
-      expect(registry.isValid('btn-suffix')).toBe(true)
-      expect(registry.isValid('other-class')).toBe(false)
-    })
-
-    it('should handle mixed literal and wildcard allowlist patterns', () => {
-      const registry = buildClassRegistry(
-        [],
-        ['literal-class', 'custom-*', 'another-literal'],
-        [],
-        null,
-        tempDir,
-      )
-
-      expect(registry.isValid('literal-class')).toBe(true)
-      expect(registry.isValid('another-literal')).toBe(true)
-      expect(registry.isValid('custom-anything')).toBe(true)
-      expect(registry.isValid('nonexistent')).toBe(false)
-    })
-
-    it('should include literal allowlist in getAllClasses', () => {
-      const registry = buildClassRegistry(
-        [],
-        ['literal-class', 'custom-*'],
-        [],
-        null,
-        tempDir,
-      )
-
-      const allClasses = registry.getAllClasses()
-
-      expect(allClasses.has('literal-class')).toBe(true)
-      expect(allClasses.has('custom-*')).toBe(false) // Wildcards not included
-    })
-  })
-
-  describe('blocklist handling', () => {
-    it('should block literal blocklist entries', () => {
-      const cssFile = path.join(tempDir, 'styles.css')
-      fs.writeFileSync(
-        cssFile,
-        '.btn { color: red; } .legacy-btn { color: blue; }',
-      )
-
-      const resolvedFiles: ResolvedFile[] = [
-        { path: cssFile, mtime: Date.now() },
-      ]
-
-      const registry = buildClassRegistry(
-        resolvedFiles,
-        [],
-        ['legacy-btn'],
-        null,
-        tempDir,
-      )
-
-      expect(registry.isValid('btn')).toBe(true)
-      expect(registry.isValid('legacy-btn')).toBe(false) // Blocked
-    })
-
-    it('should block wildcard patterns in blocklist', () => {
-      const cssFile = path.join(tempDir, 'styles.css')
-      fs.writeFileSync(
-        cssFile,
-        '.btn { color: red; } .legacy-btn { color: blue; } .legacy-card { color: green; }',
-      )
-
-      const resolvedFiles: ResolvedFile[] = [
-        { path: cssFile, mtime: Date.now() },
-      ]
-
-      const registry = buildClassRegistry(
-        resolvedFiles,
-        [],
-        ['legacy-*'],
-        null,
-        tempDir,
-      )
-
-      expect(registry.isValid('btn')).toBe(true)
-      expect(registry.isValid('legacy-btn')).toBe(false) // Blocked by pattern
-      expect(registry.isValid('legacy-card')).toBe(false) // Blocked by pattern
-    })
-
-    it('should give blocklist precedence over allowlist', () => {
-      const registry = buildClassRegistry(
-        [],
-        ['custom-*'], // Allowlist
-        ['custom-legacy'], // Blocklist
-        null,
-        tempDir,
-      )
-
-      expect(registry.isValid('custom-button')).toBe(true)
-      expect(registry.isValid('custom-legacy')).toBe(false) // Blocklist wins
-    })
-
-    it('should give blocklist precedence over CSS classes', () => {
-      const cssFile = path.join(tempDir, 'styles.css')
-      fs.writeFileSync(
-        cssFile,
-        '.btn { color: red; } .legacy-btn { color: blue; }',
-      )
-
-      const resolvedFiles: ResolvedFile[] = [
-        { path: cssFile, mtime: Date.now() },
-      ]
-
-      const registry = buildClassRegistry(
-        resolvedFiles,
-        [],
-        ['legacy-btn'],
-        null,
-        tempDir,
-      )
-
-      expect(registry.isValid('btn')).toBe(true)
-      expect(registry.isValid('legacy-btn')).toBe(false) // Blocklist wins
-    })
-  })
 
   describe('TailwindUtils integration', () => {
     it('should validate Tailwind classes via API', () => {
@@ -385,7 +241,7 @@ describe('buildClassRegistry', () => {
         'p-4',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry([], [], [], mockTailwind, tempDir)
+      const registry = buildClassRegistry([], mockTailwind, tempDir)
 
       expect(registry.isValid('flex')).toBe(true)
       expect(registry.isValid('bg-blue-500')).toBe(true)
@@ -400,7 +256,7 @@ describe('buildClassRegistry', () => {
         'md:hover:text-red-500',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry([], [], [], mockTailwind, tempDir)
+      const registry = buildClassRegistry([], mockTailwind, tempDir)
 
       expect(registry.isValid('hover:bg-blue-500')).toBe(true)
       expect(registry.isValid('sm:flex')).toBe(true)
@@ -414,7 +270,7 @@ describe('buildClassRegistry', () => {
         'text-[14px]',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry([], [], [], mockTailwind, tempDir)
+      const registry = buildClassRegistry([], mockTailwind, tempDir)
 
       expect(registry.isValid('w-[100px]')).toBe(true)
       expect(registry.isValid('bg-[#ff0000]')).toBe(true)
@@ -427,7 +283,7 @@ describe('buildClassRegistry', () => {
         'peer-focus:text-red-500',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry([], [], [], mockTailwind, tempDir)
+      const registry = buildClassRegistry([], mockTailwind, tempDir)
 
       expect(registry.isValid('group-hover:bg-blue-500')).toBe(true)
       expect(registry.isValid('peer-focus:text-red-500')).toBe(true)
@@ -439,7 +295,7 @@ describe('buildClassRegistry', () => {
         '-ml-2',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry([], [], [], mockTailwind, tempDir)
+      const registry = buildClassRegistry([], mockTailwind, tempDir)
 
       expect(registry.isValid('-mt-4')).toBe(true)
       expect(registry.isValid('-ml-2')).toBe(true)
@@ -451,86 +307,29 @@ describe('buildClassRegistry', () => {
         '!p-4',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry([], [], [], mockTailwind, tempDir)
+      const registry = buildClassRegistry([], mockTailwind, tempDir)
 
       expect(registry.isValid('!bg-blue-500')).toBe(true)
       expect(registry.isValid('!p-4')).toBe(true)
     })
 
     it('should handle null TailwindUtils gracefully', () => {
-      const registry = buildClassRegistry([], [], [], null, tempDir)
+      const registry = buildClassRegistry([], null, tempDir)
 
       expect(registry.isValid('flex')).toBe(false)
       expect(registry.getAllClasses().size).toBe(0)
     })
 
     it('should handle undefined TailwindUtils gracefully', () => {
-      const registry = buildClassRegistry([], [], [], undefined, tempDir)
+      const registry = buildClassRegistry([], undefined, tempDir)
 
       expect(registry.isValid('flex')).toBe(false)
       expect(registry.getAllClasses().size).toBe(0)
     })
 
-    it('should give blocklist precedence over Tailwind classes', () => {
-      const mockTailwind = new MockTailwindUtils([
-        'flex',
-        'bg-blue-500',
-      ]) as unknown as TailwindUtils
-
-      const registry = buildClassRegistry(
-        [],
-        [],
-        ['bg-blue-500'], // Block this Tailwind class
-        mockTailwind,
-        tempDir,
-      )
-
-      expect(registry.isValid('flex')).toBe(true)
-      expect(registry.isValid('bg-blue-500')).toBe(false) // Blocklist wins
-    })
-
-    it('should give blocklist wildcard precedence over Tailwind classes', () => {
-      const mockTailwind = new MockTailwindUtils([
-        'flex',
-        'bg-blue-500',
-        'bg-red-500',
-      ]) as unknown as TailwindUtils
-
-      const registry = buildClassRegistry(
-        [],
-        [],
-        ['bg-*'], // Block all bg classes
-        mockTailwind,
-        tempDir,
-      )
-
-      expect(registry.isValid('flex')).toBe(true)
-      expect(registry.isValid('bg-blue-500')).toBe(false) // Blocked
-      expect(registry.isValid('bg-red-500')).toBe(false) // Blocked
-    })
   })
 
   describe('combined sources', () => {
-    it('should combine CSS classes and allowlist', () => {
-      const cssFile = path.join(tempDir, 'styles.css')
-      fs.writeFileSync(cssFile, '.btn { color: red; }')
-
-      const resolvedFiles: ResolvedFile[] = [
-        { path: cssFile, mtime: Date.now() },
-      ]
-
-      const registry = buildClassRegistry(
-        resolvedFiles,
-        ['custom-*'],
-        [],
-        null,
-        tempDir,
-      )
-
-      expect(registry.isValid('btn')).toBe(true)
-      expect(registry.isValid('custom-button')).toBe(true)
-      expect(registry.isValid('nonexistent')).toBe(false)
-    })
 
     it('should combine CSS classes and Tailwind classes', () => {
       const cssFile = path.join(tempDir, 'styles.css')
@@ -544,20 +343,14 @@ describe('buildClassRegistry', () => {
         'p-4',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry(
-        resolvedFiles,
-        [],
-        [],
-        mockTailwind,
-        tempDir,
-      )
+      const registry = buildClassRegistry(resolvedFiles, mockTailwind, tempDir,)
 
       expect(registry.isValid('btn')).toBe(true)
       expect(registry.isValid('flex')).toBe(true)
       expect(registry.isValid('p-4')).toBe(true)
     })
 
-    it('should combine all sources: CSS + SCSS + Tailwind + allowlist', () => {
+    it('should combine all sources: CSS + SCSS + Tailwind', () => {
       const cssFile = path.join(tempDir, 'styles.css')
       const scssFile = path.join(tempDir, 'styles.scss')
 
@@ -580,51 +373,13 @@ describe('buildClassRegistry', () => {
         'flex',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry(
-        resolvedFiles,
-        ['whitelist-*'],
-        [],
-        mockTailwind,
-        tempDir,
-      )
+      const registry = buildClassRegistry(resolvedFiles, mockTailwind, tempDir)
 
       expect(registry.isValid('css-class')).toBe(true)
       expect(registry.isValid('scss-class')).toBe(true)
       expect(registry.isValid('scss-class-nested')).toBe(true)
       expect(registry.isValid('flex')).toBe(true)
-      expect(registry.isValid('whitelist-anything')).toBe(true)
       expect(registry.isValid('nonexistent')).toBe(false)
-    })
-
-    it('should combine all sources with blocklist', () => {
-      const cssFile = path.join(tempDir, 'styles.css')
-      fs.writeFileSync(
-        cssFile,
-        '.btn { color: red; } .legacy-btn { color: blue; }',
-      )
-
-      const resolvedFiles: ResolvedFile[] = [
-        { path: cssFile, mtime: Date.now() },
-      ]
-      const mockTailwind = new MockTailwindUtils([
-        'flex',
-        'bg-blue-500',
-      ]) as unknown as TailwindUtils
-
-      const registry = buildClassRegistry(
-        resolvedFiles,
-        ['custom-*'],
-        ['legacy-*', 'bg-*'], // Block legacy and bg classes
-        mockTailwind,
-        tempDir,
-      )
-
-      expect(registry.isValid('btn')).toBe(true)
-      expect(registry.isValid('legacy-btn')).toBe(false) // Blocked
-      expect(registry.isValid('flex')).toBe(true)
-      expect(registry.isValid('bg-blue-500')).toBe(false) // Blocked
-      expect(registry.isValid('custom-anything')).toBe(true)
-      expect(registry.isValid('legacy-custom')).toBe(false) // Blocked by legacy-* pattern
     })
 
     it('should handle overlapping classes from different sources', () => {
@@ -638,13 +393,7 @@ describe('buildClassRegistry', () => {
         'btn',
       ]) as unknown as TailwindUtils // Same as CSS
 
-      const registry = buildClassRegistry(
-        resolvedFiles,
-        ['btn'], // Same as CSS and Tailwind
-        [],
-        mockTailwind,
-        tempDir,
-      )
+      const registry = buildClassRegistry(resolvedFiles, mockTailwind, tempDir)
 
       expect(registry.isValid('btn')).toBe(true)
       // Should only be counted once in getAllClasses
@@ -665,35 +414,11 @@ describe('buildClassRegistry', () => {
         'tw-btn',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry(
-        resolvedFiles,
-        ['wl-btn'],
-        [],
-        mockTailwind,
-        tempDir,
-      )
+      const registry = buildClassRegistry(resolvedFiles, mockTailwind, tempDir,)
 
       // Each source should be checked
       expect(registry.isValid('css-btn')).toBe(true)
       expect(registry.isValid('tw-btn')).toBe(true)
-      expect(registry.isValid('wl-btn')).toBe(true)
-    })
-
-    it('should check wildcard patterns after literal lookups', () => {
-      const registry = buildClassRegistry(
-        [],
-        ['literal', 'custom-*'],
-        [],
-        null,
-        tempDir,
-      )
-
-      // Literal should match
-      expect(registry.isValid('literal')).toBe(true)
-      // Wildcard should match
-      expect(registry.isValid('custom-button')).toBe(true)
-      // Neither should match
-      expect(registry.isValid('nonexistent')).toBe(false)
     })
 
     it('should return false for empty string', () => {
@@ -704,7 +429,7 @@ describe('buildClassRegistry', () => {
         { path: cssFile, mtime: Date.now() },
       ]
 
-      const registry = buildClassRegistry(resolvedFiles, [], [], null, tempDir)
+      const registry = buildClassRegistry(resolvedFiles, null, tempDir)
 
       expect(registry.isValid('')).toBe(false)
     })
@@ -717,16 +442,10 @@ describe('buildClassRegistry', () => {
         'p-4',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry([], [], [], mockTailwind, tempDir)
+      const registry = buildClassRegistry([], mockTailwind, tempDir)
 
       expect(registry.isTailwindClass('flex')).toBe(true)
       expect(registry.isTailwindClass('p-4')).toBe(true)
-    })
-
-    it('should return true for allowlist patterns', () => {
-      const registry = buildClassRegistry([], ['custom-*'], [], null, tempDir)
-
-      expect(registry.isTailwindClass('custom-button')).toBe(true)
     })
 
     it('should return false for CSS classes', () => {
@@ -737,56 +456,15 @@ describe('buildClassRegistry', () => {
         { path: cssFile, mtime: Date.now() },
       ]
 
-      const registry = buildClassRegistry(resolvedFiles, [], [], null, tempDir)
+      const registry = buildClassRegistry(resolvedFiles, null, tempDir)
 
       expect(registry.isTailwindClass('btn')).toBe(false)
     })
 
-    it('should exclude CSS but include Tailwind and allowlist', () => {
-      const cssFile = path.join(tempDir, 'styles.css')
-      fs.writeFileSync(cssFile, '.css-btn { color: red; }')
-
-      const resolvedFiles: ResolvedFile[] = [
-        { path: cssFile, mtime: Date.now() },
-      ]
-      const mockTailwind = new MockTailwindUtils([
-        'tw-btn',
-      ]) as unknown as TailwindUtils
-
-      const registry = buildClassRegistry(
-        resolvedFiles,
-        ['wl-*'],
-        [],
-        mockTailwind,
-        tempDir,
-      )
-
-      expect(registry.isTailwindClass('css-btn')).toBe(false)
-      expect(registry.isTailwindClass('tw-btn')).toBe(true)
-      expect(registry.isTailwindClass('wl-custom')).toBe(true)
-    })
-
-    it('should return false for blocked Tailwind classes', () => {
-      const mockTailwind = new MockTailwindUtils([
-        'flex',
-        'bg-blue-500',
-      ]) as unknown as TailwindUtils
-
-      const registry = buildClassRegistry(
-        [],
-        [],
-        ['bg-blue-500'], // Block this
-        mockTailwind,
-        tempDir,
-      )
-
-      expect(registry.isTailwindClass('flex')).toBe(true)
-      expect(registry.isTailwindClass('bg-blue-500')).toBe(false)
-    })
   })
 
   describe('getAllClasses method', () => {
-    it('should return CSS and literal allowlist classes only', () => {
+    it('should return CSS classes only', () => {
       const cssFile = path.join(tempDir, 'styles.css')
       fs.writeFileSync(cssFile, '.css-class { color: red; }')
 
@@ -794,19 +472,12 @@ describe('buildClassRegistry', () => {
         { path: cssFile, mtime: Date.now() },
       ]
 
-      const registry = buildClassRegistry(
-        resolvedFiles,
-        ['literal-class', 'wildcard-*'],
-        [],
-        null,
-        tempDir,
-      )
+      const registry = buildClassRegistry(resolvedFiles, null, tempDir)
 
       const allClasses = registry.getAllClasses()
 
       expect(allClasses.has('css-class')).toBe(true)
-      expect(allClasses.has('literal-class')).toBe(true)
-      expect(allClasses.has('wildcard-*')).toBe(false) // Wildcards excluded
+      expect(allClasses.size).toBe(1)
     })
 
     it('should NOT include Tailwind classes in API mode', () => {
@@ -815,7 +486,7 @@ describe('buildClassRegistry', () => {
         'bg-blue-500',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry([], [], [], mockTailwind, tempDir)
+      const registry = buildClassRegistry([], mockTailwind, tempDir)
 
       const allClasses = registry.getAllClasses()
 
@@ -825,25 +496,9 @@ describe('buildClassRegistry', () => {
       expect(allClasses.size).toBe(0)
     })
 
-    it('should not include wildcard patterns', () => {
-      const registry = buildClassRegistry(
-        [],
-        ['custom-*', '*-suffix', 'literal'],
-        [],
-        null,
-        tempDir,
-      )
-
-      const allClasses = registry.getAllClasses()
-
-      expect(allClasses.has('literal')).toBe(true)
-      expect(allClasses.has('custom-*')).toBe(false)
-      expect(allClasses.has('*-suffix')).toBe(false)
-      expect(allClasses.size).toBe(1)
-    })
 
     it('should return empty set when no classes present', () => {
-      const registry = buildClassRegistry([], [], [], null, tempDir)
+      const registry = buildClassRegistry([], null, tempDir)
 
       const allClasses = registry.getAllClasses()
 
@@ -857,7 +512,7 @@ describe('buildClassRegistry', () => {
         'flex',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry([], [], [], mockTailwind, tempDir)
+      const registry = buildClassRegistry([], mockTailwind, tempDir)
 
       const validVariants = registry.getValidVariants()
 
@@ -866,7 +521,7 @@ describe('buildClassRegistry', () => {
     })
 
     it('should return empty set when no Tailwind provided', () => {
-      const registry = buildClassRegistry([], [], [], null, tempDir)
+      const registry = buildClassRegistry([], null, tempDir)
 
       const validVariants = registry.getValidVariants()
 
@@ -876,7 +531,7 @@ describe('buildClassRegistry', () => {
 
   describe('edge cases', () => {
     it('should handle empty inputs', () => {
-      const registry = buildClassRegistry([], [], [], null, tempDir)
+      const registry = buildClassRegistry([], null, tempDir)
 
       expect(registry.isValid('anything')).toBe(false)
       expect(registry.isTailwindClass('anything')).toBe(false)
@@ -892,15 +547,9 @@ describe('buildClassRegistry', () => {
         { path: cssFile, mtime: Date.now() },
       ]
 
-      const registry = buildClassRegistry(resolvedFiles, [], [], null, tempDir)
+      const registry = buildClassRegistry(resolvedFiles, null, tempDir)
 
       expect(registry.getAllClasses().size).toBe(0)
-    })
-
-    it('should handle empty allowlist array', () => {
-      const registry = buildClassRegistry([], [], [], null, tempDir)
-
-      expect(registry.isValid('anything')).toBe(false)
     })
 
     it('should handle special characters in class names', () => {
@@ -918,7 +567,7 @@ describe('buildClassRegistry', () => {
         { path: cssFile, mtime: Date.now() },
       ]
 
-      const registry = buildClassRegistry(resolvedFiles, [], [], null, tempDir)
+      const registry = buildClassRegistry(resolvedFiles, null, tempDir)
 
       expect(registry.isValid('btn-primary')).toBe(true)
       expect(registry.isValid('card_container')).toBe(true)
@@ -940,7 +589,7 @@ describe('buildClassRegistry', () => {
       ]
 
       const startTime = Date.now()
-      const registry = buildClassRegistry(resolvedFiles, [], [], null, tempDir)
+      const registry = buildClassRegistry(resolvedFiles, null, tempDir)
       const buildTime = Date.now() - startTime
 
       expect(registry.getAllClasses().size).toBe(10000)
@@ -966,13 +615,7 @@ describe('buildClassRegistry', () => {
         'shared',
       ]) as unknown as TailwindUtils
 
-      const registry = buildClassRegistry(
-        resolvedFiles,
-        ['shared'],
-        [],
-        mockTailwind,
-        tempDir,
-      )
+      const registry = buildClassRegistry(resolvedFiles, mockTailwind, tempDir,)
 
       // Should be valid (from any source)
       expect(registry.isValid('shared')).toBe(true)

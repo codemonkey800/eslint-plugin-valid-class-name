@@ -10,19 +10,18 @@ describe('createCacheKey', () => {
         { path: '/path/to/file1.css', mtime: 1234567890 },
         { path: '/path/to/file2.css', mtime: 9876543210 },
       ]
-      const whitelist = ['custom-*', 'app-*']
       const tailwindConfig = { config: 'tailwind.config.js' }
       const cwd = '/project/root'
 
-      const hash1 = createCacheKey(files, whitelist, [], tailwindConfig, cwd)
-      const hash2 = createCacheKey(files, whitelist, [], tailwindConfig, cwd)
+      const hash1 = createCacheKey(files, tailwindConfig, cwd)
+      const hash2 = createCacheKey(files, tailwindConfig, cwd)
 
       expect(hash1).toBe(hash2)
     })
 
     it('should generate 64-character hex string (SHA-256)', () => {
       const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
-      const hash = createCacheKey(files, [], [], undefined, '/cwd')
+      const hash = createCacheKey(files, undefined, '/cwd')
 
       expect(hash).toMatch(/^[a-f0-9]{64}$/)
       expect(hash.length).toBe(64)
@@ -34,8 +33,8 @@ describe('createCacheKey', () => {
       const files1: ResolvedFile[] = [{ path: '/file1.css', mtime: 123 }]
       const files2: ResolvedFile[] = [{ path: '/file2.css', mtime: 123 }]
 
-      const hash1 = createCacheKey(files1, [], [], undefined, '/cwd')
-      const hash2 = createCacheKey(files2, [], [], undefined, '/cwd')
+      const hash1 = createCacheKey(files1, undefined, '/cwd')
+      const hash2 = createCacheKey(files2, undefined, '/cwd')
 
       expect(hash1).not.toBe(hash2)
     })
@@ -44,17 +43,8 @@ describe('createCacheKey', () => {
       const files1: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
       const files2: ResolvedFile[] = [{ path: '/file.css', mtime: 456 }]
 
-      const hash1 = createCacheKey(files1, [], [], undefined, '/cwd')
-      const hash2 = createCacheKey(files2, [], [], undefined, '/cwd')
-
-      expect(hash1).not.toBe(hash2)
-    })
-
-    it('should generate different hashes for different allowlist arrays', () => {
-      const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
-
-      const hash1 = createCacheKey(files, ['custom-*'], [], undefined, '/cwd')
-      const hash2 = createCacheKey(files, ['app-*'], [], undefined, '/cwd')
+      const hash1 = createCacheKey(files1, undefined, '/cwd')
+      const hash2 = createCacheKey(files2, undefined, '/cwd')
 
       expect(hash1).not.toBe(hash2)
     })
@@ -62,8 +52,8 @@ describe('createCacheKey', () => {
     it('should generate different hashes for different cwd values', () => {
       const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
 
-      const hash1 = createCacheKey(files, [], [], undefined, '/cwd1')
-      const hash2 = createCacheKey(files, [], [], undefined, '/cwd2')
+      const hash1 = createCacheKey(files, undefined, '/cwd1')
+      const hash2 = createCacheKey(files, undefined, '/cwd2')
 
       expect(hash1).not.toBe(hash2)
     })
@@ -78,8 +68,8 @@ describe('createCacheKey', () => {
         { path: '/file1.css', mtime: 123 },
       ]
 
-      const hash1 = createCacheKey(files1, [], [], undefined, '/cwd')
-      const hash2 = createCacheKey(files2, [], [], undefined, '/cwd')
+      const hash1 = createCacheKey(files1, undefined, '/cwd')
+      const hash2 = createCacheKey(files2, undefined, '/cwd')
 
       expect(hash1).not.toBe(hash2)
     })
@@ -89,8 +79,8 @@ describe('createCacheKey', () => {
     it('should generate different hashes for undefined vs false', () => {
       const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
 
-      const hash1 = createCacheKey(files, [], [], undefined, '/cwd')
-      const hash2 = createCacheKey(files, [], [], false, '/cwd')
+      const hash1 = createCacheKey(files, undefined, '/cwd')
+      const hash2 = createCacheKey(files, false, '/cwd')
 
       expect(hash1).not.toBe(hash2)
     })
@@ -98,8 +88,8 @@ describe('createCacheKey', () => {
     it('should generate different hashes for true vs false', () => {
       const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
 
-      const hash1 = createCacheKey(files, [], [], true, '/cwd')
-      const hash2 = createCacheKey(files, [], [], false, '/cwd')
+      const hash1 = createCacheKey(files, true, '/cwd')
+      const hash2 = createCacheKey(files, false, '/cwd')
 
       expect(hash1).not.toBe(hash2)
     })
@@ -109,15 +99,11 @@ describe('createCacheKey', () => {
 
       const hash1 = createCacheKey(
         files,
-        [],
-        [],
         { config: 'tailwind.config.js' },
         '/cwd',
       )
       const hash2 = createCacheKey(
         files,
-        [],
-        [],
         { config: 'custom.config.js' },
         '/cwd',
       )
@@ -130,15 +116,11 @@ describe('createCacheKey', () => {
 
       const hash1 = createCacheKey(
         files,
-        [],
-        [],
         { config: 'tailwind.config.js', includePluginClasses: true },
         '/cwd',
       )
       const hash2 = createCacheKey(
         files,
-        [],
-        [],
         { config: 'tailwind.config.js', includePluginClasses: false },
         '/cwd',
       )
@@ -157,8 +139,8 @@ describe('createCacheKey', () => {
         includePluginClasses: true,
       }
 
-      const hash1 = createCacheKey(files, [], [], config1, '/cwd')
-      const hash2 = createCacheKey(files, [], [], config2, '/cwd')
+      const hash1 = createCacheKey(files, config1, '/cwd')
+      const hash2 = createCacheKey(files, config2, '/cwd')
 
       expect(hash1).toBe(hash2)
     })
@@ -166,28 +148,21 @@ describe('createCacheKey', () => {
 
   describe('edge cases', () => {
     it('should handle empty files array', () => {
-      const hash = createCacheKey([], [], [], undefined, '/cwd')
+      const hash = createCacheKey([], undefined, '/cwd')
 
       expect(hash).toMatch(/^[a-f0-9]{64}$/)
       expect(hash.length).toBe(64)
     })
 
-    it('should handle empty allowlist array', () => {
-      const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
-      const hash = createCacheKey(files, [], [], undefined, '/cwd')
-
-      expect(hash).toMatch(/^[a-f0-9]{64}$/)
-    })
-
     it('should handle empty cwd string', () => {
       const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
-      const hash = createCacheKey(files, [], [], undefined, '')
+      const hash = createCacheKey(files, undefined, '')
 
       expect(hash).toMatch(/^[a-f0-9]{64}$/)
     })
 
     it('should handle all empty inputs', () => {
-      const hash = createCacheKey([], [], [], undefined, '')
+      const hash = createCacheKey([], undefined, '')
 
       expect(hash).toMatch(/^[a-f0-9]{64}$/)
     })
@@ -199,16 +174,7 @@ describe('createCacheKey', () => {
         { path: '/path/with/unicode/文件.css', mtime: 789 },
       ]
 
-      const hash = createCacheKey(files, [], [], undefined, '/cwd')
-
-      expect(hash).toMatch(/^[a-f0-9]{64}$/)
-    })
-
-    it('should handle special characters in allowlist patterns', () => {
-      const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
-      const whitelist = ['custom-*', 'app.btn-*', '[data-*]']
-
-      const hash = createCacheKey(files, whitelist, [], undefined, '/cwd')
+      const hash = createCacheKey(files, undefined, '/cwd')
 
       expect(hash).toMatch(/^[a-f0-9]{64}$/)
     })
@@ -221,28 +187,18 @@ describe('createCacheKey', () => {
       }))
 
       const startTime = Date.now()
-      const hash = createCacheKey(files, [], [], undefined, '/cwd')
+      const hash = createCacheKey(files, undefined, '/cwd')
       const endTime = Date.now()
 
       expect(hash).toMatch(/^[a-f0-9]{64}$/)
       expect(endTime - startTime).toBeLessThan(50) // Should complete in < 50ms
     })
 
-    it('should handle large allowlist arrays', () => {
-      const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
-      // Create 500 allowlist patterns
-      const whitelist = Array.from({ length: 500 }, (_, i) => `pattern-${i}-*`)
-
-      const hash = createCacheKey(files, whitelist, [], undefined, '/cwd')
-
-      expect(hash).toMatch(/^[a-f0-9]{64}$/)
-    })
-
     it('should handle very long file paths', () => {
       const longPath = '/very/long/path/' + 'nested/'.repeat(50) + 'file.css'
       const files: ResolvedFile[] = [{ path: longPath, mtime: 123 }]
 
-      const hash = createCacheKey(files, [], [], undefined, '/cwd')
+      const hash = createCacheKey(files, undefined, '/cwd')
 
       expect(hash).toMatch(/^[a-f0-9]{64}$/)
     })
@@ -254,53 +210,9 @@ describe('createCacheKey', () => {
         { path: '/file3.css', mtime: Number.MAX_SAFE_INTEGER },
       ]
 
-      const hash = createCacheKey(files, [], [], undefined, '/cwd')
+      const hash = createCacheKey(files, undefined, '/cwd')
 
       expect(hash).toMatch(/^[a-f0-9]{64}$/)
-    })
-  })
-
-  describe('allowlist ordering', () => {
-    it('should generate different hashes for different allowlist order', () => {
-      const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
-
-      const hash1 = createCacheKey(
-        files,
-        ['custom-*', 'app-*'],
-        [],
-        undefined,
-        '/cwd',
-      )
-      const hash2 = createCacheKey(
-        files,
-        ['app-*', 'custom-*'],
-        [],
-        undefined,
-        '/cwd',
-      )
-
-      expect(hash1).not.toBe(hash2)
-    })
-
-    it('should generate same hash for identical allowlist order', () => {
-      const files: ResolvedFile[] = [{ path: '/file.css', mtime: 123 }]
-
-      const hash1 = createCacheKey(
-        files,
-        ['custom-*', 'app-*', 'btn-*'],
-        [],
-        undefined,
-        '/cwd',
-      )
-      const hash2 = createCacheKey(
-        files,
-        ['custom-*', 'app-*', 'btn-*'],
-        [],
-        undefined,
-        '/cwd',
-      )
-
-      expect(hash1).toBe(hash2)
     })
   })
 
@@ -309,8 +221,8 @@ describe('createCacheKey', () => {
       const files1: ResolvedFile[] = [{ path: '/file1.css', mtime: 123 }]
       const files2: ResolvedFile[] = [{ path: '/file2.css', mtime: 456 }]
 
-      const hash1 = createCacheKey(files1, ['custom-*'], [], true, '/cwd1')
-      const hash2 = createCacheKey(files2, ['app-*'], [], false, '/cwd2')
+      const hash1 = createCacheKey(files1, true, '/cwd1')
+      const hash2 = createCacheKey(files2, false, '/cwd2')
 
       expect(hash1).not.toBe(hash2)
     })
@@ -320,13 +232,12 @@ describe('createCacheKey', () => {
         { path: '/file1.css', mtime: 123 },
         { path: '/file2.css', mtime: 456 },
       ]
-      const whitelist = ['custom-*', 'app-*']
       const config = { config: 'tailwind.config.js' }
       const cwd = '/project/root'
 
-      const hash1 = createCacheKey(files, whitelist, [], config, cwd)
-      const hash2 = createCacheKey(files, whitelist, [], config, cwd)
-      const hash3 = createCacheKey(files, whitelist, [], config, cwd)
+      const hash1 = createCacheKey(files, config, cwd)
+      const hash2 = createCacheKey(files, config, cwd)
+      const hash3 = createCacheKey(files, config, cwd)
 
       expect(hash1).toBe(hash2)
       expect(hash2).toBe(hash3)

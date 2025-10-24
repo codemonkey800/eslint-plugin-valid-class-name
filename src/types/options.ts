@@ -71,20 +71,6 @@ export interface TailwindConfig {
  */
 export interface ValidationConfig {
   /**
-   * Array of class name patterns that are always considered valid
-   * Supports glob patterns and regular expressions
-   * @example ["custom-*", "app-*"]
-   */
-  allowlist?: string[]
-
-  /**
-   * Array of class name patterns that are forbidden
-   * Supports glob patterns and regular expressions
-   * @example ["legacy-*", "deprecated-*"]
-   */
-  blocklist?: string[]
-
-  /**
    * Array of patterns to skip validation for
    * Useful for dynamic or generated class names
    * @example ["dynamic-*", "state-*"]

@@ -42,7 +42,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['custom-class'],
+            ignorePatterns: ['custom-class'],
           },
         },
       ],
@@ -54,7 +54,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['foo', 'bar', 'baz'],
+            ignorePatterns: ['foo', 'bar', 'baz'],
           },
         },
       ],
@@ -66,7 +66,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['btn-*'],
+            ignorePatterns: ['btn-*'],
           },
         },
       ],
@@ -77,7 +77,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['text-*'],
+            ignorePatterns: ['text-*'],
           },
         },
       ],
@@ -89,7 +89,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['static-class'],
+            ignorePatterns: ['static-class'],
             ignorePatterns: ['dynamic-*'],
           },
         },
@@ -102,7 +102,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['foo', 'bar'],
+            ignorePatterns: ['foo', 'bar'],
           },
         },
       ],
@@ -119,7 +119,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['foo', 'bar', 'baz'],
+            ignorePatterns: ['foo', 'bar', 'baz'],
           },
         },
       ],
@@ -131,7 +131,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['foo', 'bar'],
+            ignorePatterns: ['foo', 'bar'],
           },
         },
       ],
@@ -143,7 +143,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['*-middle-*'],
+            ignorePatterns: ['*-middle-*'],
           },
         },
       ],
@@ -155,7 +155,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['foo', 'bar'],
+            ignorePatterns: ['foo', 'bar'],
           },
         },
       ],
@@ -166,7 +166,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['btn-*'],
+            ignorePatterns: ['btn-*'],
           },
         },
       ],
@@ -178,7 +178,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['foo', 'bar'],
+            ignorePatterns: ['foo', 'bar'],
           },
         },
       ],
@@ -189,7 +189,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['btn-*', 'text-*'],
+            ignorePatterns: ['btn-*', 'text-*'],
           },
         },
       ],
@@ -201,7 +201,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['foo', 'bar', 'baz'],
+            ignorePatterns: ['foo', 'bar', 'baz'],
           },
         },
       ],
@@ -212,7 +212,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['base', 'container', 'active'],
+            ignorePatterns: ['base', 'container', 'active'],
           },
         },
       ],
@@ -224,7 +224,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['foo', 'bar', 'baz'],
+            ignorePatterns: ['foo', 'bar', 'baz'],
           },
         },
       ],
@@ -236,7 +236,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['foo', 'bar'],
+            ignorePatterns: ['foo', 'bar'],
           },
         },
       ],
@@ -247,7 +247,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['foo', 'bar', 'baz'],
+            ignorePatterns: ['foo', 'bar', 'baz'],
           },
         },
       ],
@@ -259,7 +259,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['flex', 'items-center', 'bg-*'],
+            ignorePatterns: ['flex', 'items-center', 'bg-*'],
           },
         },
       ],
@@ -280,7 +280,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['foo', 'bar'],
+            ignorePatterns: ['foo', 'bar'],
           },
         },
       ],
@@ -292,7 +292,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['foo', 'bar'],
+            ignorePatterns: ['foo', 'bar'],
           },
         },
       ],
@@ -349,7 +349,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['valid-class'],
+            ignorePatterns: ['valid-class'],
           },
         },
       ],
@@ -369,7 +369,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['foo', 'baz'],
+            ignorePatterns: ['foo', 'baz'],
           },
         },
       ],
@@ -389,7 +389,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['valid-*'],
+            ignorePatterns: ['valid-*'],
           },
         },
       ],
@@ -415,7 +415,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['btn-*'],
+            ignorePatterns: ['btn-*'],
           },
         },
       ],
@@ -435,7 +435,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['valid-class'],
+            ignorePatterns: ['valid-class'],
           },
         },
       ],
@@ -455,7 +455,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['valid-class'],
+            ignorePatterns: ['valid-class'],
             ignorePatterns: ['dynamic-*'],
           },
         },
@@ -476,7 +476,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['valid-class'],
+            ignorePatterns: ['valid-class'],
           },
         },
       ],
@@ -496,7 +496,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['valid-class'],
+            ignorePatterns: ['valid-class'],
           },
         },
       ],
@@ -516,7 +516,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['valid-class'],
+            ignorePatterns: ['valid-class'],
           },
         },
       ],
@@ -536,7 +536,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['valid-class'],
+            ignorePatterns: ['valid-class'],
           },
         },
       ],
@@ -556,7 +556,7 @@ ruleTester.run('valid-class-name', rule, {
       options: [
         {
           validation: {
-            allowlist: ['valid-class'],
+            ignorePatterns: ['valid-class'],
           },
         },
       ],
@@ -642,7 +642,7 @@ ruleTester.run('valid-class-name', rule, {
               css: [path.join(tempDir, 'styles2.css')],
             },
             validation: {
-              allowlist: ['custom-*'],
+              ignorePatterns: ['custom-*'],
             },
           },
         ],
@@ -686,7 +686,7 @@ ruleTester.run('valid-class-name', rule, {
               css: [path.join(tempDir, 'styles2.css')],
             },
             validation: {
-              allowlist: ['custom-*'],
+              ignorePatterns: ['custom-*'],
             },
           },
         ],
@@ -718,12 +718,9 @@ describe('Tailwind variant validation', () => {
         tailwind: {
           config: path.join(
             process.cwd(),
-            'examples/react/tailwind.config.cjs',
+            'examples/react/tailwind.config.js',
           ),
         },
-      },
-      validation: {
-        allowlist: ['mt-2', 'bg-blue-500', 'text-lg', 'opacity-100', 'ring-2'],
       },
     },
   ]
@@ -934,7 +931,7 @@ describe('Tailwind variant validation', () => {
                   tailwind: {
                     config: path.join(
                       process.cwd(),
-                      'examples/react/tailwind.config.cjs',
+                      'examples/react/tailwind.config.js',
                     ),
                   },
                 },
@@ -952,7 +949,7 @@ describe('Tailwind variant validation', () => {
                   tailwind: {
                     config: path.join(
                       process.cwd(),
-                      'examples/react/tailwind.config.cjs',
+                      'examples/react/tailwind.config.js',
                     ),
                   },
                 },
@@ -969,12 +966,12 @@ describe('Tailwind variant validation', () => {
                   tailwind: {
                     config: path.join(
                       process.cwd(),
-                      'examples/react/tailwind.config.cjs',
+                      'examples/react/tailwind.config.js',
                     ),
                   },
                 },
                 validation: {
-                  allowlist: ['custom-*'],
+                  ignorePatterns: ['custom-*'],
                 },
               },
             ],
@@ -992,7 +989,7 @@ describe('Tailwind variant validation', () => {
                   tailwind: {
                     config: path.join(
                       process.cwd(),
-                      'examples/react/tailwind.config.cjs',
+                      'examples/react/tailwind.config.js',
                     ),
                     includePluginClasses: false, // Disable to test CSS-only validation
                   },
@@ -1018,7 +1015,7 @@ describe('Tailwind variant validation', () => {
                   tailwind: {
                     config: path.join(
                       process.cwd(),
-                      'examples/react/tailwind.config.cjs',
+                      'examples/react/tailwind.config.js',
                     ),
                   },
                 },
@@ -1050,7 +1047,7 @@ describe('Tailwind variant validation', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
               },
             },
@@ -1073,7 +1070,7 @@ describe('Dynamic class names - ConditionalExpression', () => {
   const options = [
     {
       validation: {
-        allowlist: ['opacity-0', 'opacity-1', 'bg-blue-500', 'bg-gray-500'],
+        ignorePatterns: ['opacity-0', 'opacity-1', 'bg-blue-500', 'bg-gray-500'],
       },
     },
   ]
@@ -1169,7 +1166,7 @@ describe('Dynamic class names - LogicalExpression', () => {
   const options = [
     {
       validation: {
-        allowlist: ['opacity-0', 'opacity-50', 'flex', 'mt-2'],
+        ignorePatterns: ['opacity-0', 'opacity-50', 'flex', 'mt-2'],
       },
     },
   ]
@@ -1255,7 +1252,7 @@ describe('Dynamic class names - CallExpression', () => {
   const options = [
     {
       validation: {
-        allowlist: ['mt-2', 'opacity-0', 'bg-blue-500', 'flex', 'items-center'],
+        ignorePatterns: ['mt-2', 'opacity-0', 'bg-blue-500', 'flex', 'items-center'],
       },
     },
   ]
@@ -1370,7 +1367,7 @@ describe('Dynamic class names - TemplateLiteral and edge cases', () => {
   const options = [
     {
       validation: {
-        allowlist: ['flex', 'opacity-0', 'mt-2'],
+        ignorePatterns: ['flex', 'opacity-0', 'mt-2'],
       },
     },
   ]
@@ -1465,7 +1462,7 @@ describe('Dynamic class names - Advanced cases', () => {
   const options = [
     {
       validation: {
-        allowlist: [
+        ignorePatterns: [
           'flex',
           'opacity-0',
           'mt-2',
@@ -1633,7 +1630,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
               },
             },
@@ -1649,7 +1646,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
               },
             },
@@ -1666,7 +1663,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
               },
             },
@@ -1682,7 +1679,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
               },
             },
@@ -1699,7 +1696,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
               },
             },
@@ -1715,7 +1712,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
               },
             },
@@ -1732,7 +1729,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
               },
             },
@@ -1749,7 +1746,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
               },
             },
@@ -1765,7 +1762,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
               },
             },
@@ -1781,7 +1778,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
               },
             },
@@ -1798,7 +1795,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
               },
             },
@@ -1815,7 +1812,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
               },
             },
@@ -1834,7 +1831,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
               },
             },
@@ -1859,7 +1856,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
                 includePluginClasses: false, // Disable to avoid interference
               },
@@ -1885,7 +1882,7 @@ describe('Tailwind arbitrary value support', () => {
               tailwind: {
                 config: path.join(
                   process.cwd(),
-                  'examples/react/tailwind.config.cjs',
+                  'examples/react/tailwind.config.js',
                 ),
               },
             },
@@ -1929,7 +1926,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2', 'p-4'],
+                  ignorePatterns: ['mt-2', 'p-4'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -1942,7 +1939,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2', 'mt-4'],
+                  ignorePatterns: ['mt-2', 'mt-4'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -1955,7 +1952,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2'],
+                  ignorePatterns: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -1968,7 +1965,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2', 'p-4'],
+                  ignorePatterns: ['mt-2', 'p-4'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -1981,7 +1978,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2'],
+                  ignorePatterns: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -1994,7 +1991,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2'],
+                  ignorePatterns: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2007,7 +2004,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['foo', 'bar'],
+                  ignorePatterns: ['foo', 'bar'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2020,7 +2017,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2'],
+                  ignorePatterns: ['mt-2'],
                   objectStyleAttributes: ['classNames'],
                 },
               },
@@ -2033,7 +2030,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2'],
+                  ignorePatterns: ['mt-2'],
                   objectStyleAttributes: ['sx'],
                 },
               },
@@ -2046,7 +2043,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2', 'p-4'],
+                  ignorePatterns: ['mt-2', 'p-4'],
                   objectStyleAttributes: ['classes', 'classNames'],
                 },
               },
@@ -2059,7 +2056,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2'],
+                  ignorePatterns: ['mt-2'],
                   // objectStyleAttributes not configured
                 },
               },
@@ -2072,7 +2069,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2', 'flex', 'items-center', 'p-4', 'rounded'],
+                  ignorePatterns: ['mt-2', 'flex', 'items-center', 'p-4', 'rounded'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2085,7 +2082,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2'],
+                  ignorePatterns: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2100,7 +2097,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2'],
+                  ignorePatterns: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2119,7 +2116,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2'],
+                  ignorePatterns: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2142,7 +2139,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2'],
+                  ignorePatterns: ['mt-2'],
                   objectStyleAttributes: ['classNames'],
                 },
               },
@@ -2161,7 +2158,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2'],
+                  ignorePatterns: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2180,7 +2177,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2'],
+                  ignorePatterns: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },
@@ -2199,7 +2196,7 @@ describe('Tailwind arbitrary value support', () => {
             options: [
               {
                 validation: {
-                  allowlist: ['mt-2'],
+                  ignorePatterns: ['mt-2'],
                   objectStyleAttributes: ['classes'],
                 },
               },

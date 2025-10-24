@@ -83,23 +83,12 @@ ruleTester.run(
         ],
       },
       {
-        code: '<div className="custom-btn" />',
-        filename: 'test.jsx',
-        options: [
-          {
-            validation: {
-              allowlist: ['custom-*', 'app-*'],
-            },
-          },
-        ],
-      },
-      {
         code: '<div />',
         filename: 'test.jsx',
         options: [
           {
             validation: {
-              blocklist: ['legacy-*', 'deprecated-*'],
+              ignorePatterns: ['dynamic-*', 'test-*'],
             },
           },
         ],
@@ -116,7 +105,7 @@ ruleTester.run(
         ],
       },
       {
-        code: '<div className="custom-class" />',
+        code: '<div />',
         filename: 'test.jsx',
         options: [
           {
@@ -128,8 +117,6 @@ ruleTester.run(
               },
             },
             validation: {
-              allowlist: ['custom-*'],
-              blocklist: ['legacy-*'],
               ignorePatterns: ['dynamic-*'],
             },
           },
@@ -145,8 +132,6 @@ ruleTester.run(
               scss: [],
             },
             validation: {
-              allowlist: [],
-              blocklist: [],
               ignorePatterns: [],
             },
           },

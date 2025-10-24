@@ -15,7 +15,7 @@ export type { ClassRegistry }
 /**
  * Module-level cache for class registries.
  *
- * Key: SHA-256 hash of configuration (files, allowlist, tailwind config, cwd)
+ * Key: SHA-256 hash of configuration (files, tailwind config, cwd)
  * Value: ClassRegistry instance
  *
  * NOTE: This cache is shared across all ESLint instances in the same Node.js process.
@@ -28,16 +28,12 @@ let cacheKey: string | null = null
 /**
  * Gets or creates a class registry with caching
  * @param cssPatterns - Glob patterns for CSS files to validate against
- * @param allowlist - Array of class name patterns that are always valid
- * @param blocklist - Array of class name patterns that are forbidden
  * @param tailwindConfig - Tailwind configuration (boolean or config object)
  * @param cwd - Current working directory for resolving relative paths
  * @returns ClassRegistry instance
  */
 export function getClassRegistry(
   cssPatterns: string[],
-  allowlist: string[],
-  blocklist: string[],
   tailwindConfig: boolean | TailwindConfig | undefined,
   cwd: string,
 ): ClassRegistry {
@@ -46,8 +42,6 @@ export function getClassRegistry(
 
   const currentCacheKey = createCacheKey(
     resolvedFiles,
-    allowlist,
-    blocklist,
     tailwindConfig,
     cwd,
   )
@@ -71,8 +65,6 @@ export function getClassRegistry(
   // Build new registry with pre-resolved files
   cachedRegistry = buildClassRegistry(
     resolvedFiles,
-    allowlist,
-    blocklist,
     tailwindUtils,
     cwd,
   )

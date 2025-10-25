@@ -9,6 +9,18 @@ import { logger } from 'src/utils/logger'
 import type { TailwindUtils } from 'tailwind-api-utils'
 
 /**
+ * Special Tailwind utility classes that are always valid but may not be
+ * recognized by the TailwindUtils API.
+ *
+ * - `group`: Marks a parent element for group-* variant modifiers
+ * - `peer`: Marks a sibling element for peer-* variant modifiers
+ *
+ * These classes are fundamental to Tailwind's variant system and should
+ * always be considered valid, regardless of API validation results.
+ */
+const TAILWIND_SPECIAL_CLASSES = new Set(['group', 'peer'])
+
+/**
  * Interface for the class registry
  */
 export interface ClassRegistry {
@@ -109,6 +121,11 @@ export function buildClassRegistry(
         return true
       }
 
+      // Check special Tailwind classes (group, peer)
+      if (tailwindUtils && TAILWIND_SPECIAL_CLASSES.has(className)) {
+        return true
+      }
+
       // Check Tailwind classes via API (if enabled)
       if (tailwindUtils?.isValidClassName(className)) {
         return true
@@ -118,6 +135,11 @@ export function buildClassRegistry(
     },
 
     isTailwindClass(className: string): boolean {
+      // Check special Tailwind classes (group, peer)
+      if (tailwindUtils && TAILWIND_SPECIAL_CLASSES.has(className)) {
+        return true
+      }
+
       // Check Tailwind classes via API (if enabled)
       if (tailwindUtils?.isValidClassName(className)) {
         return true
@@ -127,6 +149,11 @@ export function buildClassRegistry(
     },
 
     isTailwindOnly(className: string): boolean {
+      // Check special Tailwind classes (group, peer)
+      if (tailwindUtils && TAILWIND_SPECIAL_CLASSES.has(className)) {
+        return true
+      }
+
       // Check Tailwind classes via API (if enabled)
       return tailwindUtils?.isValidClassName(className) ?? false
     },

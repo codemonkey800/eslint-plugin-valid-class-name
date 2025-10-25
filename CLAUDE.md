@@ -73,13 +73,15 @@ When modifying files, run linters only for changed files to save time.
 - SCSS files are compiled to CSS using Sass before extraction
 - Handles syntax errors gracefully with warnings
 
-**4. Tailwind Integration** ([src/parsers/tailwind-parser.ts](src/parsers/tailwind-parser.ts) + [src/registry/tailwind-loader.ts](src/registry/tailwind-loader.ts))
+**4. Tailwind Integration** ([src/parsers/tailwind-parser.ts](src/parsers/tailwind-parser.ts) + [src/registry/tailwind-loader.ts](src/registry/tailwind-loader.ts) + [src/registry/tailwind-worker.ts](src/registry/tailwind-worker.ts))
 
 - **tailwind-parser.ts**: Finds Tailwind configuration file path
 - **tailwind-loader.ts**: Creates TailwindUtils instance from tailwind-api-utils library
+- **tailwind-worker.ts**: Worker thread for async validation (Tailwind CSS v4 support)
 - Validates classes on-demand via `isValidClassName()` API (no upfront generation)
 - Supports all Tailwind features automatically: variants, arbitrary values, plugins
-- Tailwind CSS v3 only (v4 requires async initialization)
+- **Tailwind CSS v3**: Synchronous config loading
+- **Tailwind CSS v4**: Async config loading via synckit worker threads
 
 **5. Tailwind Variants** ([src/utils/tailwind-variants.ts](src/utils/tailwind-variants.ts))
 
@@ -109,6 +111,8 @@ When modifying files, run linters only for changed files to save time.
 - TailwindUtils API handles all Tailwind features automatically
 - Lazy validation approach: classes validated only when encountered
 - Supports variants, arbitrary values, and plugin-generated classes out-of-the-box
+- **v3**: Synchronous validation in main thread
+- **v4**: Uses synckit to run async validation in worker thread (transparent to ESLint rules)
 
 **Variant Validation**:
 
@@ -161,7 +165,8 @@ src/
 │   ├── class-registry.ts          # Central registry and caching
 │   ├── file-resolver.ts           # File path resolution
 │   ├── registry-builder.ts        # Registry building logic
-│   └── tailwind-loader.ts         # Creates TailwindUtils validator
+│   ├── tailwind-loader.ts         # Creates TailwindUtils validator
+│   └── tailwind-worker.ts         # Worker thread for Tailwind v4 async validation
 ├── parsers/
 │   ├── css-parser.ts              # CSS/SCSS parsing
 │   └── tailwind-parser.ts         # Finds Tailwind config file path
@@ -182,6 +187,8 @@ src/
 ## Important Notes
 
 - The plugin uses ES modules (`type: "module"` in package.json)
-- TailwindUtils initialization is synchronous (required by ESLint constraints)
+- **Tailwind CSS v3**: Synchronous initialization in main thread
+- **Tailwind CSS v4**: Async initialization via synckit worker threads (transparent to ESLint)
+- Uses `synckit` to bridge ESLint's synchronous constraint with Tailwind v4's async requirements
 - The rule currently only validates static string literals in className attributes
 - Dynamic class names (template literals, variables, etc.) are skipped

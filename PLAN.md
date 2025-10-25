@@ -129,16 +129,17 @@ Add support for template literals, conditional expressions, and utility function
 - Logical expressions (LogicalExpression): `condition && 'class'`, `value || 'class'`, `value ?? 'class'`
 - Function calls (CallExpression): `cns()`, `clsx()`, `classnames()` with nested expressions
 - Template literals without interpolation: `` `class` ``
+- Object syntax: `{ 'class': condition }` - extracts keys from object literals
+- Array syntax: `['class1', condition && 'class2']` - recursively extracts from array elements
 - Recursive expression tree traversal to extract static strings
 - Deeply nested combinations of above patterns
 
 **⏸ Not Yet Implemented:**
 
-- Template literals with interpolation (currently skipped)
-- Object syntax: `{ 'class': condition }`
-- Array syntax: `['class1', condition && 'class2']`
+- Template literals with interpolation: `` `flex-${direction}` `` (currently skipped)
 - Variables and identifiers (currently skipped)
-- Spread operators in class expressions
+- Spread operators in class expressions (currently skipped)
+- Computed property names in objects (currently skipped)
 
 ### Phase 6: Framework Support
 
@@ -309,7 +310,7 @@ The plugin now uses the official Tailwind API via `tailwind-api-utils` for valid
 - [x] Handle custom utilities and plugins (handled by API)
 - [x] Process safelist patterns (handled by API)
 - [x] Tailwind CSS v3 support (synchronous config loading)
-- [ ] Tailwind CSS v4 support (requires async initialization wrapper)
+- [x] Tailwind CSS v4 support (async initialization via synckit worker threads)
 
 **Deprecated/Removed:**
 
@@ -318,12 +319,22 @@ The plugin now uses the official Tailwind API via `tailwind-api-utils` for valid
 - ~~Custom variant validation logic~~
 - ~~Safelist extraction code~~
 
+**V4 Support Implementation (January 2025):**
+
+Uses `synckit` to bridge ESLint's synchronous constraint with Tailwind v4's async requirements:
+- **tailwind-worker.ts**: Worker thread that handles async config loading
+- **tailwind-loader.ts**: Detects v4 and delegates to worker via `createSyncFn()`
+- Validation appears synchronous to ESLint rules but runs async in worker thread
+- Worker caches loaded configs to avoid reloading on every validation
+
 **Files Changed:**
 
-- `src/registry/tailwind-loader.ts`: Refactored to create `TailwindUtils` instance
+- `src/registry/tailwind-loader.ts`: Refactored to create `TailwindUtils` instance; added v4 support via synckit
+- `src/registry/tailwind-worker.ts`: New worker file for async v4 validation
 - `src/registry/registry-builder.ts`: Updated to use API for validation
 - `src/registry/class-registry.ts`: Updated to pass `TailwindUtils` instance
 - `src/parsers/tailwind-parser.ts`: Reduced from 1,838 lines to 49 lines (kept only config path finder)
+- `package.json`: Added `synckit` dependency
 
 ### Performance Optimization
 
@@ -555,15 +566,16 @@ The plugin now uses the official Tailwind API via `tailwind-api-utils` for valid
 - [x] Handle conditional expressions (ternary operators: `a ? 'b' : 'c'`)
 - [x] Support clsx/classnames/cns utility function patterns with nested expressions
 - [x] Handle logical expressions (&&, ||, ??)
+- [x] Support object syntax in utility functions (e.g., `clsx({ 'class': condition })`)
+- [x] Support array syntax in utility functions (e.g., `clsx(['class1', condition && 'class2'])`)
 - [x] Recursive extraction of static strings from expression trees
 - [x] Support deeply nested combinations of all above patterns
 
 **⏸ Not Yet Implemented:**
 
 - [ ] Parse template literals with dynamic/interpolated parts (e.g., `` `flex-${direction}` ``)
-- [ ] Process computed property names
-- [ ] Support object syntax in utility functions (e.g., `clsx({ 'class': condition })`)
-- [ ] Support array syntax in utility functions (e.g., `clsx(['class1', condition && 'class2'])`)
+- [ ] Process computed property names in objects (e.g., `{ [dynamicKey]: true }`)
+- [ ] Handle spread operators (e.g., `clsx({ ...otherClasses })`)
 - [ ] Implement configurable dynamic handling strategies (strict vs permissive modes)
 
 ### Ecosystem Integration

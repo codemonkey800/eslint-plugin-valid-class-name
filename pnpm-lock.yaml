@@ -20,6 +20,9 @@ importers:
       sass:
         specifier: ^1.93.2
         version: 1.93.2
+      synckit:
+        specifier: ^0.11.4
+        version: 0.11.11
       tailwind-api-utils:
         specifier: ^1.0.3
         version: 1.0.3(tailwindcss@3.4.18)

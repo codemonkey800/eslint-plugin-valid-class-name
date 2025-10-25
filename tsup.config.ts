@@ -5,7 +5,7 @@ import { promisify } from 'util';
 const execAsync = promisify(exec);
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: ['src/index.ts', 'src/registry/tailwind-worker.ts'],
   format: ['esm'],
   dts: true,
   clean: true,

@@ -1,0 +1,25 @@
+{
+  "name": "html-example",
+  "version": "1.0.0",
+  "description": "Integration test project for eslint-plugin-valid-class-name HTML support",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint src --ext .html",
+    "lint:fix": "eslint src --ext .html --fix",
+    "test:valid": "eslint src/pages/valid.html",
+    "test:invalid": "eslint src/pages/invalid.html",
+    "test:tailwind": "eslint src/pages/tailwind.html",
+    "test:variants": "eslint src/pages/variants.html",
+    "test:arbitrary": "eslint src/pages/arbitrary.html",
+    "test:mixed": "eslint src/pages/mixed.html",
+    "test:edge-cases": "eslint src/pages/edge-cases.html",
+    "test:all-valid": "eslint src/pages/valid.html src/pages/tailwind.html src/pages/variants.html src/pages/arbitrary.html src/pages/mixed.html src/pages/edge-cases.html",
+    "test:all-invalid": "eslint src/pages/invalid.html"
+  },
+  "devDependencies": {
+    "@angular-eslint/template-parser": "^20.4.0",
+    "eslint": "^9.38.0",
+    "eslint-plugin-valid-class-name": "file:../..",
+    "tailwindcss": "^3.4.0"
+  }
+}

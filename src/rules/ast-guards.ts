@@ -12,6 +12,7 @@ import type {
   LogicalExpression,
   ObjectExpression,
   TemplateLiteral,
+  TextAttribute,
 } from './ast-types'
 
 /**
@@ -80,4 +81,16 @@ export function isObjectExpression(
  */
 export function isIdentifier(expression: Expression): expression is Identifier {
   return expression.type === 'Identifier'
+}
+
+/**
+ * Type guard to check if a node is a TextAttribute (HTML attribute from Angular parser)
+ */
+export function isTextAttribute(node: unknown): node is TextAttribute {
+  return (
+    typeof node === 'object' &&
+    node !== null &&
+    'type' in node &&
+    node.type === 'TextAttribute'
+  )
 }

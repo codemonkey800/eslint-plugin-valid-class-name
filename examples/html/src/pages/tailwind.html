@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tailwind Utilities Example</title>
+</head>
+<body>
+  <!-- Layout utilities -->
+  <div class="container mx-auto px-4">
+    <h1 class="text-4xl font-bold mb-8">Tailwind Utilities</h1>
+
+    <!-- Flexbox -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Flexbox</h2>
+      <div class="flex flex-row flex-wrap justify-start items-center gap-4">
+        <div class="flex-1">Flex item 1</div>
+        <div class="flex-auto">Flex item 2</div>
+        <div class="flex-none">Flex item 3</div>
+      </div>
+    </section>
+
+    <!-- Grid -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Grid</h2>
+      <div class="grid grid-cols-3 gap-6">
+        <div class="col-span-1">Grid item 1</div>
+        <div class="col-span-2">Grid item 2</div>
+      </div>
+    </section>
+
+    <!-- Colors -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Colors</h2>
+      <div class="space-y-2">
+        <div class="bg-red-500 text-white p-4">Red background</div>
+        <div class="bg-blue-600 text-white p-4">Blue background</div>
+        <div class="bg-green-700 text-white p-4">Green background</div>
+        <div class="bg-yellow-400 text-black p-4">Yellow background</div>
+        <div class="bg-purple-500 text-white p-4">Purple background</div>
+        <div class="bg-pink-500 text-white p-4">Pink background</div>
+        <div class="bg-gray-800 text-white p-4">Gray background</div>
+      </div>
+    </section>
+
+    <!-- Spacing (margin & padding) -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Spacing</h2>
+      <div class="m-4 p-8 bg-gray-100">
+        <div class="mt-2 mb-4 mx-auto">Margin utilities</div>
+        <div class="pt-4 pb-8 px-6">Padding utilities</div>
+        <div class="space-x-4 flex">
+          <span>Space between</span>
+          <span>elements</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sizing -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Sizing</h2>
+      <div class="w-full h-32 bg-blue-200 mb-4">Full width</div>
+      <div class="w-1/2 h-24 bg-green-200 mb-4">Half width</div>
+      <div class="w-64 h-16 bg-red-200 mb-4">Fixed width (64)</div>
+      <div class="max-w-md h-20 bg-yellow-200 mb-4">Max width medium</div>
+      <div class="min-h-screen bg-gray-100">Min height screen</div>
+    </section>
+
+    <!-- Typography -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Typography</h2>
+      <div class="space-y-2">
+        <p class="text-xs">Extra small text</p>
+        <p class="text-sm">Small text</p>
+        <p class="text-base">Base text</p>
+        <p class="text-lg">Large text</p>
+        <p class="text-xl">Extra large text</p>
+        <p class="text-2xl">2XL text</p>
+        <p class="text-3xl">3XL text</p>
+        <p class="font-thin">Thin font</p>
+        <p class="font-normal">Normal font</p>
+        <p class="font-bold">Bold font</p>
+        <p class="italic">Italic text</p>
+        <p class="underline">Underlined text</p>
+        <p class="line-through">Strikethrough text</p>
+      </div>
+    </section>
+
+    <!-- Borders -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Borders</h2>
+      <div class="space-y-4">
+        <div class="border border-gray-300 p-4">Border all sides</div>
+        <div class="border-t-2 border-blue-500 p-4">Border top</div>
+        <div class="border-b-4 border-red-500 p-4">Border bottom</div>
+        <div class="rounded p-4 bg-gray-100">Rounded corners</div>
+        <div class="rounded-lg p-4 bg-gray-100">Large rounded</div>
+        <div class="rounded-full p-4 bg-gray-100 w-32 h-32">Circle</div>
+      </div>
+    </section>
+
+    <!-- Effects -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Effects</h2>
+      <div class="space-y-4">
+        <div class="shadow p-4">Small shadow</div>
+        <div class="shadow-md p-4">Medium shadow</div>
+        <div class="shadow-lg p-4">Large shadow</div>
+        <div class="shadow-xl p-4">Extra large shadow</div>
+        <div class="opacity-50 p-4 bg-blue-500">50% opacity</div>
+        <div class="opacity-75 p-4 bg-green-500">75% opacity</div>
+      </div>
+    </section>
+
+    <!-- Display -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Display</h2>
+      <div class="block mb-2">Block element</div>
+      <span class="inline-block mb-2 bg-gray-200 p-2">Inline block</span>
+      <div class="hidden">Hidden element</div>
+    </section>
+
+    <!-- Position -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Position</h2>
+      <div class="relative h-32 bg-gray-100">
+        <div class="absolute top-0 left-0 bg-red-500 p-2">Absolute</div>
+        <div class="absolute bottom-0 right-0 bg-blue-500 p-2">Bottom right</div>
+      </div>
+    </section>
+
+    <!-- Z-index -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Z-index</h2>
+      <div class="relative">
+        <div class="z-10 absolute bg-red-500 p-4">Z-10</div>
+        <div class="z-20 absolute top-4 left-4 bg-blue-500 p-4">Z-20</div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

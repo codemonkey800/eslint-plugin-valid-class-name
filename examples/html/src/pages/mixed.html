@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mixed Classes Example</title>
+</head>
+<body>
+  <!-- Header: Custom CSS + Tailwind -->
+  <header class="header bg-white shadow-md">
+    <div class="container flex justify-between items-center">
+      <h1 class="title text-brand-500">My Website</h1>
+      <nav class="nav">
+        <a href="#" class="nav-link hover:text-blue-600">Home</a>
+        <a href="#" class="nav-link hover:text-blue-600">About</a>
+        <a href="#" class="nav-link hover:text-blue-600">Services</a>
+        <a href="#" class="nav-link hover:text-blue-600">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main content: Mix of all sources -->
+  <main class="main-content bg-gray-50">
+    <div class="container">
+      <!-- Hero section: Tailwind utilities -->
+      <section class="section text-center">
+        <h2 class="text-5xl font-bold mb-6 text-gray-900">
+          Welcome to Our Service
+        </h2>
+        <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          Combining custom CSS classes with Tailwind utilities for maximum flexibility
+        </p>
+        <div class="flex gap-4 justify-center">
+          <button class="button-primary hover:shadow-lg transition-shadow">
+            Get Started
+          </button>
+          <button class="button-secondary hover:shadow-lg transition-shadow">
+            Learn More
+          </button>
+        </div>
+      </section>
+
+      <!-- Features grid: Custom cards + Tailwind grid -->
+      <section class="section">
+        <h2 class="subtitle text-center mb-8">Our Features</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="card hover:shadow-xl transition-shadow">
+            <div class="card-header">
+              <h3 class="text-xl font-bold text-blue-600">Fast</h3>
+            </div>
+            <p class="text-gray-600 mb-4">
+              Lightning-fast performance for all your needs
+            </p>
+            <div class="card-footer">
+              <span class="badge badge-success">Active</span>
+            </div>
+          </div>
+
+          <div class="card hover:shadow-xl transition-shadow">
+            <div class="card-header">
+              <h3 class="text-xl font-bold text-green-600">Reliable</h3>
+            </div>
+            <p class="text-gray-600 mb-4">
+              99.9% uptime guaranteed for your peace of mind
+            </p>
+            <div class="card-footer">
+              <span class="badge badge-success">Active</span>
+            </div>
+          </div>
+
+          <div class="card hover:shadow-xl transition-shadow">
+            <div class="card-header">
+              <h3 class="text-xl font-bold text-purple-600">Secure</h3>
+            </div>
+            <p class="text-gray-600 mb-4">
+              Enterprise-grade security for your data
+            </p>
+            <div class="card-footer">
+              <span class="badge badge-success">Active</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Alerts section: SCSS alerts + Tailwind spacing -->
+      <section class="section">
+        <h2 class="subtitle mb-6">Important Notifications</h2>
+        <div class="space-y-4">
+          <div class="alert alert-info flex items-center justify-between">
+            <span>New features are now available!</span>
+            <button class="btn btn-primary text-sm">View</button>
+          </div>
+          <div class="alert alert-warning flex items-center justify-between">
+            <span>Maintenance scheduled for next week</span>
+            <button class="btn btn-secondary text-sm">Details</button>
+          </div>
+          <div class="alert alert-success flex items-center justify-between">
+            <span>Your account has been verified</span>
+            <span class="badge badge-success">✓</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Form section: SCSS form classes + Tailwind layout -->
+      <section class="section">
+        <h2 class="subtitle mb-6">Contact Form</h2>
+        <form class="max-w-lg mx-auto">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" class="form-input focus:ring-2 focus:ring-blue-500" placeholder="John Doe">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-input focus:ring-2 focus:ring-blue-500" placeholder="john@example.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message</label>
+            <textarea class="form-input focus:ring-2 focus:ring-blue-500 min-h-[150px]" placeholder="Your message..."></textarea>
+          </div>
+          <div class="flex gap-4 justify-end">
+            <button type="button" class="btn btn-secondary">Cancel</button>
+            <button type="submit" class="button-primary hover:shadow-lg">Send Message</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Stats section: Mix of everything -->
+      <section class="section">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="card text-center">
+            <div class="text-4xl font-bold text-blue-600 mb-2">1000+</div>
+            <div class="text-gray-600">Happy Customers</div>
+          </div>
+          <div class="card text-center">
+            <div class="text-4xl font-bold text-green-600 mb-2">50+</div>
+            <div class="text-gray-600">Team Members</div>
+          </div>
+          <div class="card text-center">
+            <div class="text-4xl font-bold text-purple-600 mb-2">24/7</div>
+            <div class="text-gray-600">Support</div>
+          </div>
+          <div class="card text-center">
+            <div class="text-4xl font-bold text-red-600 mb-2">99.9%</div>
+            <div class="text-gray-600">Uptime</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA section: Everything mixed -->
+      <section class="section bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-12 text-center text-white">
+        <h2 class="text-4xl font-bold mb-4">Ready to Get Started?</h2>
+        <p class="text-xl mb-8 opacity-90">
+          Join thousands of satisfied customers today
+        </p>
+        <div class="flex gap-4 justify-center">
+          <button class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:shadow-xl transition-shadow">
+            Start Free Trial
+          </button>
+          <button class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
+            Schedule Demo
+          </button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer: Custom CSS + Tailwind -->
+  <footer class="footer bg-gray-900 text-white">
+    <div class="container">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <h3 class="font-bold text-lg mb-4">Company</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="hover:text-blue-400">About Us</a></li>
+            <li><a href="#" class="hover:text-blue-400">Careers</a></li>
+            <li><a href="#" class="hover:text-blue-400">Press</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-bold text-lg mb-4">Products</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="hover:text-blue-400">Features</a></li>
+            <li><a href="#" class="hover:text-blue-400">Pricing</a></li>
+            <li><a href="#" class="hover:text-blue-400">API</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-bold text-lg mb-4">Resources</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="hover:text-blue-400">Documentation</a></li>
+            <li><a href="#" class="hover:text-blue-400">Guides</a></li>
+            <li><a href="#" class="hover:text-blue-400">Support</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-bold text-lg mb-4">Legal</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="hover:text-blue-400">Privacy</a></li>
+            <li><a href="#" class="hover:text-blue-400">Terms</a></li>
+            <li><a href="#" class="hover:text-blue-400">Cookie Policy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 pt-8 text-center text-gray-400">
+        <p>© 2024 My Website. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

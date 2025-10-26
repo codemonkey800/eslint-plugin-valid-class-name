@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arbitrary Values Example</title>
+</head>
+<body>
+  <div class="container mx-auto px-4">
+    <h1 class="text-4xl font-bold mb-8">Arbitrary Values</h1>
+
+    <!-- Arbitrary spacing -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Arbitrary Spacing</h2>
+      <div class="w-[100px] h-[50px] bg-blue-500 mb-4">100px × 50px</div>
+      <div class="w-[75%] h-[80px] bg-green-500 mb-4">75% width</div>
+      <div class="m-[2rem] p-[1.5rem] bg-red-200">Custom margin & padding</div>
+      <div class="mt-[10px] mb-[20px] mx-[auto] w-[300px] bg-yellow-200">Mixed units</div>
+    </section>
+
+    <!-- Arbitrary colors -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Arbitrary Colors</h2>
+      <div class="bg-[#ff0000] text-white p-4 mb-2">Hex color</div>
+      <div class="bg-[rgb(0,255,0)] text-black p-4 mb-2">RGB color</div>
+      <div class="bg-[rgba(0,0,255,0.5)] text-white p-4 mb-2">RGBA color</div>
+      <div class="bg-[hsl(200,50%,50%)] text-white p-4 mb-2">HSL color</div>
+      <div class="text-[#1da1f2] font-bold text-xl">Custom text color</div>
+    </section>
+
+    <!-- Arbitrary sizing -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Arbitrary Sizing</h2>
+      <div class="min-w-[200px] max-w-[400px] bg-gray-200 p-4 mb-4">
+        Min/Max width
+      </div>
+      <div class="min-h-[100px] max-h-[200px] bg-gray-300 p-4 mb-4">
+        Min/Max height
+      </div>
+      <div class="h-[50vh] bg-blue-100 p-4 mb-4">50vh height</div>
+      <div class="w-[calc(100%-2rem)] bg-green-100 p-4">Calc width</div>
+    </section>
+
+    <!-- Arbitrary typography -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Arbitrary Typography</h2>
+      <p class="text-[14px] mb-2">14px text</p>
+      <p class="text-[1.5rem] mb-2">1.5rem text</p>
+      <p class="leading-[2.5] mb-2">Custom line height</p>
+      <p class="tracking-[0.2em] mb-2">Custom letter spacing</p>
+    </section>
+
+    <!-- Arbitrary borders & radius -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Arbitrary Borders</h2>
+      <div class="border-[3px] border-blue-500 p-4 mb-4">3px border</div>
+      <div class="border-t-[5px] border-red-500 p-4 mb-4">5px top border</div>
+      <div class="rounded-[20px] bg-gray-200 p-4 mb-4">20px border radius</div>
+      <div class="border-[#ff6b6b] border-2 p-4">Custom border color</div>
+    </section>
+
+    <!-- Arbitrary grid & flex -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Arbitrary Grid/Flex</h2>
+      <div class="grid grid-cols-[200px_1fr_100px] gap-4 mb-4">
+        <div class="bg-blue-200 p-4">200px</div>
+        <div class="bg-green-200 p-4">1fr</div>
+        <div class="bg-red-200 p-4">100px</div>
+      </div>
+      <div class="flex gap-[30px]">
+        <div class="bg-yellow-200 p-4">Item 1</div>
+        <div class="bg-purple-200 p-4">Item 2</div>
+      </div>
+    </section>
+
+    <!-- Arbitrary with variants -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Arbitrary with Variants</h2>
+      <button class="hover:w-[200px] w-[150px] bg-blue-500 text-white p-2 transition-all">
+        Hover to expand
+      </button>
+      <div class="md:w-[500px] w-[300px] bg-gray-200 p-4 mt-4">
+        Responsive arbitrary width
+      </div>
+      <div class="hover:bg-[#ff6b6b] bg-gray-300 p-4 mt-4">
+        Hover for custom color
+      </div>
+    </section>
+
+    <!-- Arbitrary transforms -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Arbitrary Transforms</h2>
+      <div class="rotate-[45deg] w-[100px] h-[100px] bg-blue-500 mb-8"></div>
+      <div class="scale-[1.5] w-[100px] h-[100px] bg-green-500 mb-8"></div>
+      <div class="translate-x-[50px] w-[100px] h-[100px] bg-red-500"></div>
+    </section>
+
+    <!-- Arbitrary shadows -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Arbitrary Shadows</h2>
+      <div class="shadow-[0_10px_20px_rgba(0,0,0,0.3)] p-4 bg-white mb-4">
+        Custom box shadow
+      </div>
+      <div class="shadow-[0_0_10px_#ff0000] p-4 bg-white">
+        Colored shadow
+      </div>
+    </section>
+
+    <!-- Arbitrary z-index & opacity -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Arbitrary Z-index & Opacity</h2>
+      <div class="relative h-[200px]">
+        <div class="z-[100] absolute top-0 left-0 bg-blue-500 p-4 opacity-[0.8]">
+          Z-100, 80% opacity
+        </div>
+        <div class="z-[50] absolute top-8 left-8 bg-red-500 p-4 opacity-[0.9]">
+          Z-50, 90% opacity
+        </div>
+      </div>
+    </section>
+
+    <!-- Negative arbitrary values -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Negative Arbitrary Values</h2>
+      <div class="relative">
+        <div class="-mt-[10px] -ml-[20px] bg-purple-500 text-white p-4">
+          Negative margins
+        </div>
+      </div>
+    </section>
+
+    <!-- Arbitrary content -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">Arbitrary Content</h2>
+      <div class="before:content-['★'] before:mr-2 before:text-yellow-500">
+        Star before
+      </div>
+      <div class="after:content-['→'] after:ml-2 after:text-blue-500">
+        Arrow after
+      </div>
+    </section>
+  </div>
+</body>
+</html>

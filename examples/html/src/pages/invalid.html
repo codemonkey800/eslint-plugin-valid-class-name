@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invalid HTML Example</title>
+</head>
+<body>
+  <!-- Invalid CSS class names -->
+  <header class="headr">
+    <div class="containr">
+      <nav class="nvigation">
+        <a href="#" class="nav-lnk">Home</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-contnt">
+    <div class="container">
+      <h1 class="ttile">Invalid Classes Example</h1>
+
+      <!-- Invalid Tailwind utilities -->
+      <section class="secton">
+        <div class="flx gap-4">
+          <div class="bg-blu-500 text-white">Invalid color</div>
+          <div class="bg-green-5000">Invalid shade</div>
+          <div class="p-400">Invalid spacing</div>
+        </div>
+      </section>
+
+      <!-- Typos in existing classes -->
+      <section class="section">
+        <div class="crd">
+          <div class="card-headr">
+            <h3 class="txt-xl">Wrong class</h3>
+          </div>
+          <div class="card-foter">
+            <button class="buton-primary">Typo in button</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Non-existent component classes -->
+      <section class="section">
+        <button class="btn-danger">Non-existent variant</button>
+        <button class="button-tertiary">Non-existent SCSS class</button>
+      </section>
+
+      <!-- Invalid alert classes -->
+      <div class="alert alert-critical">Non-existent alert variant</div>
+      <div class="alrt alert-info">Typo in alert</div>
+
+      <!-- Invalid form classes -->
+      <form>
+        <div class="form-grp">
+          <label class="form-labl">Label typo</label>
+          <input type="text" class="form-inpt">
+        </div>
+      </form>
+
+      <!-- Completely made-up classes -->
+      <div class="does-not-exist">This class doesn't exist</div>
+      <div class="random-class-name">Another non-existent class</div>
+      <div class="typo-flex">Typo of flex</div>
+      <div class="non-existent-button">Made up class</div>
+
+      <!-- Invalid Tailwind variants -->
+      <div class="hoverr:bg-blue-500">Typo in variant</div>
+      <div class="focuss:text-red-500">Another variant typo</div>
+
+      <!-- Empty arbitrary values -->
+      <div class="w-[]">Empty arbitrary value</div>
+      <div class="bg-[]">Another empty arbitrary</div>
+    </div>
+  </main>
+
+  <footer class="footr">
+    <div class="container">
+      <p>Invalid classes everywhere</p>
+    </div>
+  </footer>
+</body>
+</html>

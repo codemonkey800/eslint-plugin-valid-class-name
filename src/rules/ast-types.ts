@@ -1,5 +1,5 @@
 /**
- * Type definitions for JSX AST nodes used in ESLint rule validation
+ * Type definitions for JSX and HTML AST nodes used in ESLint rule validation
  */
 
 export interface JSXIdentifier {
@@ -99,4 +99,24 @@ export interface JSXAttribute {
   type: 'JSXAttribute'
   name: JSXIdentifier
   value: Literal | JSXExpressionContainer | null
+}
+
+/**
+ * HTML attribute node from @angular-eslint/template-parser
+ * Used for validating class attributes in HTML files
+ */
+export interface TextAttribute {
+  type: 'TextAttribute'
+  name: string
+  value: string
+  loc: {
+    start: {
+      line: number
+      column: number
+    }
+    end: {
+      line: number
+      column: number
+    }
+  }
 }

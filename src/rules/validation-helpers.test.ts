@@ -1,6 +1,9 @@
-import { describe, expect, it } from '@jest/globals'
+import { describe, expect, it, jest } from '@jest/globals'
+import type { Rule } from 'eslint'
+import type { ClassRegistry } from 'src/registry/registry-builder'
 
-import { isClassNameIgnored } from './validation-helpers'
+import type { JSXAttribute } from './ast-types'
+import { isClassNameIgnored, validateClassNames } from './validation-helpers'
 
 describe('validation-helpers', () => {
   describe('isClassNameIgnored', () => {
@@ -143,6 +146,470 @@ describe('validation-helpers', () => {
       // Invalid patterns should not match (pattern-matcher returns null for invalid patterns)
       expect(isClassNameIgnored('aaa', ignorePatterns)).toBe(false)
       expect(isClassNameIgnored('bbb', ignorePatterns)).toBe(false)
+    })
+  })
+
+  describe('validateClassNames', () => {
+    /**
+     * Helper to create a mock ESLint context
+     */
+    function createMockContext(): Rule.RuleContext {
+      return {
+        report: jest.fn(),
+      } as unknown as Rule.RuleContext
+    }
+
+    /**
+     * Helper to create a mock JSXAttribute node
+     */
+    function createMockNode(): JSXAttribute {
+      return {
+        type: 'JSXAttribute',
+        name: { type: 'JSXIdentifier', name: 'className' },
+        value: null,
+      }
+    }
+
+    /**
+     * Helper to create a mock ClassRegistry
+     */
+    function createMockRegistry(config: {
+      validClasses?: string[]
+      cssClasses?: string[]
+      tailwindOnlyClasses?: string[]
+    }): ClassRegistry {
+      const validClasses = new Set(config.validClasses || [])
+      const cssClasses = new Set(config.cssClasses || [])
+      const tailwindOnlyClasses = new Set(config.tailwindOnlyClasses || [])
+
+      return {
+        isValid: jest.fn((className: string) => validClasses.has(className)),
+        isCssClass: jest.fn((className: string) => cssClasses.has(className)),
+        isTailwindOnly: jest.fn((className: string) =>
+          tailwindOnlyClasses.has(className),
+        ),
+        isTailwindClass: jest.fn((className: string) =>
+          !cssClasses.has(className) && validClasses.has(className),
+        ),
+        getAllClasses: jest.fn(() => validClasses),
+        getValidVariants: jest.fn(() => new Set()),
+      }
+    }
+
+    describe('basic validation', () => {
+      it('should not report when all class names are valid', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({
+          validClasses: ['btn', 'card'],
+        })
+
+        validateClassNames({
+          classNames: new Set(['btn', 'card']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: [],
+        })
+
+        expect(context.report).not.toHaveBeenCalled()
+      })
+
+      it('should report when class name is invalid', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({
+          validClasses: ['btn'],
+        })
+
+        validateClassNames({
+          classNames: new Set(['invalid-class']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: [],
+        })
+
+        expect(context.report).toHaveBeenCalledTimes(1)
+        expect(context.report).toHaveBeenCalledWith({
+          node,
+          messageId: 'invalidClassName',
+          data: { className: 'invalid-class' },
+        })
+      })
+
+      it('should handle empty class name set', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({ validClasses: [] })
+
+        validateClassNames({
+          classNames: new Set([]),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: [],
+        })
+
+        expect(context.report).not.toHaveBeenCalled()
+      })
+
+      it('should handle array of class names', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({
+          validClasses: ['valid'],
+        })
+
+        validateClassNames({
+          classNames: ['valid', 'invalid'],
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: [],
+        })
+
+        expect(context.report).toHaveBeenCalledTimes(1)
+        expect(context.report).toHaveBeenCalledWith({
+          node,
+          messageId: 'invalidClassName',
+          data: { className: 'invalid' },
+        })
+      })
+    })
+
+    describe('ignore patterns', () => {
+      it('should skip classes matching ignore patterns', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({ validClasses: [] })
+
+        validateClassNames({
+          classNames: new Set(['dynamic-123', 'temp-abc']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: ['dynamic-*', 'temp-*'],
+        })
+
+        expect(context.report).not.toHaveBeenCalled()
+      })
+
+      it('should validate classes not matching ignore patterns', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({
+          validClasses: ['valid'],
+        })
+
+        validateClassNames({
+          classNames: new Set(['valid', 'invalid', 'dynamic-skip']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: ['dynamic-*'],
+        })
+
+        expect(context.report).toHaveBeenCalledTimes(1)
+        expect(context.report).toHaveBeenCalledWith({
+          node,
+          messageId: 'invalidClassName',
+          data: { className: 'invalid' },
+        })
+      })
+
+      it('should skip base class when it matches ignore pattern (with variants)', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({ validClasses: [] })
+
+        validateClassNames({
+          classNames: new Set(['hover:dynamic-123']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: ['dynamic-*'],
+        })
+
+        expect(context.report).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('empty arbitrary values', () => {
+      it('should report error for empty arbitrary values', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({ validClasses: [] })
+
+        validateClassNames({
+          classNames: new Set(['w-[]', 'bg-[]']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: [],
+        })
+
+        expect(context.report).toHaveBeenCalledTimes(2)
+        expect(context.report).toHaveBeenCalledWith({
+          node,
+          messageId: 'invalidClassName',
+          data: { className: 'w-[]' },
+        })
+        expect(context.report).toHaveBeenCalledWith({
+          node,
+          messageId: 'invalidClassName',
+          data: { className: 'bg-[]' },
+        })
+      })
+
+      it('should skip empty arbitrary values if they match ignore pattern', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({ validClasses: [] })
+
+        validateClassNames({
+          classNames: new Set(['w-[]']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: ['w-[]'],
+        })
+
+        expect(context.report).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('classes with variants', () => {
+      it('should report error when base class is invalid', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({ validClasses: [] })
+
+        validateClassNames({
+          classNames: new Set(['hover:invalid-base']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: [],
+        })
+
+        expect(context.report).toHaveBeenCalledTimes(1)
+        expect(context.report).toHaveBeenCalledWith({
+          node,
+          messageId: 'invalidClassName',
+          data: { className: 'invalid-base' },
+        })
+      })
+
+      it('should report error when base is CSS class (CSS classes cannot have Tailwind variants)', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({
+          validClasses: ['my-css-class'],
+          cssClasses: ['my-css-class'],
+        })
+
+        validateClassNames({
+          classNames: new Set(['hover:my-css-class']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: [],
+        })
+
+        expect(context.report).toHaveBeenCalledTimes(1)
+        expect(context.report).toHaveBeenCalledWith({
+          node,
+          messageId: 'invalidClassName',
+          data: { className: 'my-css-class' },
+        })
+      })
+
+      it('should report error when variant is invalid on Tailwind-only class', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({
+          validClasses: ['mt-2'],
+          tailwindOnlyClasses: ['mt-2'],
+        })
+
+        validateClassNames({
+          classNames: new Set(['hover:mt-2']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: [],
+        })
+
+        expect(context.report).toHaveBeenCalledTimes(1)
+        expect(context.report).toHaveBeenCalledWith({
+          node,
+          messageId: 'invalidVariant',
+          data: {
+            variant: 'hover',
+            className: 'hover:mt-2',
+          },
+        })
+      })
+
+      it('should not report when base is valid Tailwind-only and variant is valid', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({
+          validClasses: ['mt-2', 'hover:mt-2'],
+          tailwindOnlyClasses: ['mt-2'],
+        })
+
+        validateClassNames({
+          classNames: new Set(['hover:mt-2']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: [],
+        })
+
+        expect(context.report).not.toHaveBeenCalled()
+      })
+
+      it('should report only first invalid variant when multiple variants are present', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({
+          validClasses: ['mt-2'],
+          tailwindOnlyClasses: ['mt-2'],
+        })
+
+        validateClassNames({
+          classNames: new Set(['invalid1:invalid2:mt-2']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: [],
+        })
+
+        // Should report only the first invalid variant
+        expect(context.report).toHaveBeenCalledTimes(1)
+        expect(context.report).toHaveBeenCalledWith({
+          node,
+          messageId: 'invalidVariant',
+          data: {
+            variant: 'invalid1',
+            className: 'invalid1:invalid2:mt-2',
+          },
+        })
+      })
+    })
+
+    describe('classes without variants', () => {
+      it('should not report when class is valid', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({
+          validClasses: ['btn', 'card'],
+        })
+
+        validateClassNames({
+          classNames: new Set(['btn', 'card']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: [],
+        })
+
+        expect(context.report).not.toHaveBeenCalled()
+      })
+
+      it('should report when class is invalid', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({ validClasses: [] })
+
+        validateClassNames({
+          classNames: new Set(['invalid']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: [],
+        })
+
+        expect(context.report).toHaveBeenCalledTimes(1)
+        expect(context.report).toHaveBeenCalledWith({
+          node,
+          messageId: 'invalidClassName',
+          data: { className: 'invalid' },
+        })
+      })
+    })
+
+    describe('mixed scenarios', () => {
+      it('should handle mix of valid, invalid, and ignored classes', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({
+          validClasses: ['valid1', 'valid2'],
+        })
+
+        validateClassNames({
+          classNames: new Set([
+            'valid1',
+            'valid2',
+            'invalid1',
+            'dynamic-skip',
+            'invalid2',
+          ]),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: ['dynamic-*'],
+        })
+
+        expect(context.report).toHaveBeenCalledTimes(2)
+        expect(context.report).toHaveBeenCalledWith({
+          node,
+          messageId: 'invalidClassName',
+          data: { className: 'invalid1' },
+        })
+        expect(context.report).toHaveBeenCalledWith({
+          node,
+          messageId: 'invalidClassName',
+          data: { className: 'invalid2' },
+        })
+      })
+
+      it('should handle mix of classes with and without variants', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({
+          validClasses: ['btn', 'hover:btn'],
+          tailwindOnlyClasses: ['btn'],
+        })
+
+        validateClassNames({
+          classNames: new Set(['btn', 'hover:btn']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: [],
+        })
+
+        expect(context.report).not.toHaveBeenCalled()
+      })
+
+      it('should report multiple errors for multiple invalid classes', () => {
+        const context = createMockContext()
+        const node = createMockNode()
+        const classRegistry = createMockRegistry({ validClasses: [] })
+
+        validateClassNames({
+          classNames: new Set(['invalid1', 'invalid2', 'invalid3']),
+          node,
+          context,
+          classRegistry,
+          ignorePatterns: [],
+        })
+
+        expect(context.report).toHaveBeenCalledTimes(3)
+      })
     })
   })
 })

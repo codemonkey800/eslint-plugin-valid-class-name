@@ -1,13 +1,14 @@
 # eslint-plugin-valid-class-name
 
-> ESLint plugin that validates CSS class names in JSX/TSX against actual CSS/SCSS files and Tailwind configuration.
+> ESLint plugin that validates CSS class names in JSX/TSX and HTML files against actual CSS/SCSS files and Tailwind configuration.
 
-Catch typos and invalid class names at lint time, before they reach production. This plugin ensures that every `className` in your React/JSX code corresponds to an actual CSS class that exists in your stylesheets or Tailwind configuration.
+Catch typos and invalid class names at lint time, before they reach production. This plugin ensures that every `className` in your React/JSX code and every `class` in your HTML files corresponds to an actual CSS class that exists in your stylesheets or Tailwind configuration.
 
 ## Features
 
 - 📝 **CSS/SCSS Validation** - Parses your CSS and SCSS files to extract valid class names
 - 🎨 **Tailwind CSS Support** - Validates Tailwind utilities, variants, arbitrary values, and plugin-generated classes
+- 🌐 **HTML File Support** - Validates `class` attributes in HTML files (requires `@angular-eslint/template-parser`)
 - 🔀 **Dynamic Expression Support** - Validates class names in ternaries, logical operators, and utility functions (cns/clsx/classnames)
 - 🎯 **Object-Style Attributes** - Validates component library patterns like `classes={{ root: 'mt-2' }}` (Material-UI, Chakra UI, etc.)
 - 🔇 **Ignore Patterns** - Skip validation for dynamic or generated class names
@@ -76,6 +77,96 @@ export default [
   }
 }
 ```
+
+## HTML File Support
+
+This plugin also supports validating `class` attributes in HTML files using the `@angular-eslint/template-parser`.
+
+### Setup
+
+1. Install the HTML parser:
+
+```bash
+pnpm add --save-dev @angular-eslint/template-parser
+```
+
+2. Configure ESLint to use the Angular template parser for HTML files:
+
+**ESLint 9+ (Flat Config)**
+
+```javascript
+// eslint.config.js
+import validClassName from 'eslint-plugin-valid-class-name'
+import * as angularParser from '@angular-eslint/template-parser'
+
+export default [
+  // JSX/TSX files (existing config)
+  {
+    files: ['**/*.jsx', '**/*.tsx'],
+    languageOptions: {
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
+    },
+    plugins: { 'valid-class-name': validClassName },
+    rules: {
+      'valid-class-name/valid-class-name': [
+        'error',
+        {
+          sources: {
+            css: ['src/**/*.css'],
+            tailwind: true,
+          },
+        },
+      ],
+    },
+  },
+  // HTML files (new)
+  {
+    files: ['**/*.html'],
+    languageOptions: {
+      parser: angularParser,
+    },
+    plugins: { 'valid-class-name': validClassName },
+    rules: {
+      'valid-class-name/valid-class-name': [
+        'error',
+        {
+          sources: {
+            css: ['src/**/*.css'],
+            tailwind: true,
+          },
+        },
+      ],
+    },
+  },
+]
+```
+
+### How It Works
+
+- The plugin validates `class` attributes in HTML elements (e.g., `<div class="mt-2">`)
+- Uses the same validation rules as JSX `className` attributes
+- Supports all configuration options (CSS files, Tailwind, ignore patterns, etc.)
+
+### Example
+
+```html
+<!-- Valid HTML -->
+<div class="mt-2 p-4 flex"></div>
+<section class="container">
+  <h1 class="text-2xl font-bold">Title</h1>
+</section>
+
+<!-- Invalid HTML (if classes don't exist) -->
+<div class="invalid-class"></div>
+```
+
+### Notes
+
+- The `@angular-eslint/template-parser` works with plain HTML files, not just Angular templates
+- HTML `class` attributes only support string literals (no dynamic expressions)
+- All validation features (Tailwind variants, arbitrary values, ignore patterns) work with HTML
 
 ## Configuration
 

@@ -30,6 +30,9 @@ importers:
         specifier: ^3.4.0
         version: 3.4.18
     devDependencies:
+      '@angular-eslint/template-parser':
+        specifier: ^20.4.0
+        version: 20.4.0(eslint@9.38.0(jiti@1.21.7))(typescript@5.9.3)
       '@eslint/js':
         specifier: ^9.38.0
         version: 9.38.0
@@ -99,6 +102,15 @@ packages:
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
+
+  '@angular-eslint/bundled-angular-compiler@20.4.0':
+    resolution: {integrity: sha512-u3I/yABCm+lda/AdnLKJnjdQp1i4BACgEKY9D6eKIgijcRtlvUc6Jq+43e1oPZLj+3DdrlABNcB8HsA/+RzikA==}
+
+  '@angular-eslint/template-parser@20.4.0':
+    resolution: {integrity: sha512-5Vyo/VJ1DrIsAkudFpZj1f7CpCLYuiTzTQksHTiZE18iYsLKRkEC7y9S6+TiHrdD96rhNxL28Pz9FDU4lIBjkw==}
+    peerDependencies:
+      eslint: ^8.57.0 || ^9.0.0
+      typescript: '*'
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -3028,6 +3040,15 @@ packages:
 snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
+
+  '@angular-eslint/bundled-angular-compiler@20.4.0': {}
+
+  '@angular-eslint/template-parser@20.4.0(eslint@9.38.0(jiti@1.21.7))(typescript@5.9.3)':
+    dependencies:
+      '@angular-eslint/bundled-angular-compiler': 20.4.0
+      eslint: 9.38.0(jiti@1.21.7)
+      eslint-scope: 8.4.0
+      typescript: 5.9.3
 
   '@babel/code-frame@7.27.1':
     dependencies:

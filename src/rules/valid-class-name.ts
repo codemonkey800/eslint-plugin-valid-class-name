@@ -1,16 +1,15 @@
 import type { Rule } from 'eslint'
+import { getClassRegistry } from 'src/registry/class-registry'
+import type { RuleOptions } from 'src/types/options'
 
-import { getClassRegistry } from '../registry/class-registry'
-import type { RuleOptions } from '../types/options'
-import { parseClassName } from '../utils/tailwind-variants'
 import { isObjectExpression } from './ast-guards'
-import type { JSXAttribute } from './ast-types'
+import type { JSXAttribute, TextAttribute } from './ast-types'
 import {
   extractClassNamesFromString,
   extractClassStringsFromExpression,
   extractClassStringsFromObjectValues,
 } from './class-extractors'
-import { isClassNameIgnored } from './validation-helpers'
+import { validateClassNames } from './validation-helpers'
 
 export const validClassNameRule: Rule.RuleModule = {
   meta: {
@@ -174,98 +173,42 @@ export const validClassNameRule: Rule.RuleModule = {
         // (e.g., className={condition ? "mt-2 flex" : "mt-2 grid"})
         const uniqueClassNames = new Set(allClassNames)
 
-        // Validate each unique class name
-        for (const className of uniqueClassNames) {
-          // Parse className to extract base utility and variants
-          const { variants, base } = parseClassName(className)
+        // Validate each unique class name using the shared utility
+        validateClassNames({
+          classNames: uniqueClassNames,
+          node,
+          context,
+          classRegistry,
+          ignorePatterns,
+        })
+      },
 
-          // Skip if the BASE matches an ignore pattern (not full className)
-          // This check happens first to allow users to ignore any pattern they want
-          if (isClassNameIgnored(base, ignorePatterns)) {
-            continue
-          }
-
-          // Check for empty arbitrary values (e.g., w-[], bg-[])
-          // These should always be invalid (unless explicitly ignored above)
-          if (/^[\w-]+-\[\]$/.test(base)) {
-            context.report({
-              node,
-              messageId: 'invalidClassName',
-              data: {
-                className: base,
-              },
-            })
-            continue
-          }
-
-          // If className has variants, validate the full className with variants
-          if (variants.length > 0) {
-            // First check if base is valid (Tailwind or CSS)
-            const isBaseValid = classRegistry.isValid(base)
-
-            if (!isBaseValid) {
-              // Base itself is invalid
-              context.report({
-                node,
-                messageId: 'invalidClassName',
-                data: {
-                  className: base,
-                },
-              })
-              continue
-            }
-
-            // Base is valid - determine if it's CSS or Tailwind
-            const isCssClass = classRegistry.isCssClass(base)
-
-            if (isCssClass) {
-              // It's a pure CSS class - cannot be used with Tailwind variants
-              context.report({
-                node,
-                messageId: 'invalidClassName',
-                data: {
-                  className: base,
-                },
-              })
-            } else {
-              // Base is Tailwind
-              const isTailwindOnly = classRegistry.isTailwindOnly(base)
-
-              if (isTailwindOnly) {
-                // Base is a pure Tailwind class, validate the full className with variants
-                const isValidWithVariants = classRegistry.isValid(className)
-
-                if (!isValidWithVariants) {
-                  // Full className is not valid - variant is invalid
-                  for (const variant of variants) {
-                    context.report({
-                      node,
-                      messageId: 'invalidVariant',
-                      data: {
-                        variant,
-                        className,
-                      },
-                    })
-                    break // Only report the first invalid variant
-                  }
-                }
-              }
-            }
-          } else {
-            // No variants - validate base utility against all sources
-            const isValidBase = classRegistry.isValid(base)
-
-            if (!isValidBase) {
-              context.report({
-                node,
-                messageId: 'invalidClassName',
-                data: {
-                  className: base,
-                },
-              })
-            }
-          }
+      TextAttribute(node: TextAttribute) {
+        // Only validate class attributes in HTML
+        if (node.name !== 'class') {
+          return
         }
+
+        // For HTML, the value is directly a string
+        const classString = node.value
+
+        // If empty string, skip validation
+        if (classString === '') {
+          return
+        }
+
+        // Extract individual class names from the string
+        const classNames = extractClassNamesFromString(classString)
+        const uniqueClassNames = new Set(classNames)
+
+        // Validate each unique class name using the shared utility
+        validateClassNames({
+          classNames: uniqueClassNames,
+          node,
+          context,
+          classRegistry,
+          ignorePatterns,
+        })
       },
     }
   },

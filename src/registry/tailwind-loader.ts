@@ -46,7 +46,7 @@ const validateClassNameWorker = createSyncFn<
     cwd: string
     isV4: boolean
   }) => boolean
->(new URL('./tailwind-worker.js', import.meta.url).pathname)
+>(new URL('./registry/tailwind-worker.js', import.meta.url).pathname)
 
 /**
  * Creates a Tailwind validator using tailwind-api-utils

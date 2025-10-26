@@ -4,7 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an ESLint plugin that validates CSS class names in JSX/TSX files against actual CSS/SCSS files and Tailwind configuration. The plugin reports errors when class names are used that don't exist in any of the configured sources.
+This is an ESLint plugin that validates CSS class names in JSX/TSX and HTML files against actual CSS/SCSS files and Tailwind configuration. The plugin reports errors when class names are used that don't exist in any of the configured sources.
+
+### Supported File Types
+
+- **JSX/TSX**: Validates `className` attributes in React/JSX components
+- **HTML**: Validates `class` attributes in HTML files (requires `@angular-eslint/template-parser`)
 
 ## Development Commands
 
@@ -48,13 +53,17 @@ When modifying files, run linters only for changed files to save time.
 
 **1. Rule Implementation** ([src/rules/valid-class-name.ts](src/rules/valid-class-name.ts))
 
-- Main ESLint rule that validates className attributes in JSX
+- Main ESLint rule that validates class attributes in both JSX and HTML
+- **JSX Support**: Validates `className` attributes via `JSXAttribute` visitor
+- **HTML Support**: Validates `class` attributes via `TextAttribute` visitor (Angular template parser)
 - Integrates with the class registry for validation
 - Supports ignore patterns with glob-style wildcards
 - Delegates to specialized helper modules for AST parsing and class extraction
 
 **Rule Helper Modules**:
-- **AST Types** ([src/rules/ast-types.ts](src/rules/ast-types.ts)) - Type definitions for JSX AST nodes
+- **AST Types** ([src/rules/ast-types.ts](src/rules/ast-types.ts)) - Type definitions for JSX and HTML AST nodes
+  - JSX types: `JSXAttribute`, `JSXExpressionContainer`, etc.
+  - HTML types: `TextAttribute` (from `@angular-eslint/template-parser`)
 - **AST Guards** ([src/rules/ast-guards.ts](src/rules/ast-guards.ts)) - Type guard functions for runtime type checking
 - **Class Extractors** ([src/rules/class-extractors.ts](src/rules/class-extractors.ts)) - Functions to extract class names from various expression types (literals, ternaries, function calls, arrays, objects)
 - **Validation Helpers** ([src/rules/validation-helpers.ts](src/rules/validation-helpers.ts)) - Utility functions for pattern matching and validation
@@ -190,5 +199,7 @@ src/
 - **Tailwind CSS v3**: Synchronous initialization in main thread
 - **Tailwind CSS v4**: Async initialization via synckit worker threads (transparent to ESLint)
 - Uses `synckit` to bridge ESLint's synchronous constraint with Tailwind v4's async requirements
-- The rule currently only validates static string literals in className attributes
-- Dynamic class names (template literals, variables, etc.) are skipped
+- **JSX/TSX**: Validates `className` attributes; supports complex expressions (ternaries, function calls, etc.)
+- **HTML**: Validates `class` attributes; only supports string literals (no dynamic expressions)
+- Dynamic class names (template literals, variables, etc.) are skipped in JSX
+- **HTML Parser**: Requires `@angular-eslint/template-parser` as an optional peer dependency

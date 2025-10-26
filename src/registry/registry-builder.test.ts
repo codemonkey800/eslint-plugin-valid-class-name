@@ -537,6 +537,65 @@ describe('buildClassRegistry', () => {
     })
   })
 
+  describe('TAILWIND_SPECIAL_CLASSES', () => {
+    it('should validate "group" class via isValid', () => {
+      const mockTailwind = asTailwindUtils(new MockTailwindUtils([]))
+
+      const registry = buildClassRegistry([], mockTailwind, tempDir.path)
+
+      expect(registry.isValid('group')).toBe(true)
+    })
+
+    it('should validate "peer" class via isValid', () => {
+      const mockTailwind = asTailwindUtils(new MockTailwindUtils([]))
+
+      const registry = buildClassRegistry([], mockTailwind, tempDir.path)
+
+      expect(registry.isValid('peer')).toBe(true)
+    })
+
+    it('should return true for "group" in isTailwindClass', () => {
+      const mockTailwind = asTailwindUtils(new MockTailwindUtils([]))
+
+      const registry = buildClassRegistry([], mockTailwind, tempDir.path)
+
+      expect(registry.isTailwindClass('group')).toBe(true)
+    })
+
+    it('should return true for "peer" in isTailwindClass', () => {
+      const mockTailwind = asTailwindUtils(new MockTailwindUtils([]))
+
+      const registry = buildClassRegistry([], mockTailwind, tempDir.path)
+
+      expect(registry.isTailwindClass('peer')).toBe(true)
+    })
+
+    it('should return true for "group" in isTailwindOnly', () => {
+      const mockTailwind = asTailwindUtils(new MockTailwindUtils([]))
+
+      const registry = buildClassRegistry([], mockTailwind, tempDir.path)
+
+      expect(registry.isTailwindOnly('group')).toBe(true)
+    })
+
+    it('should return true for "peer" in isTailwindOnly', () => {
+      const mockTailwind = asTailwindUtils(new MockTailwindUtils([]))
+
+      const registry = buildClassRegistry([], mockTailwind, tempDir.path)
+
+      expect(registry.isTailwindOnly('peer')).toBe(true)
+    })
+
+    it('should not return special classes when no Tailwind provided', () => {
+      const registry = buildClassRegistry([], null, tempDir.path)
+
+      expect(registry.isValid('group')).toBe(false)
+      expect(registry.isValid('peer')).toBe(false)
+      expect(registry.isTailwindClass('group')).toBe(false)
+      expect(registry.isTailwindOnly('group')).toBe(false)
+    })
+  })
+
   describe('edge cases', () => {
     it('should handle empty inputs', () => {
       const registry = buildClassRegistry([], null, tempDir.path)

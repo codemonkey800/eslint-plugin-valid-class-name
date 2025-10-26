@@ -6,9 +6,11 @@ import {
   it,
   jest,
 } from '@jest/globals'
+import fg from 'fast-glob'
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
+import { logger } from 'src/utils/logger'
 
 import {
   clearFileResolverCache,
@@ -530,6 +532,65 @@ describe('file-resolver', () => {
         // Should not throw and should return an array (may be empty)
         expect(Array.isArray(files)).toBe(true)
         expect(files.length).toBeGreaterThanOrEqual(0)
+      })
+    })
+
+    describe('error handling and logging', () => {
+      it('should log warning when file stat fails', () => {
+        const cssFile = path.join(tempDir, 'test.css')
+        fs.writeFileSync(cssFile, '.btn {}')
+
+        const loggerSpy = jest.spyOn(logger, 'warn').mockImplementation()
+
+        // Mock statSync to throw error for this specific file
+        const originalStatSync = fs.statSync
+        jest.spyOn(fs, 'statSync').mockImplementation((filePath, ...args) => {
+          if (filePath === cssFile) {
+            throw new Error('Permission denied')
+          }
+          return originalStatSync(filePath, ...args)
+        })
+
+        // Clear cache to force resolution
+        clearFileResolverCache()
+
+        const files = getCachedOrResolveFiles([`${tempDir}/*.css`], tempDir)
+
+        // File should be skipped due to stat error
+        expect(files).toHaveLength(0)
+        // Logger should be called with warning
+        expect(loggerSpy).toHaveBeenCalledWith(
+          `Failed to stat file "${cssFile}"`,
+          expect.any(Error),
+        )
+
+        loggerSpy.mockRestore()
+        jest.spyOn(fs, 'statSync').mockRestore()
+      })
+
+      it('should log warning when glob operation fails', () => {
+        const loggerSpy = jest.spyOn(logger, 'warn').mockImplementation()
+
+        // Mock fg.sync to throw error
+        jest.spyOn(fg, 'sync').mockImplementation(() => {
+          throw new Error('Glob error')
+        })
+
+        // Clear cache to force resolution
+        clearFileResolverCache()
+
+        const files = getCachedOrResolveFiles([`${tempDir}/*.css`], tempDir)
+
+        // Should return empty array on error
+        expect(files).toHaveLength(0)
+        // Logger should be called with warning
+        expect(loggerSpy).toHaveBeenCalledWith(
+          'Failed to find CSS files',
+          expect.any(Error),
+        )
+
+        loggerSpy.mockRestore()
+        jest.spyOn(fg, 'sync').mockRestore()
       })
     })
   })

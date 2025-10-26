@@ -3,7 +3,11 @@ import fs from 'fs'
 import path from 'path'
 
 import { useTempDir } from '../test'
-import { findTailwindConfigPath } from './tailwind-parser'
+import {
+  findTailwindConfigPath,
+  findTailwindCSSConfig,
+  isTailwindCSSFile,
+} from './tailwind-parser'
 
 describe('findTailwindConfigPath', () => {
   const tempDir = useTempDir('tailwind-parser-test')
@@ -235,6 +239,248 @@ describe('findTailwindConfigPath', () => {
 
       // Should find .js first due to priority
       expect(result).toBe(jsConfig)
+    })
+  })
+})
+
+describe('isTailwindCSSFile', () => {
+  const tempDir = useTempDir('tailwind-css-file-test')
+
+  describe('Tailwind CSS v4 detection', () => {
+    it('should detect @import "tailwindcss" with double quotes', () => {
+      const cssFile = tempDir.createFile(
+        'app.css',
+        '@import "tailwindcss";\n.custom { color: red; }',
+      )
+
+      const result = isTailwindCSSFile(cssFile)
+
+      expect(result).toBe(true)
+    })
+
+    it("should detect @import 'tailwindcss' with single quotes", () => {
+      const cssFile = tempDir.createFile(
+        'app.css',
+        "@import 'tailwindcss';\n.custom { color: red; }",
+      )
+
+      const result = isTailwindCSSFile(cssFile)
+
+      expect(result).toBe(true)
+    })
+
+    it('should detect import within first 1000 characters', () => {
+      const cssFile = tempDir.createFile(
+        'app.css',
+        '/* Comment */\n\n@import "tailwindcss";\n\n.class { color: blue; }',
+      )
+
+      const result = isTailwindCSSFile(cssFile)
+
+      expect(result).toBe(true)
+    })
+
+    it('should return false for files without Tailwind import', () => {
+      const cssFile = tempDir.createFile(
+        'regular.css',
+        '.btn { color: red; }\n.card { padding: 10px; }',
+      )
+
+      const result = isTailwindCSSFile(cssFile)
+
+      expect(result).toBe(false)
+    })
+
+    it('should return false for files with similar but incorrect imports', () => {
+      const cssFile = tempDir.createFile(
+        'app.css',
+        '@import "tailwind-css";\n@import url("tailwindcss");',
+      )
+
+      const result = isTailwindCSSFile(cssFile)
+
+      expect(result).toBe(false)
+    })
+  })
+
+  describe('Error handling', () => {
+    it('should handle file read errors gracefully', () => {
+      const nonExistentFile = tempDir.resolve('nonexistent.css')
+
+      const result = isTailwindCSSFile(nonExistentFile)
+
+      expect(result).toBe(false)
+    })
+
+    it('should handle files that cannot be opened', () => {
+      // This test might be skipped on Windows where permissions work differently
+      if (process.platform === 'win32') {
+        return
+      }
+
+      const cssFile = tempDir.createFile(
+        'restricted.css',
+        '@import "tailwindcss";',
+      )
+
+      // Remove read permissions
+      fs.chmodSync(cssFile, 0o000)
+
+      try {
+        const result = isTailwindCSSFile(cssFile)
+
+        // Should return false when file can't be read
+        expect(result).toBe(false)
+      } finally {
+        // Restore permissions for cleanup
+        fs.chmodSync(cssFile, 0o644)
+      }
+    })
+  })
+
+  describe('Edge cases', () => {
+    it('should handle empty files', () => {
+      const cssFile = tempDir.createFile('empty.css', '')
+
+      const result = isTailwindCSSFile(cssFile)
+
+      expect(result).toBe(false)
+    })
+
+    it('should handle very large files by only reading first 1000 bytes', () => {
+      // Create a file larger than 1000 bytes with import at the end
+      const largeContent =
+        '/* ' + 'x'.repeat(1100) + ' */\n@import "tailwindcss";'
+      const cssFile = tempDir.createFile('large.css', largeContent)
+
+      const result = isTailwindCSSFile(cssFile)
+
+      // Should return false because import is after first 1000 bytes
+      expect(result).toBe(false)
+    })
+
+    it('should handle files with import within first 1000 bytes', () => {
+      // Create a file with import early, then lots of content
+      const content =
+        '@import "tailwindcss";\n' + '/* ' + 'x'.repeat(2000) + ' */'
+      const cssFile = tempDir.createFile('early-import.css', content)
+
+      const result = isTailwindCSSFile(cssFile)
+
+      // Should return true because import is within first 1000 bytes
+      expect(result).toBe(true)
+    })
+  })
+})
+
+describe('findTailwindCSSConfig', () => {
+  const tempDir = useTempDir('tailwind-css-config-test')
+
+  describe('CSS config detection', () => {
+    it('should find src/styles/tailwind.css with Tailwind import', () => {
+      const srcDir = tempDir.createDir('src')
+      const stylesDir = path.join(srcDir, 'styles')
+      fs.mkdirSync(stylesDir)
+
+      const cssFile = tempDir.createFile(
+        'src/styles/tailwind.css',
+        '@import "tailwindcss";',
+      )
+
+      const result = findTailwindCSSConfig(tempDir.path)
+
+      expect(result).toBe(cssFile)
+    })
+
+    it('should find src/app.css with Tailwind import', () => {
+      const srcDir = tempDir.createDir('src')
+      const cssFile = path.join(srcDir, 'app.css')
+      fs.writeFileSync(cssFile, '@import "tailwindcss";')
+
+      const result = findTailwindCSSConfig(tempDir.path)
+
+      expect(result).toBe(cssFile)
+    })
+
+    it('should find src/index.css with Tailwind import', () => {
+      const srcDir = tempDir.createDir('src')
+      const cssFile = path.join(srcDir, 'index.css')
+      fs.writeFileSync(cssFile, '@import "tailwindcss";')
+
+      const result = findTailwindCSSConfig(tempDir.path)
+
+      expect(result).toBe(cssFile)
+    })
+
+    it('should find src/main.css with Tailwind import', () => {
+      const srcDir = tempDir.createDir('src')
+      const cssFile = path.join(srcDir, 'main.css')
+      fs.writeFileSync(cssFile, '@import "tailwindcss";')
+
+      const result = findTailwindCSSConfig(tempDir.path)
+
+      expect(result).toBe(cssFile)
+    })
+
+    it('should find tailwind.css in root with Tailwind import', () => {
+      const cssFile = tempDir.createFile(
+        'tailwind.css',
+        '@import "tailwindcss";',
+      )
+
+      const result = findTailwindCSSConfig(tempDir.path)
+
+      expect(result).toBe(cssFile)
+    })
+
+    it('should return null when no CSS config found', () => {
+      const result = findTailwindCSSConfig(tempDir.path)
+
+      expect(result).toBeNull()
+    })
+
+    it('should return null when CSS files exist but lack Tailwind import', () => {
+      const srcDir = tempDir.createDir('src')
+      fs.writeFileSync(path.join(srcDir, 'app.css'), '.custom { color: red; }')
+
+      const result = findTailwindCSSConfig(tempDir.path)
+
+      expect(result).toBeNull()
+    })
+  })
+
+  describe('Priority order', () => {
+    it('should prioritize src/styles/tailwind.css over other paths', () => {
+      const srcDir = tempDir.createDir('src')
+      const stylesDir = path.join(srcDir, 'styles')
+      fs.mkdirSync(stylesDir)
+
+      // Create multiple CSS configs
+      const priorityFile = tempDir.createFile(
+        'src/styles/tailwind.css',
+        '@import "tailwindcss";',
+      )
+      tempDir.createFile('src/app.css', '@import "tailwindcss";')
+      tempDir.createFile('tailwind.css', '@import "tailwindcss";')
+
+      const result = findTailwindCSSConfig(tempDir.path)
+
+      // Should find the first one in priority order
+      expect(result).toBe(priorityFile)
+    })
+
+    it('should check paths in order and return first match', () => {
+      const srcDir = tempDir.createDir('src')
+
+      // Create only the second priority file
+      const appCss = path.join(srcDir, 'app.css')
+      fs.writeFileSync(appCss, '@import "tailwindcss";')
+      tempDir.createFile('tailwind.css', '@import "tailwindcss";')
+
+      const result = findTailwindCSSConfig(tempDir.path)
+
+      // Should find src/app.css before tailwind.css
+      expect(result).toBe(appCss)
     })
   })
 })

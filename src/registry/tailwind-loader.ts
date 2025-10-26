@@ -86,9 +86,7 @@ export function createTailwindValidator(
             content.includes('@import "tailwindcss"')
         }
       } else {
-        logger.warn(
-          `Tailwind config file not found at "${explicitConfigPath}"`,
-        )
+        logger.warn(`Tailwind config file not found at "${explicitConfigPath}"`)
         return null
       }
     } else {

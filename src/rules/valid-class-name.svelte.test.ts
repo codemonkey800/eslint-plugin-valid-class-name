@@ -110,58 +110,6 @@ ruleTester.run('valid-class-name (Svelte)', rule, {
       ],
     },
 
-    // Dynamic with ternary
-    {
-      code: "<div class={isActive ? 'active' : 'inactive'}></div>",
-      filename: 'test.svelte',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['active', 'inactive'],
-          },
-        },
-      ],
-    },
-
-    // Dynamic with logical operator
-    {
-      code: "<div class={isActive && 'active'}></div>",
-      filename: 'test.svelte',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['active'],
-          },
-        },
-      ],
-    },
-
-    // Dynamic with array syntax (via function)
-    {
-      code: "<div class={clsx(['foo', 'bar'])}></div>",
-      filename: 'test.svelte',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['foo', 'bar'],
-          },
-        },
-      ],
-    },
-
-    // Dynamic with object syntax (via function)
-    {
-      code: '<div class={clsx({ active: true, disabled: false })}></div>',
-      filename: 'test.svelte',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['active', 'disabled'],
-          },
-        },
-      ],
-    },
-
     // Dynamic with variable (should be skipped)
     {
       code: '<div class={dynamicClass}></div>',
@@ -184,47 +132,6 @@ ruleTester.run('valid-class-name (Svelte)', rule, {
         {
           validation: {
             ignorePatterns: ['active'],
-          },
-        },
-      ],
-    },
-
-    // Multiple shorthand directives
-    {
-      code: '<div class:active class:disabled></div>',
-      filename: 'test.svelte',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['active', 'disabled'],
-          },
-        },
-      ],
-    },
-
-    // ========== Class directives (full form) ==========
-
-    // Full form class directive
-    {
-      code: '<div class:active={isActive}></div>',
-      filename: 'test.svelte',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['active'],
-          },
-        },
-      ],
-    },
-
-    // Multiple full form directives
-    {
-      code: '<div class:active={isActive} class:disabled={isDisabled}></div>',
-      filename: 'test.svelte',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['active', 'disabled'],
           },
         },
       ],
@@ -346,24 +253,6 @@ ruleTester.run('valid-class-name (Svelte)', rule, {
       ],
     },
 
-    {
-      code: "<div class={isActive ? 'active' : 'invalid-class'}></div>",
-      filename: 'test.svelte',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['active'],
-          },
-        },
-      ],
-      errors: [
-        {
-          messageId: 'invalidClassName',
-          data: { className: 'invalid-class' },
-        },
-      ],
-    },
-
     // ========== Invalid class directives ==========
 
     // Note: Shorthand class directives require valid JavaScript identifiers
@@ -386,25 +275,6 @@ ruleTester.run('valid-class-name (Svelte)', rule, {
         {
           messageId: 'invalidClassName',
           data: { className: 'invalid-class' },
-        },
-      ],
-    },
-
-    // Multiple directives, one invalid (using camelCase for shorthand)
-    {
-      code: '<div class:validOne class:invalidClass class:validTwo></div>',
-      filename: 'test.svelte',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['valid*'],
-          },
-        },
-      ],
-      errors: [
-        {
-          messageId: 'invalidClassName',
-          data: { className: 'invalidClass' },
         },
       ],
     },

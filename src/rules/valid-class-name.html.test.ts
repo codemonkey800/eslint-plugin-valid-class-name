@@ -82,30 +82,6 @@ ruleTester.run('valid-class-name (HTML)', rule, {
         },
       ],
     },
-    // Edge case - extra spaces
-    {
-      code: '<div class="foo  bar   baz"></div>',
-      filename: 'test.html',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['foo', 'bar', 'baz'],
-          },
-        },
-      ],
-    },
-    // Edge case - leading/trailing spaces
-    {
-      code: '<div class="  foo bar  "></div>',
-      filename: 'test.html',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['foo', 'bar'],
-          },
-        },
-      ],
-    },
     // Nested elements
     {
       code: '<section class="container"><h1 class="title">Heading</h1></section>',

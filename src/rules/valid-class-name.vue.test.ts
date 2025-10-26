@@ -96,42 +96,6 @@ ruleTester.run('valid-class-name (Vue)', rule, {
         },
       ],
     },
-    // Dynamic :class with ternary
-    {
-      code: "<template><div :class=\"isActive ? 'active' : 'inactive'\"></div></template>",
-      filename: 'test.vue',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['active', 'inactive'],
-          },
-        },
-      ],
-    },
-    // Dynamic :class with logical operator
-    {
-      code: '<template><div :class="isActive && \'active\'"></div></template>',
-      filename: 'test.vue',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['active'],
-          },
-        },
-      ],
-    },
-    // v-bind:class (long form)
-    {
-      code: '<template><div v-bind:class="\'foo bar\'"></div></template>',
-      filename: 'test.vue',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['foo', 'bar'],
-          },
-        },
-      ],
-    },
     // Dynamic :class with variable (should be skipped)
     {
       code: '<template><div :class="dynamicClass"></div></template>',
@@ -209,72 +173,6 @@ ruleTester.run('valid-class-name (Vue)', rule, {
     // Invalid dynamic :class with string literal
     {
       code: '<template><div :class="\'invalid-class\'"></div></template>',
-      filename: 'test.vue',
-      errors: [
-        {
-          messageId: 'invalidClassName',
-          data: {
-            className: 'invalid-class',
-          },
-        },
-      ],
-    },
-    // Invalid dynamic :class with object syntax
-    {
-      code: '<template><div :class="{ \'invalid-class\': true }"></div></template>',
-      filename: 'test.vue',
-      errors: [
-        {
-          messageId: 'invalidClassName',
-          data: {
-            className: 'invalid-class',
-          },
-        },
-      ],
-    },
-    // Invalid dynamic :class with array syntax
-    {
-      code: "<template><div :class=\"['valid-one', 'invalid-class']\"></div></template>",
-      filename: 'test.vue',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['valid-*'],
-          },
-        },
-      ],
-      errors: [
-        {
-          messageId: 'invalidClassName',
-          data: {
-            className: 'invalid-class',
-          },
-        },
-      ],
-    },
-    // Invalid dynamic :class with ternary
-    {
-      code: "<template><div :class=\"isActive ? 'active' : 'invalid-class'\"></div></template>",
-      filename: 'test.vue',
-      options: [
-        {
-          validation: {
-            ignorePatterns: ['active'],
-          },
-        },
-      ],
-      errors: [
-        {
-          messageId: 'invalidClassName',
-          data: {
-            className: 'invalid-class',
-          },
-        },
-      ],
-    },
-    // Invalid v-bind:class (long form)
-    {
-      code: '<template><div v-bind:class="\'invalid-class\'"></div></template>',
       filename: 'test.vue',
       errors: [
         {

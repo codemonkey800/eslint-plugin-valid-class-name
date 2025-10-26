@@ -2,6 +2,8 @@
  * Type definitions for JSX and HTML AST nodes used in ESLint rule validation
  */
 
+import type { Rule } from 'eslint'
+
 export interface JSXIdentifier {
   type: 'JSXIdentifier'
   name: string
@@ -281,5 +283,32 @@ export interface SvelteDirective {
       line: number
       column: number
     }
+  }
+}
+
+/**
+ * Vue parser types from vue-eslint-parser
+ * Used for working with Vue SFC templates
+ */
+
+/**
+ * Interface for Vue parser services from vue-eslint-parser
+ * Used to visit both template and script sections in Vue SFCs
+ */
+export interface VueParserServices {
+  defineTemplateBodyVisitor: (
+    templateVisitor: Record<string, (node: VAttribute) => void>,
+    scriptVisitor?: Record<string, (node: JSXAttribute) => void>,
+  ) => Record<string, (node: VAttribute | JSXAttribute) => void>
+}
+
+/**
+ * Extended RuleContext that may include Vue parser services
+ * Uses intersection type to add Vue-specific properties without conflicting with base type
+ */
+export type RuleContextWithVueParser = Rule.RuleContext & {
+  parserServices?: VueParserServices
+  sourceCode?: Rule.RuleContext['sourceCode'] & {
+    parserServices?: VueParserServices
   }
 }

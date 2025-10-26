@@ -44,7 +44,7 @@ describe('createJSXVisitor', () => {
           !cssClasses.has(className) && validClasses.has(className),
       ),
       getAllClasses: jest.fn(() => validClasses),
-      getValidVariants: jest.fn(() => new Set()),
+      getValidVariants: jest.fn(() => new Set<string>()),
     }
   }
 
@@ -634,7 +634,7 @@ describe('createJSXVisitor', () => {
         objectStyleAttributes: [],
       })
 
-      const node = createJSXAttributeNode('className', undefined)
+      const node = createJSXAttributeNode('className', null)
       visitor(node)
 
       // Should not crash or validate

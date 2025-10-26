@@ -541,7 +541,7 @@ describe('file-resolver', () => {
         const cssFile = path.join(tempDir, 'test.css')
         fs.writeFileSync(cssFile, '.btn {}')
 
-        const loggerSpy = jest.spyOn(logger, 'warn').mockImplementation()
+        const loggerSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {})
 
         // Mock statSync to throw error for this specific file
         const originalStatSync = fs.statSync
@@ -570,7 +570,7 @@ describe('file-resolver', () => {
       })
 
       it('should log warning when glob operation fails', () => {
-        const loggerSpy = jest.spyOn(logger, 'warn').mockImplementation()
+        const loggerSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {})
 
         // Mock fg.sync to throw error
         jest.spyOn(fg, 'sync').mockImplementation(() => {

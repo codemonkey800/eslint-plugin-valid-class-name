@@ -39,7 +39,7 @@ describe('createHTMLVisitor', () => {
           !cssClasses.has(className) && validClasses.has(className),
       ),
       getAllClasses: jest.fn(() => validClasses),
-      getValidVariants: jest.fn(() => new Set()),
+      getValidVariants: jest.fn(() => new Set<string>()),
     }
   }
 
@@ -51,6 +51,10 @@ describe('createHTMLVisitor', () => {
       type: 'TextAttribute',
       name,
       value,
+      loc: {
+        start: { line: 1, column: 0 },
+        end: { line: 1, column: 0 },
+      },
     }
   }
 

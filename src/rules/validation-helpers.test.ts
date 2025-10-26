@@ -194,7 +194,7 @@ describe('validation-helpers', () => {
             !cssClasses.has(className) && validClasses.has(className),
         ),
         getAllClasses: jest.fn(() => validClasses),
-        getValidVariants: jest.fn(() => new Set()),
+        getValidVariants: jest.fn(() => new Set<string>()),
       }
     }
 

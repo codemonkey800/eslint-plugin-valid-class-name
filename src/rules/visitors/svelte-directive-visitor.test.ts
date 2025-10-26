@@ -44,7 +44,7 @@ describe('createSvelteDirectiveVisitor', () => {
           !cssClasses.has(className) && validClasses.has(className),
       ),
       getAllClasses: jest.fn(() => validClasses),
-      getValidVariants: jest.fn(() => new Set()),
+      getValidVariants: jest.fn(() => new Set<string>()),
     }
   }
 
@@ -66,6 +66,7 @@ describe('createSvelteDirectiveVisitor', () => {
     const key: SvelteDirectiveKey = {
       type: 'SvelteDirectiveKey',
       name: createSvelteName(className),
+      modifiers: [],
     }
 
     return {
@@ -74,6 +75,10 @@ describe('createSvelteDirectiveVisitor', () => {
       key,
       shorthand: true,
       expression: null,
+      loc: {
+        start: { line: 1, column: 0 },
+        end: { line: 1, column: 0 },
+      },
     }
   }
 
@@ -88,6 +93,7 @@ describe('createSvelteDirectiveVisitor', () => {
     const key: SvelteDirectiveKey = {
       type: 'SvelteDirectiveKey',
       name: createSvelteName(className),
+      modifiers: [],
     }
 
     return {
@@ -96,6 +102,10 @@ describe('createSvelteDirectiveVisitor', () => {
       key,
       shorthand: false,
       expression,
+      loc: {
+        start: { line: 1, column: 0 },
+        end: { line: 1, column: 0 },
+      },
     }
   }
 
@@ -132,14 +142,19 @@ describe('createSvelteDirectiveVisitor', () => {
       const key: SvelteDirectiveKey = {
         type: 'SvelteDirectiveKey',
         name: createSvelteName('myProp'),
+        modifiers: [],
       }
 
       const node: SvelteDirective = {
         type: 'SvelteDirective',
-        kind: 'Style', // Not a Class directive
+        kind: 'Binding', // Not a Class directive
         key,
         shorthand: false,
         expression: null,
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -148,7 +163,7 @@ describe('createSvelteDirectiveVisitor', () => {
       expect(classRegistry.isValid).not.toHaveBeenCalled()
     })
 
-    it('should skip Use directives', () => {
+    it('should skip Action directives', () => {
       const context = createMockContext()
       const classRegistry = createMockRegistry({
         validClasses: [],
@@ -162,14 +177,19 @@ describe('createSvelteDirectiveVisitor', () => {
       const key: SvelteDirectiveKey = {
         type: 'SvelteDirectiveKey',
         name: createSvelteName('action'),
+        modifiers: [],
       }
 
       const node: SvelteDirective = {
         type: 'SvelteDirective',
-        kind: 'Use',
+        kind: 'Action',
         key,
         shorthand: false,
         expression: null,
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -191,6 +211,7 @@ describe('createSvelteDirectiveVisitor', () => {
       const key: SvelteDirectiveKey = {
         type: 'SvelteDirectiveKey',
         name: createSvelteName('fade'),
+        modifiers: [],
       }
 
       const node: SvelteDirective = {
@@ -199,6 +220,10 @@ describe('createSvelteDirectiveVisitor', () => {
         key,
         shorthand: false,
         expression: null,
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)

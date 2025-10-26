@@ -45,7 +45,7 @@ describe('createSvelteVisitor', () => {
           !cssClasses.has(className) && validClasses.has(className),
       ),
       getAllClasses: jest.fn(() => validClasses),
-      getValidVariants: jest.fn(() => new Set()),
+      getValidVariants: jest.fn(() => new Set<string>()),
     }
   }
 
@@ -72,9 +72,7 @@ describe('createSvelteVisitor', () => {
   /**
    * Helper to create a SvelteLiteral
    */
-  function createSvelteLiteral(
-    value: string | number | boolean,
-  ): SvelteLiteral {
+  function createSvelteLiteral(value: string): SvelteLiteral {
     return {
       type: 'SvelteLiteral',
       value,
@@ -100,7 +98,12 @@ describe('createSvelteVisitor', () => {
     return {
       type: 'SvelteAttribute',
       key: createSvelteName('class'),
+      boolean: false,
       value: [createSvelteLiteral(classString)],
+      loc: {
+        start: { line: 1, column: 0 },
+        end: { line: 1, column: 0 },
+      },
     }
   }
 
@@ -113,7 +116,12 @@ describe('createSvelteVisitor', () => {
     return {
       type: 'SvelteAttribute',
       key: createSvelteName('class'),
+      boolean: false,
       value: [createSvelteMustacheTag(expression)],
+      loc: {
+        start: { line: 1, column: 0 },
+        end: { line: 1, column: 0 },
+      },
     }
   }
 
@@ -127,10 +135,15 @@ describe('createSvelteVisitor', () => {
     return {
       type: 'SvelteAttribute',
       key: createSvelteName('class'),
+      boolean: false,
       value: [
         createSvelteLiteral(staticPart),
         createSvelteMustacheTag(dynamicExpression),
       ],
+      loc: {
+        start: { line: 1, column: 0 },
+        end: { line: 1, column: 0 },
+      },
     }
   }
 
@@ -167,7 +180,12 @@ describe('createSvelteVisitor', () => {
       const node: SvelteAttribute = {
         type: 'SvelteAttribute',
         key: createSvelteName('id'),
+        boolean: false,
         value: [createSvelteLiteral('my-id')],
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -228,7 +246,17 @@ describe('createSvelteVisitor', () => {
       const node: SvelteAttribute = {
         type: 'SvelteAttribute',
         key: createSvelteName('class'),
-        value: [createSvelteLiteral(42)],
+        boolean: false,
+        value: [
+          {
+            type: 'SvelteLiteral',
+            value: 42 as unknown as string,
+          },
+        ],
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -251,7 +279,17 @@ describe('createSvelteVisitor', () => {
       const node: SvelteAttribute = {
         type: 'SvelteAttribute',
         key: createSvelteName('class'),
-        value: [createSvelteLiteral(true)],
+        boolean: false,
+        value: [
+          {
+            type: 'SvelteLiteral',
+            value: true as unknown as string,
+          },
+        ],
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -371,7 +409,12 @@ describe('createSvelteVisitor', () => {
       const node: SvelteAttribute = {
         type: 'SvelteAttribute',
         key: createSvelteName('class'),
+        boolean: false,
         value: [createSvelteMustacheTag(null)],
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -438,12 +481,17 @@ describe('createSvelteVisitor', () => {
       const node: SvelteAttribute = {
         type: 'SvelteAttribute',
         key: createSvelteName('class'),
+        boolean: false,
         value: [
           createSvelteLiteral('btn '),
           createSvelteMustacheTag(createLiteral('primary')),
           createSvelteLiteral(' '),
           createSvelteMustacheTag(createLiteral('active')),
         ],
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -581,7 +629,12 @@ describe('createSvelteVisitor', () => {
       const node: SvelteAttribute = {
         type: 'SvelteAttribute',
         key: createSvelteName('class'),
-        value: null,
+        boolean: false,
+        value: [],
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -604,7 +657,12 @@ describe('createSvelteVisitor', () => {
       const node: SvelteAttribute = {
         type: 'SvelteAttribute',
         key: createSvelteName('class'),
+        boolean: false,
         value: [],
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -695,11 +753,16 @@ describe('createSvelteVisitor', () => {
       const node: SvelteAttribute = {
         type: 'SvelteAttribute',
         key: createSvelteName('class'),
+        boolean: false,
         value: [
           {
             type: 'UnknownType',
           } as unknown as SvelteLiteral,
         ],
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)

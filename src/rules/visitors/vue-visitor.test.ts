@@ -46,7 +46,7 @@ describe('createVueVisitor', () => {
           !cssClasses.has(className) && validClasses.has(className),
       ),
       getAllClasses: jest.fn(() => validClasses),
-      getValidVariants: jest.fn(() => new Set()),
+      getValidVariants: jest.fn(() => new Set<string>()),
     }
   }
 
@@ -67,6 +67,7 @@ describe('createVueVisitor', () => {
     const key: VIdentifier = {
       type: 'VIdentifier',
       name: 'class',
+      rawName: 'class',
     }
 
     const value: VLiteral = {
@@ -79,6 +80,10 @@ describe('createVueVisitor', () => {
       directive: false,
       key,
       value,
+      loc: {
+        start: { line: 1, column: 0 },
+        end: { line: 1, column: 0 },
+      },
     }
   }
 
@@ -91,17 +96,21 @@ describe('createVueVisitor', () => {
       name: {
         type: 'VIdentifier',
         name: 'bind',
+        rawName: 'bind',
       },
       argument: {
         type: 'VIdentifier',
         name: 'class',
+        rawName: 'class',
       },
+      modifiers: [],
     }
 
     const value: VExpressionContainer | null = expression
       ? {
           type: 'VExpressionContainer',
           expression,
+          references: [],
         }
       : null
 
@@ -110,6 +119,10 @@ describe('createVueVisitor', () => {
       directive: true,
       key,
       value,
+      loc: {
+        start: { line: 1, column: 0 },
+        end: { line: 1, column: 0 },
+      },
     }
   }
 
@@ -147,6 +160,7 @@ describe('createVueVisitor', () => {
       const key: VIdentifier = {
         type: 'VIdentifier',
         name: 'id',
+        rawName: 'id',
       }
 
       const value: VLiteral = {
@@ -159,6 +173,10 @@ describe('createVueVisitor', () => {
         directive: false,
         key,
         value,
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -198,6 +216,7 @@ describe('createVueVisitor', () => {
       const key: VIdentifier = {
         type: 'VIdentifier',
         name: 'class',
+        rawName: 'class',
       }
 
       const node: VAttribute = {
@@ -205,6 +224,10 @@ describe('createVueVisitor', () => {
         directive: false,
         key,
         value: null,
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -226,6 +249,7 @@ describe('createVueVisitor', () => {
       const key: VIdentifier = {
         type: 'VIdentifier',
         name: 'class',
+        rawName: 'class',
       }
 
       // Wrong type for static attribute
@@ -239,6 +263,10 @@ describe('createVueVisitor', () => {
         directive: false,
         key,
         value,
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -284,11 +312,14 @@ describe('createVueVisitor', () => {
         name: {
           type: 'VIdentifier',
           name: 'on', // v-on directive, not v-bind
+          rawName: 'on',
         },
         argument: {
           type: 'VIdentifier',
           name: 'click',
+          rawName: 'click',
         },
+        modifiers: [],
       }
 
       const node: VAttribute = {
@@ -296,6 +327,10 @@ describe('createVueVisitor', () => {
         directive: true,
         key,
         value: null,
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -319,16 +354,20 @@ describe('createVueVisitor', () => {
         name: {
           type: 'VIdentifier',
           name: 'bind',
+          rawName: 'bind',
         },
         argument: {
           type: 'VIdentifier',
           name: 'id', // Not 'class'
+          rawName: 'id',
         },
+        modifiers: [],
       }
 
       const value: VExpressionContainer = {
         type: 'VExpressionContainer',
         expression: createLiteral('my-id'),
+        references: [],
       }
 
       const node: VAttribute = {
@@ -336,6 +375,10 @@ describe('createVueVisitor', () => {
         directive: true,
         key,
         value,
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -378,16 +421,20 @@ describe('createVueVisitor', () => {
         name: {
           type: 'VIdentifier',
           name: 'bind',
+          rawName: 'bind',
         },
         argument: {
           type: 'VIdentifier',
           name: 'class',
+          rawName: 'class',
         },
+        modifiers: [],
       }
 
       const value: VExpressionContainer = {
         type: 'VExpressionContainer',
         expression: null,
+        references: [],
       }
 
       const node: VAttribute = {
@@ -395,6 +442,10 @@ describe('createVueVisitor', () => {
         directive: true,
         key,
         value,
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -680,8 +731,10 @@ describe('createVueVisitor', () => {
         name: {
           type: 'VIdentifier',
           name: 'bind',
+          rawName: 'bind',
         },
         argument: null, // No argument
+        modifiers: [],
       }
 
       const node: VAttribute = {
@@ -689,6 +742,10 @@ describe('createVueVisitor', () => {
         directive: true,
         key,
         value: null,
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)
@@ -712,11 +769,14 @@ describe('createVueVisitor', () => {
         name: {
           type: 'VIdentifier',
           name: 'bind',
+          rawName: 'bind',
         },
         argument: {
           type: 'VIdentifier',
           name: 'class',
+          rawName: 'class',
         },
+        modifiers: [],
       }
 
       // Wrong type for directive value
@@ -730,6 +790,10 @@ describe('createVueVisitor', () => {
         directive: true,
         key,
         value,
+        loc: {
+          start: { line: 1, column: 0 },
+          end: { line: 1, column: 0 },
+        },
       }
 
       visitor(node)

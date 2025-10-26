@@ -3,6 +3,7 @@
  */
 
 import type { Rule } from 'eslint'
+
 import type { ClassRegistry } from 'src/registry/registry-builder'
 import { matchesPattern } from 'src/utils/pattern-matcher'
 import { parseClassName } from 'src/utils/tailwind-variants'

@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+
 import type { TailwindConfig } from 'src/types/options'
 
 import type { ResolvedFile } from './file-resolver'

@@ -27,7 +27,25 @@ const sharedRules = {
   'import/no-unresolved': 'error',
   'import/named': 'error',
   'import/no-duplicates': 'error',
-  'simple-import-sort/imports': 'error',
+  'simple-import-sort/imports': [
+    'error',
+    {
+      groups: [
+        // Side effect imports
+        ['^\\u0000'],
+        // Node.js builtins
+        ['^node:'],
+        // External packages
+        ['^@?\\w'],
+        // Absolute imports starting with "src/"
+        ['^src/'],
+        // Other absolute imports
+        ['^[^.]'],
+        // Relative imports
+        ['^\\.'],
+      ],
+    },
+  ],
   'simple-import-sort/exports': 'error',
   ...nodePlugin.configs.recommended.rules,
   'n/no-missing-import': 'off',

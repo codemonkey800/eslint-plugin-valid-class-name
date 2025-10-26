@@ -1,5 +1,7 @@
 import fs from 'fs'
 import path from 'path'
+import type { TailwindUtils } from 'tailwind-api-utils'
+
 import {
   extractClassNamesFromCss,
   extractClassNamesFromScss,
@@ -7,7 +9,6 @@ import {
 import type { ResolvedFile } from 'src/registry/file-resolver'
 import type { TailwindV4Validator } from 'src/registry/tailwind-loader'
 import { logger } from 'src/utils/logger'
-import type { TailwindUtils } from 'tailwind-api-utils'
 
 /**
  * Special Tailwind utility classes that are always valid but may not be

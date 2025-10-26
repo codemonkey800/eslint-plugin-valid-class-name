@@ -1,5 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals'
 import type { Rule } from 'eslint'
+
 import type { ClassRegistry } from 'src/registry/registry-builder'
 
 import type { JSXAttribute } from './ast-types'

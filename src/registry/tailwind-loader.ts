@@ -1,15 +1,16 @@
 import fs from 'fs'
 import { createRequire } from 'module'
 import path from 'path'
+import { createSyncFn } from 'synckit'
+import type { TailwindUtils } from 'tailwind-api-utils'
+import { TailwindUtils as TailwindUtilsImpl } from 'tailwind-api-utils'
+
 import {
   findTailwindConfigPath,
   findTailwindCSSConfig,
 } from 'src/parsers/tailwind-parser'
 import type { TailwindConfig } from 'src/types/options'
 import { logger } from 'src/utils/logger'
-import { createSyncFn } from 'synckit'
-import type { TailwindUtils } from 'tailwind-api-utils'
-import { TailwindUtils as TailwindUtilsImpl } from 'tailwind-api-utils'
 
 /**
  * Minimal interface for Tailwind v4 validation via worker thread

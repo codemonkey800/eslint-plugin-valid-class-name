@@ -2,6 +2,7 @@ import { RuleTester } from 'eslint'
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
+
 import { clearCache } from 'src/registry/class-registry'
 
 import { validClassNameRule as rule } from './valid-class-name'

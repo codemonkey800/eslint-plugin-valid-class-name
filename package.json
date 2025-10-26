@@ -75,6 +75,7 @@
     "svelte": "^4.2.20",
     "svelte-eslint-parser": "^0.43.0",
     "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.10",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",

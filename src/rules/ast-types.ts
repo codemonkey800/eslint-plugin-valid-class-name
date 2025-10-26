@@ -186,3 +186,100 @@ export interface VAttribute {
     }
   }
 }
+
+/**
+ * Svelte AST node types from svelte-eslint-parser
+ */
+
+/**
+ * Svelte name identifier node
+ * Similar to Identifier but allows special strings
+ */
+export interface SvelteName {
+  type: 'SvelteName'
+  name: string
+}
+
+/**
+ * Svelte literal node containing decoded string value
+ */
+export interface SvelteLiteral {
+  type: 'SvelteLiteral'
+  value: string
+}
+
+/**
+ * Svelte mustache tag for dynamic expressions in attributes
+ * Wraps JavaScript expressions within templates
+ */
+export interface SvelteMustacheTag {
+  type: 'SvelteMustacheTag'
+  expression: Expression | null
+}
+
+/**
+ * Svelte attribute node from svelte-eslint-parser
+ * Used for static and interpolated class attributes
+ * Examples:
+ * - <div class="foo"> (static - value contains SvelteLiteral)
+ * - <div class="foo {bar}"> (mixed - value contains SvelteLiteral and SvelteMustacheTag)
+ * - <div class={expr}> (dynamic - value contains SvelteMustacheTag)
+ */
+export interface SvelteAttribute {
+  type: 'SvelteAttribute'
+  key: SvelteName
+  boolean: boolean
+  value: Array<SvelteLiteral | SvelteMustacheTag>
+  loc: {
+    start: {
+      line: number
+      column: number
+    }
+    end: {
+      line: number
+      column: number
+    }
+  }
+}
+
+/**
+ * Svelte directive key containing the directive name
+ */
+export interface SvelteDirectiveKey {
+  type: 'SvelteDirectiveKey'
+  name: SvelteName
+  modifiers: SvelteName[]
+}
+
+/**
+ * Svelte directive node from svelte-eslint-parser
+ * Used for reactive class directives
+ * Examples:
+ * - <div class:active> (shorthand - boolean is true, expression is null)
+ * - <div class:active={isActive}> (full form - boolean is false, expression contains value)
+ */
+export interface SvelteDirective {
+  type: 'SvelteDirective'
+  kind:
+    | 'Animation'
+    | 'Action'
+    | 'Binding'
+    | 'Class'
+    | 'Let'
+    | 'On'
+    | 'Ref'
+    | 'Transition'
+  key: SvelteDirectiveKey
+  shorthand: boolean
+  expression: Expression | null
+  loc: {
+    start: {
+      line: number
+      column: number
+    }
+    end: {
+      line: number
+      column: number
+    }
+  }
+}

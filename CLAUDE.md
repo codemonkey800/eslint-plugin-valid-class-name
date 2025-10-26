@@ -4,13 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an ESLint plugin that validates CSS class names in JSX/TSX, HTML, and Vue files against actual CSS/SCSS files and Tailwind configuration. The plugin reports errors when class names are used that don't exist in any of the configured sources.
+This is an ESLint plugin that validates CSS class names in JSX/TSX, HTML, Vue, and Svelte files against actual CSS/SCSS files and Tailwind configuration. The plugin reports errors when class names are used that don't exist in any of the configured sources.
 
 ### Supported File Types
 
 - **JSX/TSX**: Validates `className` attributes in React/JSX components
 - **HTML**: Validates `class` attributes in HTML files (requires `@angular-eslint/template-parser`)
 - **Vue**: Validates `class` attributes and `:class` bindings in Vue Single File Components (requires `vue-eslint-parser`)
+- **Svelte**: Validates `class` attributes and reactive `class:` directives in Svelte Single File Components (requires `svelte-eslint-parser`)
 
 ## Development Commands
 
@@ -54,7 +55,7 @@ When modifying files, run linters only for changed files to save time.
 
 **1. Rule Implementation** ([src/rules/valid-class-name.ts](src/rules/valid-class-name.ts))
 
-- Main ESLint rule that validates class attributes in JSX, HTML, and Vue
+- Main ESLint rule that validates class attributes in JSX, HTML, Vue, and Svelte
 - **JSX Support**: Validates `className` attributes via `JSXAttribute` visitor
 - **HTML Support**: Validates `class` attributes via `TextAttribute` visitor (Angular template parser)
 - **Vue Support**: Validates both static `class` and dynamic `:class` bindings via `VAttribute` visitor (Vue parser)
@@ -63,16 +64,23 @@ When modifying files, run linters only for changed files to save time.
   - Supports object syntax: `:class="{ active: true }"`
   - Supports array syntax: `:class="['foo', 'bar']"`
   - Supports all expression types: ternaries, logical operators, function calls, etc.
+- **Svelte Support**: Validates static, interpolated, and directive-based class attributes via `SvelteAttribute` and `SvelteDirective` visitors (Svelte parser)
+  - Static: `<div class="foo">` (SvelteAttribute with SvelteLiteral value)
+  - Mixed: `<div class="foo {bar}">` (SvelteAttribute with SvelteLiteral + SvelteMustacheTag)
+  - Dynamic: `<div class={expr}>` (SvelteAttribute with SvelteMustacheTag)
+  - Directives (shorthand): `<div class:active>` (SvelteDirective with `shorthand: true`)
+  - Directives (full): `<div class:active={isActive}>` (SvelteDirective with expression)
 - Integrates with the class registry for validation
 - Supports ignore patterns with glob-style wildcards
 - Delegates to specialized helper modules for AST parsing and class extraction
 
 **Rule Helper Modules**:
-- **AST Types** ([src/rules/ast-types.ts](src/rules/ast-types.ts)) - Type definitions for JSX, HTML, and Vue AST nodes
+- **AST Types** ([src/rules/ast-types.ts](src/rules/ast-types.ts)) - Type definitions for JSX, HTML, Vue, and Svelte AST nodes
   - JSX types: `JSXAttribute`, `JSXExpressionContainer`, etc.
   - HTML types: `TextAttribute` (from `@angular-eslint/template-parser`)
   - Vue types: `VAttribute`, `VDirectiveKey`, `VExpressionContainer`, `VLiteral`, `VIdentifier` (from `vue-eslint-parser`)
-- **AST Guards** ([src/rules/ast-guards.ts](src/rules/ast-guards.ts)) - Type guard functions for runtime type checking (JSX, HTML, and Vue nodes)
+  - Svelte types: `SvelteAttribute`, `SvelteDirective`, `SvelteLiteral`, `SvelteMustacheTag`, `SvelteName` (from `svelte-eslint-parser`)
+- **AST Guards** ([src/rules/ast-guards.ts](src/rules/ast-guards.ts)) - Type guard functions for runtime type checking (JSX, HTML, Vue, and Svelte nodes)
 - **Class Extractors** ([src/rules/class-extractors.ts](src/rules/class-extractors.ts)) - Functions to extract class names from various expression types (literals, ternaries, function calls, arrays, objects)
 - **Validation Helpers** ([src/rules/validation-helpers.ts](src/rules/validation-helpers.ts)) - Utility functions for pattern matching and validation
 
@@ -210,6 +218,8 @@ src/
 - **JSX/TSX**: Validates `className` attributes; supports complex expressions (ternaries, function calls, etc.)
 - **HTML**: Validates `class` attributes; only supports string literals (no dynamic expressions)
 - **Vue**: Validates both static `class` and dynamic `:class` bindings; supports all expression types (object, array, ternary, etc.)
-- Dynamic class names (template literals, variables, etc.) are skipped in JSX and Vue
+- **Svelte**: Validates static `class`, mixed static/dynamic with mustache tags, fully dynamic `class={expr}`, and reactive `class:` directives; supports all expression types
+- Dynamic class names (template literals, variables, etc.) are skipped in JSX, Vue, and Svelte
 - **HTML Parser**: Requires `@angular-eslint/template-parser` as an optional peer dependency
 - **Vue Parser**: Requires `vue-eslint-parser` as an optional peer dependency
+- **Svelte Parser**: Requires `svelte-eslint-parser` as an optional peer dependency

@@ -260,7 +260,7 @@ export const ArrayObjectSyntaxValid: React.FC<Props> = ({
           <div className={clsx({})}>Empty object (no classes)</div>
 
           {/* Sparse array (with holes) */}
-          <div className={clsx(['container', , 'header'])}>
+          <div className={clsx(['container', undefined, 'header'])}>
             Sparse array with holes
           </div>
 

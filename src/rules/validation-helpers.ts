@@ -7,7 +7,13 @@ import type { ClassRegistry } from 'src/registry/registry-builder'
 import { matchesPattern } from 'src/utils/pattern-matcher'
 import { parseClassName } from 'src/utils/tailwind-variants'
 
-import type { JSXAttribute, TextAttribute, VAttribute } from './ast-types'
+import type {
+  JSXAttribute,
+  SvelteAttribute,
+  SvelteDirective,
+  TextAttribute,
+  VAttribute,
+} from './ast-types'
 
 /**
  * Checks if a class name should be ignored based on ignore patterns
@@ -45,7 +51,12 @@ function isEmptyArbitraryValue(className: string): boolean {
  */
 function reportInvalidClassName(
   context: Rule.RuleContext,
-  node: JSXAttribute | TextAttribute | VAttribute,
+  node:
+    | JSXAttribute
+    | TextAttribute
+    | VAttribute
+    | SvelteAttribute
+    | SvelteDirective,
   className: string,
 ): void {
   context.report({
@@ -60,7 +71,12 @@ function reportInvalidClassName(
  */
 function reportInvalidVariant(
   context: Rule.RuleContext,
-  node: JSXAttribute | TextAttribute | VAttribute,
+  node:
+    | JSXAttribute
+    | TextAttribute
+    | VAttribute
+    | SvelteAttribute
+    | SvelteDirective,
   variant: string,
   fullClassName: string,
 ): void {
@@ -82,7 +98,12 @@ function validateClassWithVariants(
   base: string,
   variants: string[],
   params: {
-    node: JSXAttribute | TextAttribute | VAttribute
+    node:
+      | JSXAttribute
+      | TextAttribute
+      | VAttribute
+      | SvelteAttribute
+      | SvelteDirective
     context: Rule.RuleContext
     classRegistry: ClassRegistry
   },
@@ -130,7 +151,12 @@ function validateClassWithVariants(
 function validateClassWithoutVariants(
   base: string,
   params: {
-    node: JSXAttribute | TextAttribute | VAttribute
+    node:
+      | JSXAttribute
+      | TextAttribute
+      | VAttribute
+      | SvelteAttribute
+      | SvelteDirective
     context: Rule.RuleContext
     classRegistry: ClassRegistry
   },
@@ -156,7 +182,12 @@ function validateClassWithoutVariants(
  */
 export function validateClassNames(params: {
   classNames: Set<string> | string[]
-  node: JSXAttribute | TextAttribute | VAttribute
+  node:
+    | JSXAttribute
+    | TextAttribute
+    | VAttribute
+    | SvelteAttribute
+    | SvelteDirective
   context: Rule.RuleContext
   classRegistry: ClassRegistry
   ignorePatterns: string[]

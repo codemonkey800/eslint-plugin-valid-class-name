@@ -5,6 +5,7 @@ import {
   extractClassNamesFromScss,
 } from 'src/parsers/css-parser'
 import type { ResolvedFile } from 'src/registry/file-resolver'
+import type { TailwindV4Validator } from 'src/registry/tailwind-loader'
 import { logger } from 'src/utils/logger'
 import type { TailwindUtils } from 'tailwind-api-utils'
 
@@ -85,7 +86,7 @@ export interface ClassRegistry {
  */
 export function buildClassRegistry(
   resolvedFiles: ResolvedFile[],
-  tailwindUtils: TailwindUtils | null | undefined,
+  tailwindUtils: TailwindUtils | TailwindV4Validator | null | undefined,
   cwd: string,
 ): ClassRegistry {
   // Extract CSS classes

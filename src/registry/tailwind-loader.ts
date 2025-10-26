@@ -15,7 +15,7 @@ import { TailwindUtils as TailwindUtilsImpl } from 'tailwind-api-utils'
  * Minimal interface for Tailwind v4 validation via worker thread
  * Implements only the methods and properties needed for class name validation
  */
-interface TailwindV4Validator {
+export interface TailwindV4Validator {
   readonly isV4: true
   readonly context: null
   isValidClassName(className: string): boolean
@@ -57,7 +57,7 @@ const validateClassNameWorker = createSyncFn<
     cwd: string
     isV4: boolean
   }) => boolean
->(new URL('./registry/tailwind-worker.js', import.meta.url).pathname)
+>(new URL('./tailwind-worker.js', import.meta.url).pathname)
 
 /**
  * Creates a Tailwind validator using tailwind-api-utils

@@ -4,11 +4,19 @@ import type { RuleOptions } from 'src/types/options'
 
 import {
   isObjectExpression,
+  isSvelteLiteral,
+  isSvelteMustacheTag,
   isVDirectiveKey,
   isVExpressionContainer,
   isVLiteral,
 } from './ast-guards'
-import type { JSXAttribute, TextAttribute, VAttribute } from './ast-types'
+import type {
+  JSXAttribute,
+  SvelteAttribute,
+  SvelteDirective,
+  TextAttribute,
+  VAttribute,
+} from './ast-types'
 import {
   extractClassNamesFromString,
   extractClassStringsFromExpression,
@@ -316,6 +324,101 @@ export const validClassNameRule: Rule.RuleModule = {
       }
     }
 
+    /**
+     * Visitor for Svelte static and interpolated class attributes
+     * Handles:
+     * - Static: <div class="foo bar">
+     * - Mixed: <div class="foo {bar}">
+     * - Dynamic: <div class={expr}>
+     */
+    const svelteAttributeVisitor = (node: SvelteAttribute) => {
+      // Only process class attributes
+      if (node.key.name !== 'class') {
+        return
+      }
+
+      // If no value, skip validation
+      if (!node.value || node.value.length === 0) {
+        return
+      }
+
+      // Collect class strings from both literals and mustache expressions
+      const classStrings: string[] = []
+
+      for (const valueNode of node.value) {
+        if (isSvelteLiteral(valueNode)) {
+          // Static string literal: <div class="foo bar">
+          const literalValue = valueNode.value
+          if (typeof literalValue === 'string' && literalValue !== '') {
+            classStrings.push(literalValue)
+          }
+        } else if (isSvelteMustacheTag(valueNode)) {
+          // Dynamic mustache expression: <div class="foo {bar}"> or <div class={expr}>
+          const expression = valueNode.expression
+          if (expression) {
+            const extractedClasses =
+              extractClassStringsFromExpression(expression)
+            classStrings.push(...extractedClasses)
+          }
+        }
+      }
+
+      // If we couldn't extract any class strings, skip validation
+      if (classStrings.length === 0) {
+        return
+      }
+
+      // Extract all individual class names from all class strings
+      const allClassNames: string[] = []
+      for (const classString of classStrings) {
+        const classNames = extractClassNamesFromString(classString)
+        allClassNames.push(...classNames)
+      }
+
+      // Deduplicate class names
+      const uniqueClassNames = new Set(allClassNames)
+
+      // Validate each unique class name
+      validateClassNames({
+        classNames: uniqueClassNames,
+        node,
+        context,
+        classRegistry,
+        ignorePatterns,
+      })
+    }
+
+    /**
+     * Visitor for Svelte reactive class directives
+     * Handles:
+     * - Shorthand: <div class:active>
+     * - Full form: <div class:active={isActive}>
+     */
+    const svelteDirectiveVisitor = (node: SvelteDirective) => {
+      // Only process class directives
+      if (node.kind !== 'Class') {
+        return
+      }
+
+      // Extract the class name from the directive key
+      // For class:active or class:active={expr}, the class name is "active"
+      const className = node.key.name.name
+
+      // If empty class name, skip validation
+      if (!className) {
+        return
+      }
+
+      // Validate the single class name
+      validateClassNames({
+        classNames: new Set([className]),
+        node,
+        context,
+        classRegistry,
+        ignorePatterns,
+      })
+    }
+
     // Check if we have Vue parser services (for .vue files)
     // Cast to extended context type to access Vue-specific parser services
     const contextWithVue = context as RuleContextWithVueParser
@@ -370,6 +473,12 @@ export const validClassNameRule: Rule.RuleModule = {
           ignorePatterns,
         })
       },
+
+      // Svelte static/interpolated class attributes
+      SvelteAttribute: svelteAttributeVisitor,
+
+      // Svelte reactive class directives
+      SvelteDirective: svelteDirectiveVisitor,
     }
   },
 }

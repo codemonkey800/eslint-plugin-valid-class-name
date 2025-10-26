@@ -1,14 +1,17 @@
 # eslint-plugin-valid-class-name
 
-> ESLint plugin that validates CSS class names in JSX/TSX and HTML files against actual CSS/SCSS files and Tailwind configuration.
+> ESLint plugin that validates CSS class names in JSX/TSX, HTML, Vue, and Svelte files against actual CSS/SCSS files and Tailwind configuration.
 
-Catch typos and invalid class names at lint time, before they reach production. This plugin ensures that every `className` in your React/JSX code and every `class` in your HTML files corresponds to an actual CSS class that exists in your stylesheets or Tailwind configuration.
+Catch typos and invalid class names at lint time, before they reach production. This plugin ensures that every `className` in your React/JSX code, every `class` in your HTML/Vue/Svelte files, and every `:class` binding in Vue or `class:` directive in Svelte corresponds to an actual CSS class that exists in your stylesheets or Tailwind configuration.
 
 ## Features
 
 - 📝 **CSS/SCSS Validation** - Parses your CSS and SCSS files to extract valid class names
 - 🎨 **Tailwind CSS Support** - Validates Tailwind utilities, variants, arbitrary values, and plugin-generated classes
-- 🌐 **HTML File Support** - Validates `class` attributes in HTML files (requires `@angular-eslint/template-parser`)
+- 🌐 **Multi-Framework Support** - Works with JSX/TSX, HTML, Vue, and Svelte
+  - **HTML**: Validates `class` attributes (requires `@angular-eslint/template-parser`)
+  - **Vue**: Validates both static `class` and dynamic `:class` bindings (requires `vue-eslint-parser`)
+  - **Svelte**: Validates `class` attributes and reactive `class:` directives (requires `svelte-eslint-parser`)
 - 🔀 **Dynamic Expression Support** - Validates class names in ternaries, logical operators, and utility functions (cns/clsx/classnames)
 - 🎯 **Object-Style Attributes** - Validates component library patterns like `classes={{ root: 'mt-2' }}` (Material-UI, Chakra UI, etc.)
 - 🔇 **Ignore Patterns** - Skip validation for dynamic or generated class names
@@ -315,6 +318,176 @@ The plugin validates both static and dynamic class attributes in Vue templates:
 - Object syntax validates the property keys as class names
 - Array syntax validates string literals in the array
 - All validation features (Tailwind variants, arbitrary values, ignore patterns) work with Vue
+
+## Svelte File Support
+
+This plugin supports validating both static `class` attributes and reactive `class:` directives in Svelte Single File Components (SFCs).
+
+### Svelte Setup
+
+1. Install the Svelte parser:
+
+```bash
+pnpm add --save-dev svelte-eslint-parser
+```
+
+2. Configure ESLint to use the Svelte parser for `.svelte` files:
+
+**ESLint 9+ (Flat Config)**
+
+```javascript
+// eslint.config.js
+import validClassName from 'eslint-plugin-valid-class-name'
+import * as svelteParser from 'svelte-eslint-parser'
+
+export default [
+  // JSX/TSX files
+  {
+    files: ['**/*.jsx', '**/*.tsx'],
+    languageOptions: {
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
+    },
+    plugins: { 'valid-class-name': validClassName },
+    rules: {
+      'valid-class-name/valid-class-name': [
+        'error',
+        {
+          sources: {
+            css: ['src/**/*.css'],
+            tailwind: true,
+          },
+        },
+      ],
+    },
+  },
+  // Svelte files
+  {
+    files: ['**/*.svelte'],
+    languageOptions: {
+      parser: svelteParser,
+    },
+    plugins: { 'valid-class-name': validClassName },
+    rules: {
+      'valid-class-name/valid-class-name': [
+        'error',
+        {
+          sources: {
+            css: ['src/**/*.css'],
+            tailwind: true,
+          },
+        },
+      ],
+    },
+  },
+]
+```
+
+**ESLint 8 (.eslintrc)**
+
+```json
+{
+  "plugins": ["valid-class-name"],
+  "rules": {
+    "valid-class-name/valid-class-name": [
+      "error",
+      {
+        "sources": {
+          "css": ["src/**/*.css"],
+          "tailwind": true
+        }
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["*.svelte"],
+      "parser": "svelte-eslint-parser"
+    }
+  ]
+}
+```
+
+### How Svelte Validation Works
+
+The plugin validates three types of class patterns in Svelte:
+
+#### Static class attributes
+
+```svelte
+<div class="mt-2 p-4 flex">Static classes</div>
+```
+
+#### Mixed static and dynamic classes
+
+```svelte
+<!-- Mustache interpolation -->
+<div class="container {dynamicClass}">Mixed</div>
+
+<!-- String literal in mustache -->
+<div class="flex {'items-center'}">Mixed</div>
+```
+
+#### Fully dynamic class attributes
+
+```svelte
+<!-- String literal -->
+<div class={'foo bar'}>Dynamic</div>
+
+<!-- Ternary expression -->
+<div class={isActive ? 'active' : 'inactive'}>Ternary</div>
+
+<!-- Logical operator -->
+<div class={condition && 'visible'}>Logical</div>
+
+<!-- Function calls -->
+<div class={clsx('btn', isPrimary && 'btn-primary')}>Function</div>
+```
+
+#### Reactive class directives
+
+```svelte
+<!-- Shorthand (boolean) - variable name must match class name -->
+<div class:active>Shorthand</div>
+
+<!-- Full form (with expression) -->
+<div class:active={isActive}>Full form</div>
+
+<!-- Multiple directives -->
+<div class:active={isActive} class:disabled={isDisabled}>Multiple</div>
+```
+
+### Svelte Examples
+
+```svelte
+<script>
+  let isActive = true
+  let isPrimary = false
+</script>
+
+<!-- Valid Svelte template -->
+<div class="container">
+  <h1 class="text-2xl font-bold">Title</h1>
+  <button class:active class:primary={isPrimary}>Button</button>
+  <div class="flex {isActive ? 'visible' : 'hidden'}">Mixed</div>
+</div>
+
+<!-- Invalid (if classes don't exist) -->
+<div class="invalid-class"></div>
+<div class:invalidDirective></div>
+```
+
+### Svelte Notes
+
+- Static `class` attributes are fully validated
+- Mixed static + dynamic (mustache) are validated
+- Fully dynamic `class={expression}` extracts string literals
+- Class directives (`class:name` and `class:name={expr}`) validate the class name
+- **Shorthand directives** (e.g., `class:active`) require valid JavaScript identifiers - use camelCase or single words, not kebab-case
+- Dynamic variables are skipped (e.g., `class={someVar}`)
+- Template literals with interpolation are skipped (e.g., `class={`foo-${bar}`}`)
+- All validation features (Tailwind variants, arbitrary values, ignore patterns) work with Svelte
 
 ## Configuration
 
@@ -907,22 +1080,9 @@ Validate class names in Angular templates.
 
 #### Svelte
 
-**Status:** Under consideration
+**Status:** ✅ Implemented
 
-Validate class names in Svelte components.
-
-**Patterns that would be supported:**
-
-```svelte
-<!-- Static classes -->
-<div class="flex items-center"></div>
-
-<!-- Dynamic classes -->
-<div class={dynamicClass}></div>
-
-<!-- Conditional classes -->
-<div class:active={isActive} class:disabled={isDisabled}></div>
-```
+Svelte support is now available! See the [Svelte File Support](#svelte-file-support) section for setup instructions and usage examples.
 
 **Note:** Framework support depends on community demand and maintainer bandwidth. If you'd like to see support for a specific framework, please [open an issue](https://github.com/your-username/eslint-plugin-valid-class-name/issues) with your use case and examples.
 

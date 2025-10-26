@@ -11,6 +11,10 @@ import type {
   Literal,
   LogicalExpression,
   ObjectExpression,
+  SvelteAttribute,
+  SvelteDirective,
+  SvelteLiteral,
+  SvelteMustacheTag,
   TemplateLiteral,
   TextAttribute,
   VAttribute,
@@ -146,5 +150,55 @@ export function isVDirectiveKey(key: unknown): key is VDirectiveKey {
     key !== null &&
     'type' in key &&
     key.type === 'VDirectiveKey'
+  )
+}
+
+/**
+ * Type guard to check if a node is a SvelteAttribute (Svelte class attribute)
+ */
+export function isSvelteAttribute(node: unknown): node is SvelteAttribute {
+  return (
+    typeof node === 'object' &&
+    node !== null &&
+    'type' in node &&
+    node.type === 'SvelteAttribute'
+  )
+}
+
+/**
+ * Type guard to check if a node is a SvelteDirective (Svelte class directive)
+ */
+export function isSvelteDirective(node: unknown): node is SvelteDirective {
+  return (
+    typeof node === 'object' &&
+    node !== null &&
+    'type' in node &&
+    node.type === 'SvelteDirective'
+  )
+}
+
+/**
+ * Type guard to check if a value is a SvelteLiteral (Svelte literal value)
+ */
+export function isSvelteLiteral(value: unknown): value is SvelteLiteral {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    value.type === 'SvelteLiteral'
+  )
+}
+
+/**
+ * Type guard to check if a value is a SvelteMustacheTag (Svelte mustache expression)
+ */
+export function isSvelteMustacheTag(
+  value: unknown,
+): value is SvelteMustacheTag {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    value.type === 'SvelteMustacheTag'
   )
 }

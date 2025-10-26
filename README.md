@@ -32,7 +32,7 @@ yarn add --dev eslint-plugin-valid-class-name
 pnpm add --save-dev eslint-plugin-valid-class-name
 ```
 
-**Requirements:** ESLint 8.0.0+ or 9.0.0+
+**Requirements:** Node.js 20.0.0+, ESLint 8.0.0+ or 9.0.0+
 
 ## Quick Start
 

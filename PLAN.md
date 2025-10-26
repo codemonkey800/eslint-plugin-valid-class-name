@@ -2,7 +2,13 @@
 
 ## Project Overview
 
-An ESLint plugin that validates CSS class names in HTML and JSX files by checking them against actual CSS/SCSS files, Tailwind configuration, and user-defined allowlists. The plugin prevents runtime errors from typos and non-existent class names during development. Supports both standard HTML `class` attributes and JSX `className` attributes.
+An ESLint plugin that validates CSS class names in JSX/TSX, HTML, and Vue files by checking them against actual CSS/SCSS files, Tailwind configuration, and user-defined allowlists. The plugin prevents runtime errors from typos and non-existent class names during development.
+
+**Supported File Types:**
+
+- **JSX/TSX**: Validates `className` attributes in React components
+- **HTML**: Validates `class` attributes in HTML files
+- **Vue**: Validates `class` and `:class` bindings in Vue Single File Components (January 2025)
 
 ## Core Objectives
 
@@ -14,17 +20,42 @@ An ESLint plugin that validates CSS class names in HTML and JSX files by checkin
 
 ## Recent Updates
 
+### Vue Support (January 2025)
+
+**Complete implementation** of Vue Single File Component (SFC) support with comprehensive validation for both static and dynamic class bindings.
+
+**Features Implemented:**
+
+- ✅ Vue SFC parser integration via `vue-eslint-parser`
+- ✅ Static `class` attribute validation: `<div class="foo">`
+- ✅ Dynamic `:class` binding validation: `<div :class="...">`
+- ✅ Object syntax support: `:class="{ active: true, disabled: false }"`
+- ✅ Array syntax support: `:class="['foo', 'bar', condition && 'baz']"`
+- ✅ Complex expression support: ternaries, logical operators, function calls
+- ✅ Recursive expression tree traversal for nested class extraction
+- ✅ Full test coverage via `valid-class-name.vue.test.ts`
+
+**Implementation Details:**
+
+- AST visitor for `VAttribute` nodes (Vue template AST)
+- Handles both `directive: false` (static) and `directive: true` (dynamic bindings)
+- Reuses existing class extraction logic from JSX support
+- Type guards and AST types in [ast-types.ts](src/rules/ast-types.ts) and [ast-guards.ts](src/rules/ast-guards.ts)
+- Main rule implementation in [valid-class-name.ts](src/rules/valid-class-name.ts)
+
 ### Unit Test Coverage Improvements (January 2025)
 
 Comprehensive unit test suite added to cover all previously untested code paths, bringing core module coverage to 100%.
 
 **Coverage Achievements:**
+
 - **tailwind-parser.ts**: 100% coverage (17 new tests for v4 CSS config detection)
 - **file-resolver.ts**: 100% coverage (error logging and cache validation tests)
 - **registry-builder.ts**: 100% coverage (TAILWIND_SPECIAL_CLASSES tests)
 - **Overall**: 668 total tests with 642 passing, 26 skipped (integration tests)
 
 **Tests Added:**
+
 - v4 CSS config file detection (`isTailwindCSSFile`, `findTailwindCSSConfig`)
 - File resolver error handling (stat failures, glob failures)
 - Special Tailwind classes validation (`group`, `peer`)
@@ -160,9 +191,28 @@ Add support for template literals, conditional expressions, and utility function
 - Spread operators in class expressions (currently skipped)
 - Computed property names in objects (currently skipped)
 
-### Phase 6: Framework Support
+### Phase 6: Framework Support (Partially Complete)
 
 Extend support to Vue templates, Angular templates, and HTML files. Handle framework-specific class binding syntax.
+
+**✅ Completed:**
+
+- **Vue SFC Support** (January 2025): Full validation for Vue Single File Components
+  - Static `class` attributes: `<div class="foo">`
+  - Dynamic `:class` bindings with object syntax: `:class="{ active: true }"`
+  - Dynamic `:class` bindings with array syntax: `:class="['foo', 'bar']"`
+  - Complex expressions: ternaries, logical operators, function calls
+  - Requires `vue-eslint-parser` as peer dependency
+  - Test coverage: `valid-class-name.vue.test.ts`
+
+- **HTML Support**: Validates `class` attributes in HTML files
+  - String literal validation only (no dynamic expressions)
+  - Requires `@angular-eslint/template-parser` as peer dependency
+
+**⏸ Not Yet Implemented:**
+
+- Angular template-specific features (e.g., `[ngClass]` directive)
+- Framework-specific inline style processing
 
 ### Phase 7: Advanced Features
 
@@ -341,6 +391,7 @@ The plugin now uses the official Tailwind API via `tailwind-api-utils` for valid
 **V4 Support Implementation (January 2025):**
 
 Uses `synckit` to bridge ESLint's synchronous constraint with Tailwind v4's async requirements:
+
 - **tailwind-worker.ts**: Worker thread that handles async config loading
 - **tailwind-loader.ts**: Detects v4 and delegates to worker via `createSyncFn()`
 - Validation appears synchronous to ESLint rules but runs async in worker thread
@@ -461,10 +512,22 @@ Uses `synckit` to bridge ESLint's synchronous constraint with Tailwind v4's asyn
 
 ### Framework Support
 
-- [ ] Add Vue template support
-- [ ] Implement Angular template handling
-- [ ] Support HTML file processing
-- [ ] Handle framework-specific bindings
+**✅ Vue Support Complete (January 2025)**
+
+- [x] Add Vue template support
+- [x] Handle framework-specific bindings (`:class` directive)
+- [x] Support static class attributes
+- [x] Support dynamic class bindings (object/array syntax)
+- [x] Support complex expressions in Vue templates
+
+**HTML Support Complete**
+
+- [x] Support HTML file processing
+- [x] Validate `class` attributes in HTML files
+
+**⏸ Pending:**
+
+- [ ] Implement Angular template handling (`[ngClass]` directive)
 - [ ] Process inline styles with classes
 
 ### Advanced Features

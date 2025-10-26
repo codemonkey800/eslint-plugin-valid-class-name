@@ -2,14 +2,38 @@ import type { Rule } from 'eslint'
 import { getClassRegistry } from 'src/registry/class-registry'
 import type { RuleOptions } from 'src/types/options'
 
-import { isObjectExpression } from './ast-guards'
-import type { JSXAttribute, TextAttribute } from './ast-types'
+import {
+  isObjectExpression,
+  isVDirectiveKey,
+  isVExpressionContainer,
+  isVLiteral,
+} from './ast-guards'
+import type { JSXAttribute, TextAttribute, VAttribute } from './ast-types'
 import {
   extractClassNamesFromString,
   extractClassStringsFromExpression,
   extractClassStringsFromObjectValues,
 } from './class-extractors'
 import { validateClassNames } from './validation-helpers'
+
+/**
+ * Interface for Vue parser services from vue-eslint-parser
+ * Used to visit both template and script sections in Vue SFCs
+ */
+interface VueParserServices {
+  defineTemplateBodyVisitor: (
+    templateVisitor: Record<string, (node: VAttribute) => void>,
+    scriptVisitor?: Record<string, (node: JSXAttribute) => void>,
+  ) => Record<string, (node: VAttribute | JSXAttribute) => void>
+}
+
+/**
+ * Extended RuleContext that may include Vue parser services
+ * Uses intersection type to add Vue-specific properties without conflicting with base type
+ */
+type RuleContextWithVueParser = Rule.RuleContext & {
+  parserServices?: VueParserServices
+}
 
 export const validClassNameRule: Rule.RuleModule = {
   meta: {
@@ -111,50 +135,160 @@ export const validClassNameRule: Rule.RuleModule = {
     // Get the class registry (with CSS, SCSS, Tailwind parsing and caching)
     const classRegistry = getClassRegistry(allCssPatterns, tailwindConfig, cwd)
 
-    return {
-      JSXAttribute(node: JSXAttribute) {
-        const attributeName = node.name.name
+    /**
+     * Creates a JSXAttribute visitor function for validating className and object-style attributes
+     * This is used in both Vue SFC script sections and non-Vue JSX/TSX files
+     */
+    const createJSXAttributeVisitor = () => (node: JSXAttribute) => {
+      const attributeName = node.name.name
 
-        // Check if this is an attribute we should validate
-        const isClassNameAttribute = attributeName === 'className'
-        const isObjectStyleAttribute =
-          objectStyleAttributes.includes(attributeName)
+      // Check if this is an attribute we should validate
+      const isClassNameAttribute = attributeName === 'className'
+      const isObjectStyleAttribute =
+        objectStyleAttributes.includes(attributeName)
 
-        if (!isClassNameAttribute && !isObjectStyleAttribute) {
+      if (!isClassNameAttribute && !isObjectStyleAttribute) {
+        return
+      }
+
+      // Extract class strings from the attribute value
+      let classStrings: string[] = []
+
+      if (isClassNameAttribute) {
+        // Handle className attribute (existing behavior)
+        if (node.value?.type === 'Literal') {
+          // Handle direct string literal: <div className="foo bar" />
+          const value = node.value.value
+          if (typeof value === 'string') {
+            classStrings.push(value)
+          }
+        } else if (node.value?.type === 'JSXExpressionContainer') {
+          // Handle JSXExpressionContainer with dynamic expressions:
+          // - String literals: <div className={"foo bar"} />
+          // - Ternary: <div className={condition ? "foo" : "bar"} />
+          // - Logical: <div className={condition && "foo"} />
+          // - Function calls: <div className={cns("foo", condition && "bar")} />
+          const expression = node.value.expression
+          classStrings = extractClassStringsFromExpression(expression)
+        }
+      } else if (isObjectStyleAttribute) {
+        // Handle object-style attributes (new behavior)
+        // Extract class strings from object property VALUES
+        // Example: <Component classes={{ root: 'mt-2', container: 'p-4' }} />
+        if (node.value?.type === 'JSXExpressionContainer') {
+          const expression = node.value.expression
+          if (isObjectExpression(expression)) {
+            classStrings = extractClassStringsFromObjectValues(expression)
+          }
+        }
+      }
+
+      // If we couldn't extract any class strings, skip validation
+      if (classStrings.length === 0) {
+        return
+      }
+
+      // Extract all individual class names from all class strings
+      const allClassNames: string[] = []
+      for (const classString of classStrings) {
+        const classNames = extractClassNamesFromString(classString)
+        allClassNames.push(...classNames)
+      }
+
+      // Deduplicate class names to avoid validating the same class multiple times
+      // This is especially helpful when the same class appears in multiple branches
+      // (e.g., className={condition ? "mt-2 flex" : "mt-2 grid"})
+      const uniqueClassNames = new Set(allClassNames)
+
+      // Validate each unique class name using the shared utility
+      validateClassNames({
+        classNames: uniqueClassNames,
+        node,
+        context,
+        classRegistry,
+        ignorePatterns,
+      })
+    }
+
+    // Define visitor functions that will be used for both script and template
+    const vueAttributeVisitor = (node: VAttribute) => {
+      // Handle both static and dynamic class attributes in Vue templates
+      // Static: <div class="foo"> (directive: false)
+      // Dynamic: <div :class="bar"> or <div v-bind:class="bar"> (directive: true)
+
+      if (!node.directive) {
+        // Static class attribute: <div class="foo bar">
+        // Check if this is the class attribute
+        if (node.key.type !== 'VIdentifier' || node.key.name !== 'class') {
           return
         }
 
-        // Extract class strings from the attribute value
-        let classStrings: string[] = []
-
-        if (isClassNameAttribute) {
-          // Handle className attribute (existing behavior)
-          if (node.value?.type === 'Literal') {
-            // Handle direct string literal: <div className="foo bar" />
-            const value = node.value.value
-            if (typeof value === 'string') {
-              classStrings.push(value)
-            }
-          } else if (node.value?.type === 'JSXExpressionContainer') {
-            // Handle JSXExpressionContainer with dynamic expressions:
-            // - String literals: <div className={"foo bar"} />
-            // - Ternary: <div className={condition ? "foo" : "bar"} />
-            // - Logical: <div className={condition && "foo"} />
-            // - Function calls: <div className={cns("foo", condition && "bar")} />
-            const expression = node.value.expression
-            classStrings = extractClassStringsFromExpression(expression)
-          }
-        } else if (isObjectStyleAttribute) {
-          // Handle object-style attributes (new behavior)
-          // Extract class strings from object property VALUES
-          // Example: <Component classes={{ root: 'mt-2', container: 'p-4' }} />
-          if (node.value?.type === 'JSXExpressionContainer') {
-            const expression = node.value.expression
-            if (isObjectExpression(expression)) {
-              classStrings = extractClassStringsFromObjectValues(expression)
-            }
-          }
+        // If no value, skip validation
+        if (!node.value) {
+          return
         }
+
+        // For static attributes, the value is a VLiteral
+        if (!isVLiteral(node.value)) {
+          return
+        }
+
+        const classString = node.value.value
+
+        // If empty string, skip validation
+        if (classString === '') {
+          return
+        }
+
+        // Extract individual class names from the string
+        const classNames = extractClassNamesFromString(classString)
+        const uniqueClassNames = new Set(classNames)
+
+        // Validate each unique class name using the shared utility
+        validateClassNames({
+          classNames: uniqueClassNames,
+          node,
+          context,
+          classRegistry,
+          ignorePatterns,
+        })
+      } else {
+        // Dynamic class binding: <div :class="..."> or <div v-bind:class="...">
+        // Check if this is a class binding directive
+        if (!isVDirectiveKey(node.key)) {
+          return
+        }
+
+        // Check if the directive is v-bind (or shorthand :)
+        if (node.key.name.name !== 'bind') {
+          return
+        }
+
+        // Check if the argument is "class"
+        if (!node.key.argument || node.key.argument.name !== 'class') {
+          return
+        }
+
+        // If no value, skip validation
+        if (!node.value) {
+          return
+        }
+
+        // For dynamic bindings, the value is a VExpressionContainer
+        if (!isVExpressionContainer(node.value)) {
+          return
+        }
+
+        const expression = node.value.expression
+
+        // If no expression, skip validation
+        if (!expression) {
+          return
+        }
+
+        // Extract class strings from the expression
+        // This handles: string literals, ternaries, arrays, objects, function calls, etc.
+        const classStrings = extractClassStringsFromExpression(expression)
 
         // If we couldn't extract any class strings, skip validation
         if (classStrings.length === 0) {
@@ -168,9 +302,7 @@ export const validClassNameRule: Rule.RuleModule = {
           allClassNames.push(...classNames)
         }
 
-        // Deduplicate class names to avoid validating the same class multiple times
-        // This is especially helpful when the same class appears in multiple branches
-        // (e.g., className={condition ? "mt-2 flex" : "mt-2 grid"})
+        // Deduplicate class names
         const uniqueClassNames = new Set(allClassNames)
 
         // Validate each unique class name using the shared utility
@@ -181,7 +313,35 @@ export const validClassNameRule: Rule.RuleModule = {
           classRegistry,
           ignorePatterns,
         })
-      },
+      }
+    }
+
+    // Check if we have Vue parser services (for .vue files)
+    // Cast to extended context type to access Vue-specific parser services
+    const contextWithVue = context as RuleContextWithVueParser
+    const parserServices =
+      (contextWithVue.sourceCode?.parserServices as VueParserServices) ||
+      contextWithVue.parserServices
+    if (
+      parserServices &&
+      typeof parserServices.defineTemplateBodyVisitor === 'function'
+    ) {
+      // Vue SFC: Use parser services to visit template nodes
+      return parserServices.defineTemplateBodyVisitor(
+        {
+          // Template visitor (for Vue template)
+          VAttribute: vueAttributeVisitor,
+        },
+        {
+          // Script visitor (for regular JSX in script section)
+          JSXAttribute: createJSXAttributeVisitor(),
+        },
+      )
+    }
+
+    // Non-Vue files: Return normal visitors for JSX and HTML
+    return {
+      JSXAttribute: createJSXAttributeVisitor(),
 
       TextAttribute(node: TextAttribute) {
         // Only validate class attributes in HTML

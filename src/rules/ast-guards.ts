@@ -13,6 +13,10 @@ import type {
   ObjectExpression,
   TemplateLiteral,
   TextAttribute,
+  VAttribute,
+  VDirectiveKey,
+  VExpressionContainer,
+  VLiteral,
 } from './ast-types'
 
 /**
@@ -92,5 +96,55 @@ export function isTextAttribute(node: unknown): node is TextAttribute {
     node !== null &&
     'type' in node &&
     node.type === 'TextAttribute'
+  )
+}
+
+/**
+ * Type guard to check if a node is a VAttribute (Vue template attribute)
+ */
+export function isVAttribute(node: unknown): node is VAttribute {
+  return (
+    typeof node === 'object' &&
+    node !== null &&
+    'type' in node &&
+    node.type === 'VAttribute'
+  )
+}
+
+/**
+ * Type guard to check if a node is a VExpressionContainer (Vue template expression)
+ */
+export function isVExpressionContainer(
+  value: unknown,
+): value is VExpressionContainer {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    value.type === 'VExpressionContainer'
+  )
+}
+
+/**
+ * Type guard to check if a node is a VLiteral (Vue template literal)
+ */
+export function isVLiteral(value: unknown): value is VLiteral {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    value.type === 'VLiteral'
+  )
+}
+
+/**
+ * Type guard to check if a key is a VDirectiveKey (Vue directive like v-bind:class)
+ */
+export function isVDirectiveKey(key: unknown): key is VDirectiveKey {
+  return (
+    typeof key === 'object' &&
+    key !== null &&
+    'type' in key &&
+    key.type === 'VDirectiveKey'
   )
 }

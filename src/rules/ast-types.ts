@@ -120,3 +120,69 @@ export interface TextAttribute {
     }
   }
 }
+
+/**
+ * Vue template identifier node from vue-eslint-parser
+ */
+export interface VIdentifier {
+  type: 'VIdentifier'
+  name: string
+  rawName: string
+}
+
+/**
+ * Vue template literal node from vue-eslint-parser
+ * Contains decoded HTML string value
+ */
+export interface VLiteral {
+  type: 'VLiteral'
+  value: string
+}
+
+/**
+ * Vue expression container from vue-eslint-parser
+ * Wraps JavaScript expressions in template attributes
+ */
+export interface VExpressionContainer {
+  type: 'VExpressionContainer'
+  expression: Expression | null
+  references: Array<{
+    id: Identifier
+    mode: string
+    variable: unknown
+  }>
+}
+
+/**
+ * Vue directive key from vue-eslint-parser
+ * Represents the directive name and argument (e.g., v-bind:class or :class)
+ */
+export interface VDirectiveKey {
+  type: 'VDirectiveKey'
+  name: VIdentifier
+  argument: VIdentifier | null
+  modifiers: VIdentifier[]
+}
+
+/**
+ * Vue attribute node from vue-eslint-parser
+ * Used for both static attributes and directives in Vue templates
+ * When directive is false, it's a static attribute (e.g., <div class="foo">)
+ * When directive is true, it's a Vue directive (e.g., <div :class="bar">)
+ */
+export interface VAttribute {
+  type: 'VAttribute'
+  directive: boolean
+  key: VIdentifier | VDirectiveKey
+  value: VLiteral | VExpressionContainer | null
+  loc: {
+    start: {
+      line: number
+      column: number
+    }
+    end: {
+      line: number
+      column: number
+    }
+  }
+}

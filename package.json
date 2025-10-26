@@ -39,16 +39,21 @@
   },
   "peerDependencies": {
     "@angular-eslint/template-parser": ">=18.0.0",
-    "eslint": "^8.0.0 || ^9.0.0"
+    "eslint": "^8.0.0 || ^9.0.0",
+    "vue-eslint-parser": ">=9.0.0"
   },
   "peerDependenciesMeta": {
     "@angular-eslint/template-parser": {
+      "optional": true
+    },
+    "vue-eslint-parser": {
       "optional": true
     }
   },
   "devDependencies": {
     "@angular-eslint/template-parser": "^20.4.0",
     "@eslint/js": "^9.38.0",
+    "vue-eslint-parser": "^10.2.0",
     "@jest/globals": "^30.2.0",
     "@types/eslint": "^9.6.1",
     "@types/estree": "^1.0.8",

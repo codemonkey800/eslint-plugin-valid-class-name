@@ -8,7 +8,18 @@ import {
 import type { TailwindConfig } from 'src/types/options'
 import { logger } from 'src/utils/logger'
 import { createSyncFn } from 'synckit'
-import { TailwindUtils } from 'tailwind-api-utils'
+import type { TailwindUtils } from 'tailwind-api-utils'
+import { TailwindUtils as TailwindUtilsImpl } from 'tailwind-api-utils'
+
+/**
+ * Minimal interface for Tailwind v4 validation via worker thread
+ * Implements only the methods and properties needed for class name validation
+ */
+interface TailwindV4Validator {
+  readonly isV4: true
+  readonly context: null
+  isValidClassName(className: string): boolean
+}
 
 /**
  * IMPORTANT: globalThis Mutation Side Effect
@@ -51,17 +62,17 @@ const validateClassNameWorker = createSyncFn<
 /**
  * Creates a Tailwind validator using tailwind-api-utils
  *
- * For Tailwind CSS v3: Loads JS config synchronously
- * For Tailwind CSS v4: Loads CSS config and uses synckit worker for async validation
+ * For Tailwind CSS v3: Loads JS config synchronously and returns TailwindUtils
+ * For Tailwind CSS v4: Returns a minimal validator that delegates to synckit worker
  *
  * @param tailwindConfig - Tailwind configuration
  * @param cwd - Current working directory
- * @returns TailwindUtils instance or null if loading fails
+ * @returns TailwindUtils (v3) or TailwindV4Validator (v4) or null if loading fails
  */
 export function createTailwindValidator(
   tailwindConfig: boolean | TailwindConfig,
   cwd: string,
-): TailwindUtils | null {
+): TailwindUtils | TailwindV4Validator | null {
   try {
     // Determine config path and detect version based on file presence
     let resolvedConfigPath: string | null = null
@@ -86,7 +97,9 @@ export function createTailwindValidator(
             content.includes('@import "tailwindcss"')
         }
       } else {
-        logger.warn(`Tailwind config file not found at "${explicitConfigPath}"`)
+        logger.warn(
+          `Tailwind config file not found at "${explicitConfigPath}" (cwd: ${cwd})`,
+        )
         return null
       }
     } else {
@@ -101,7 +114,7 @@ export function createTailwindValidator(
 
       if (!resolvedConfigPath) {
         logger.warn(
-          'Tailwind config file not found, skipping Tailwind validation',
+          `Tailwind config file not found in "${cwd}", skipping Tailwind validation`,
         )
         return null
       }
@@ -116,13 +129,13 @@ export function createTailwindValidator(
     }
 
     // Create TailwindUtils instance
-    const utils = new TailwindUtils({ paths: [cwd] })
+    const utils = new TailwindUtilsImpl({ paths: [cwd] })
 
     // Handle v4 with synckit worker for async support
     if (isV4Config) {
-      // Return a wrapper that delegates to the worker thread
+      // Return a minimal validator that delegates to the worker thread
       // This makes async validation appear synchronous to ESLint rules
-      return {
+      const v4Validator: TailwindV4Validator = {
         isV4: true,
         context: null, // Context will be loaded in worker
         isValidClassName: (className: string) => {
@@ -133,7 +146,8 @@ export function createTailwindValidator(
             isV4: true,
           })
         },
-      } as TailwindUtils
+      }
+      return v4Validator
     }
 
     // Load config synchronously for v3
@@ -144,7 +158,7 @@ export function createTailwindValidator(
 
     return utils
   } catch (error) {
-    logger.warn(`Failed to create Tailwind validator`, error)
+    logger.warn(`Failed to create Tailwind validator (cwd: ${cwd})`, error)
     return null
   }
 }

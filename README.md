@@ -168,6 +168,154 @@ export default [
 - HTML `class` attributes only support string literals (no dynamic expressions)
 - All validation features (Tailwind variants, arbitrary values, ignore patterns) work with HTML
 
+## Vue File Support
+
+This plugin supports validating both static `class` attributes and dynamic `:class` bindings in Vue Single File Components (SFCs).
+
+### Vue Setup
+
+1. Install the Vue parser:
+
+```bash
+pnpm add --save-dev vue-eslint-parser
+```
+
+2. Configure ESLint to use the Vue parser for `.vue` files:
+
+**ESLint 9+ (Flat Config)**
+
+```javascript
+// eslint.config.js
+import validClassName from 'eslint-plugin-valid-class-name'
+import * as vueParser from 'vue-eslint-parser'
+
+export default [
+  // JSX/TSX files
+  {
+    files: ['**/*.jsx', '**/*.tsx'],
+    languageOptions: {
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
+    },
+    plugins: { 'valid-class-name': validClassName },
+    rules: {
+      'valid-class-name/valid-class-name': [
+        'error',
+        {
+          sources: {
+            css: ['src/**/*.css'],
+            tailwind: true,
+          },
+        },
+      ],
+    },
+  },
+  // Vue files
+  {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parser: vueParser,
+    },
+    plugins: { 'valid-class-name': validClassName },
+    rules: {
+      'valid-class-name/valid-class-name': [
+        'error',
+        {
+          sources: {
+            css: ['src/**/*.css'],
+            tailwind: true,
+          },
+        },
+      ],
+    },
+  },
+]
+```
+
+**ESLint 8 (.eslintrc)**
+
+```json
+{
+  "plugins": ["valid-class-name"],
+  "rules": {
+    "valid-class-name/valid-class-name": [
+      "error",
+      {
+        "sources": {
+          "css": ["src/**/*.css"],
+          "tailwind": true
+        }
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["*.vue"],
+      "parser": "vue-eslint-parser"
+    }
+  ]
+}
+```
+
+### How Vue Validation Works
+
+The plugin validates both static and dynamic class attributes in Vue templates:
+
+#### Static class attributes
+
+```vue
+<template>
+  <div class="mt-2 p-4 flex">Static classes</div>
+</template>
+```
+
+#### Dynamic :class bindings
+
+```vue
+<template>
+  <!-- String literal -->
+  <div :class="'foo bar'">String</div>
+
+  <!-- Object syntax -->
+  <div :class="{ active: isActive, 'text-bold': isBold }">Object</div>
+
+  <!-- Array syntax -->
+  <div :class="['foo', 'bar', condition && 'baz']">Array</div>
+
+  <!-- Ternary expression -->
+  <div :class="isActive ? 'active' : 'inactive'">Ternary</div>
+
+  <!-- Long form v-bind:class also works -->
+  <div v-bind:class="'foo bar'">Long form</div>
+</template>
+```
+
+### Vue Examples
+
+```vue
+<template>
+  <!-- Valid Vue template -->
+  <div class="container">
+    <h1 :class="{ 'text-2xl': true, 'font-bold': isBold }">Title</h1>
+    <button :class="['btn', isPrimary && 'btn-primary']">Click</button>
+  </div>
+
+  <!-- Invalid (if classes don't exist) -->
+  <div class="invalid-class"></div>
+  <div :class="'another-invalid'"></div>
+</template>
+```
+
+### Vue Notes
+
+- Both `class` and `:class` (or `v-bind:class`) are validated
+- Dynamic variables are skipped (e.g., `:class="dynamicVar"`)
+- Template literals with interpolation are skipped (e.g., `:class="`foo-${bar}`"`)
+- Object syntax validates the property keys as class names
+- Array syntax validates string literals in the array
+- All validation features (Tailwind variants, arbitrary values, ignore patterns) work with Vue
+
 ## Configuration
 
 ### Options

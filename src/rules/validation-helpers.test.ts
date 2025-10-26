@@ -188,8 +188,9 @@ describe('validation-helpers', () => {
         isTailwindOnly: jest.fn((className: string) =>
           tailwindOnlyClasses.has(className),
         ),
-        isTailwindClass: jest.fn((className: string) =>
-          !cssClasses.has(className) && validClasses.has(className),
+        isTailwindClass: jest.fn(
+          (className: string) =>
+            !cssClasses.has(className) && validClasses.has(className),
         ),
         getAllClasses: jest.fn(() => validClasses),
         getValidVariants: jest.fn(() => new Set()),
